@@ -1,0 +1,93 @@
+:root {
+  /* 深紫蓝 KTV 主题 */
+  --bg-0: #1a1d2e; /* 应用底色 */
+  --bg-1: #222438; /* 面板 */
+  --bg-2: #2a2e45; /* 卡片 */
+  --bg-3: #323753; /* hover / 高亮底 */
+  --line: #3a3f5c; /* 描边 */
+  --text-0: #ffffff; /* 主文字 */
+  --text-1: #c8ccdd; /* 次文字 */
+  --text-2: #999bb2; /* 说明文字 */
+  --accent: #ff9922; /* 橙黄主强调 */
+  --accent-2: #ffb347; /* 浅橙 */
+  --danger: #ff4d4f; /* VIP 红 / 删除 */
+  --popup-bg: rgba(30, 33, 55, 0.92);
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+body {
+  background: var(--bg-0);
+  color: var(--text-0);
+  font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4a5170;
+}
+
+.glass {
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.neon-text {
+  background: linear-gradient(92deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 通用按钮：大热区，适配触摸 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--text-0);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 14px;
+}
+.btn:hover {
+  background: var(--bg-3);
+  border-color: var(--accent);
+}
+.btn.accent {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border: none;
+  color: #1a1205;
+  font-weight: 700;
+}
+
+/* 橙黄滑块 */
+:deep(.ant-slider-track),
+.ant-slider-track {
+  background: linear-gradient(92deg, var(--accent), var(--accent-2)) !important;
+}
+:deep(.ant-slider-handle::after),
+.ant-slider-handle::after {
+  box-shadow: 0 0 0 2px var(--accent) !important;
+}

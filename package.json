@@ -1,0 +1,49 @@
+{
+  "name": "local-desktop-karaoke",
+  "version": "1.0.0",
+  "description": "桌面系统测试 (Electron + Vue3 离线版) — 双屏点歌/电视全屏播放 MV + LRC 歌词",
+  "author": "practiced with WorkBuddy",
+  "license": "MIT",
+  "private": true,
+  "main": "dist/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "pack": "npm run build && electron-builder",
+    "sample": "node scripts/make-sample-lib.mjs"
+  },
+  "dependencies": {
+    "ant-design-vue": "^4.2.6",
+    "sql.js": "^1.12.0",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@types/sql.js": "^1.4.9",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
+    "typescript": "^5.7.3",
+    "vite": "^5.4.11",
+    "vue-tsc": "^2.2.0"
+  },
+  "build": {
+    "appId": "com.local.karaoke",
+    "productName": "桌面系统测试",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
