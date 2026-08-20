@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { store, progress } from '../store'
+import { computed, ref } from 'vue'
+import { store } from '../store'
 
 const state = store.state
 
@@ -12,9 +12,15 @@ function fmt(d: number): string {
 }
 
 const masterPct = computed(() => Math.round(state.volumes.master * 100))
+const micPct = computed(() => Math.round(state.volumes.mic * 100))
+const popOpen = ref(false)
 
-function onVolume(val: number) {
+function onMaster(val: number) {
   state.volumes.master = val / 100
+  store.applyVolumes()
+}
+function onMic(val: number) {
+  state.volumes.mic = val / 100
   store.applyVolumes()
 }
 </script>
@@ -40,7 +46,12 @@ function onVolume(val: number) {
     <div class="center">
       <button class="ctl" title="上一曲" @click="store.playPrev()">⏮</button>
       <button class="play" :title="state.playing ? '暂停' : '播放'" @click="store.togglePlay()">
-        {{ state.playing ? '⏸' : '▶' }}
+        <svg v-if="state.playing" class="ic" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <path d="M6 5h4v14H6zM14 5h4v14h-4z" fill="currentColor" />
+        </svg>
+        <svg v-else class="ic" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <path d="M8 5v14l11-7z" fill="currentColor" />
+        </svg>
       </button>
       <button class="ctl" title="下一曲" @click="store.playNext()">⏭</button>
     </div>
@@ -48,17 +59,6 @@ function onVolume(val: number) {
     <!-- 功能按钮组 -->
     <div class="funcs">
       <button class="f" title="重唱" @click="store.reSing()">重唱</button>
-      <button
-        class="f"
-        :class="{ on: state.currentSong && store.isFav(state.currentSong.id) }"
-        title="收藏"
-        @click="state.currentSong && store.toggleFav(state.currentSong)"
-      >
-        收藏
-      </button>
-      <button class="f" :title="state.playMode === 'order' ? '顺序播放' : '随机播放'" @click="store.togglePlayMode()">
-        {{ state.playMode === 'order' ? '顺序' : '随机' }}
-      </button>
       <button class="f" :class="{ on: state.queueOpen }" title="已点歌单" @click="store.toggleQueueOpen()">
         已点
       </button>
@@ -74,22 +74,52 @@ function onVolume(val: number) {
       </div>
     </div>
 
-    <!-- 音量 + 总时长 -->
+    <!-- 音量 + 麦克风 + 总时长 -->
     <div class="right">
-      <span class="spk">🔊</span>
-      <input
-        class="vol"
-        type="range"
-        min="0"
-        max="100"
-        :value="masterPct"
-        @input="onVolume(Number(($event.target as HTMLInputElement).value))"
-      />
-      <span class="vt">{{ masterPct }}</span>
+      <button class="vbtn" title="音量" @click="popOpen = !popOpen">
+        <span class="spk">🔊</span>
+        <span class="vt">{{ masterPct }}</span>
+      </button>
+      <button class="vbtn" title="麦克风音量" @click="popOpen = !popOpen">
+        <span class="spk">🎙️</span>
+        <span class="vt">{{ micPct }}</span>
+      </button>
       <span class="total">{{ fmt(state.duration) }}</span>
-      <div class="prog"><div class="bar" :style="{ width: progress + '%' }" /></div>
+
+      <!-- 点击后弹出的竖直音量面板 -->
+      <div v-if="popOpen" class="vpop">
+        <div class="col">
+          <span class="vlbl">总音量</span>
+          <input
+            class="vslide"
+            type="range"
+            min="0"
+            max="100"
+            :value="masterPct"
+            step="1"
+            @input="onMaster(Number(($event.target as HTMLInputElement).value))"
+          />
+          <span class="vnum">{{ masterPct }}</span>
+        </div>
+        <div class="col">
+          <span class="vlbl">麦克风</span>
+          <input
+            class="vslide"
+            type="range"
+            min="0"
+            max="100"
+            :value="micPct"
+            step="1"
+            @input="onMic(Number(($event.target as HTMLInputElement).value))"
+          />
+          <span class="vnum">{{ micPct }}</span>
+        </div>
+      </div>
     </div>
   </footer>
+
+  <!-- 点击面板外关闭 -->
+  <div v-if="popOpen" class="pop-backdrop" @click="popOpen = false" />
 </template>
 
 <style scoped>
@@ -165,11 +195,17 @@ function onVolume(val: number) {
   height: 56px;
   border-radius: 50%;
   border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: #1a1205;
-  font-size: 24px;
+  color: #232631;
+  padding: 0;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(255, 153, 34, 0.4);
+  box-shadow: 0 6px 18px rgba(169, 173, 184, 0.35);
+}
+.play .ic {
+  display: block;
 }
 .funcs {
   display: flex;
@@ -191,7 +227,7 @@ function onVolume(val: number) {
   border-color: var(--accent);
 }
 .f.on {
-  background: rgba(255, 153, 34, 0.16);
+  background: rgba(169, 173, 184, 0.16);
   color: var(--accent);
   border-color: var(--accent);
 }
@@ -232,26 +268,38 @@ function onVolume(val: number) {
   left: 25px;
 }
 .right {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 320px;
   justify-content: flex-end;
+  margin-left: auto;
 }
-.spk {
-  font-size: 16px;
-}
-.vol {
-  width: 120px;
-  accent-color: var(--accent);
+.vbtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 44px;
+  padding: 4px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--text-0);
   cursor: pointer;
 }
+.vbtn:hover {
+  border-color: var(--accent);
+}
+.spk {
+  font-size: 15px;
+  line-height: 1;
+}
 .vt {
-  width: 28px;
-  text-align: right;
-  font-size: 12px;
+  font-size: 10px;
   color: var(--text-2);
   font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 .total {
   font-size: 13px;
@@ -260,7 +308,44 @@ function onVolume(val: number) {
   width: 44px;
   text-align: right;
 }
-.prog {
-  display: none;
+.vpop {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 12px);
+  z-index: 60;
+  display: flex;
+  gap: 16px;
+  padding: 16px 14px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.vlbl {
+  font-size: 12px;
+  color: var(--text-2);
+}
+.vslide {
+  width: 22px;
+  height: 140px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  -webkit-appearance: slider-vertical;
+}
+.vnum {
+  font-size: 12px;
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+}
+.pop-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
 }
 </style>

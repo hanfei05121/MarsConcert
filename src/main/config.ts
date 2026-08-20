@@ -6,7 +6,7 @@ import type { AppConfig } from '../shared/types'
 const DEFAULT_CONFIG: AppConfig = {
   songLibPath: 'D:/song-lib',
   videoMode: 'orig',
-  volumes: { orig: 1, accomp: 1, master: 1 },
+  volumes: { orig: 1, accomp: 1, master: 1, mic: 1 },
   playerScreenId: -1
 }
 

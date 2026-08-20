@@ -22,6 +22,9 @@ const api: KaraokeApi = {
   control: (action, payload) => ipcRenderer.invoke(IPC.PLAYER_CONTROL, action, payload),
   setVolumes: (vols) => ipcRenderer.invoke(IPC.PLAYER_SET_VOLUMES, vols),
   windowControl: (action) => ipcRenderer.invoke(IPC.WINDOW_CONTROL, action),
+  openLibFolder: () => ipcRenderer.invoke(IPC.LIBRARY_OPEN),
+  escape: () => ipcRenderer.invoke(IPC.PLAYER_ESCAPE),
+  setLyricOffset: (songId, offset) => ipcRenderer.invoke(IPC.LYRIC_OFFSET_SET, songId, offset),
 
   // 播放窗接收指令
   onLoad: (cb) => subscribe(IPC.TO_PLAYER_LOAD, cb),

@@ -4,7 +4,6 @@ import { store } from './store'
 import type { Song } from '../../shared/types'
 import Sidebar from './components/Sidebar.vue'
 import TopBar from './components/TopBar.vue'
-import Banner from './components/Banner.vue'
 import ChartBlock from './components/ChartBlock.vue'
 import SongRow from './components/SongRow.vue'
 import PlaylistPopup from './components/PlaylistPopup.vue'
@@ -74,7 +73,6 @@ const playlistTitle = computed(() => {
       <main class="content">
         <!-- 推荐首页 -->
         <div v-if="state.view === 'recommend'" class="scroll">
-          <Banner />
           <div class="charts">
             <ChartBlock title="飙升榜" badge="日榜" :songs="rising" @add="onAdd" @play="onPlay" />
             <ChartBlock title="新歌排行榜" badge="日榜" :songs="fresh" @add="onAdd" @play="onPlay" />
@@ -279,7 +277,7 @@ const playlistTitle = computed(() => {
   height: 64px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: #1a1205;
+  color: #232631;
   font-size: 28px;
   font-weight: 800;
   display: flex;
@@ -313,7 +311,7 @@ const playlistTitle = computed(() => {
 }
 .chip.on {
   background: var(--accent);
-  color: #1a1205;
+  color: #232631;
   border-color: var(--accent);
 }
 .list {

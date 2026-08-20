@@ -41,13 +41,20 @@ function pickPlayerDisplay(config: AppConfig) {
       if (found) return found
     }
     // 默认选择非主屏（扩展屏）
-    const external = displays.find((d) => !d.bounds.equals(screen.getPrimaryDisplay().bounds))
+    const p = screen.getPrimaryDisplay().bounds
+    const external = displays.find(
+      (d) => !(d.bounds.x === p.x && d.bounds.y === p.y && d.bounds.width === p.width && d.bounds.height === p.height)
+    )
     return external ?? screen.getPrimaryDisplay()
   }
   return screen.getPrimaryDisplay()
 }
 
-/** 播放窗（副屏/电视）：无边框、置顶、全屏，仅展示 MV + 歌词 */
+/** 播放窗（副屏/电视）：无边框铺满扩展屏，仅展示 MV + 歌词
+ *  关键：刻意不使用 alwaysOnTop / 真正 fullscreen / win.focus()。
+ *  否则播放窗会变成系统级置顶 + 独占全屏并抢走焦点，
+ *  导致控制台与其它软件点不动、只能关副屏才能夺回控制权。
+ */
 export function createPlayerWindow(config: AppConfig): BrowserWindow {
   const display = pickPlayerDisplay(config)
   const { x, y, width, height } = display.bounds
@@ -59,8 +66,7 @@ export function createPlayerWindow(config: AppConfig): BrowserWindow {
     height,
     frame: false,
     transparent: false,
-    alwaysOnTop: true,
-    fullscreen: true,
+    fullscreen: false,
     title: '桌面系统测试 · 播放屏',
     backgroundColor: '#000000',
     webPreferences: {
@@ -75,8 +81,8 @@ export function createPlayerWindow(config: AppConfig): BrowserWindow {
   if (url) win.loadURL(url)
   else win.loadFile(join(__dirname, '../renderer/player.html'))
 
-  // 确保它在目标屏幕并置顶
+  // 用无边框窗口“铺满”目标屏幕达到视觉全屏，但不进入独占全屏、也不置顶，
+  // 这样控制台在主屏可正常点击，副屏照样全屏放 MV，且随时可 Alt+Tab 切走。
   win.setBounds({ x, y, width, height })
-  win.focus()
   return win
 }

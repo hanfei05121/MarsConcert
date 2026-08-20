@@ -35,8 +35,6 @@ function win(action: 'min' | 'max' | 'close') {
     <div class="spacer" />
 
     <div class="icons">
-      <button class="ic" title="消息">✉️</button>
-      <button class="ic" title="麦克风音量">🎙️</button>
       <span class="sep" />
       <button class="ic" title="最小化" @click="win('min')">—</button>
       <button class="ic" title="最大化" @click="win('max')">▢</button>

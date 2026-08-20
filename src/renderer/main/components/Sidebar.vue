@@ -13,16 +13,19 @@ const menus: { key: ViewName; label: string; icon: string }[] = [
   { key: 'playlists', label: '歌单', icon: '📃' },
   { key: 'mine', label: '我的', icon: '👤' }
 ]
+
+function openLib() {
+  window.api.openLibFolder()
+}
 </script>
 
 <template>
   <aside class="sidebar">
     <!-- 用户区 -->
     <div class="user">
-      <div class="avatar">浪</div>
+      <div class="avatar">花</div>
       <div class="uinfo">
-        <div class="nick">70后后浪</div>
-        <div class="vip">开通VIP</div>
+        <div class="nick">花花</div>
       </div>
     </div>
 
@@ -40,8 +43,8 @@ const menus: { key: ViewName; label: string; icon: string }[] = [
       </button>
     </nav>
 
-    <!-- 云盘 -->
-    <div class="cloud">
+    <!-- 云盘：打开本地素材库 -->
+    <div class="cloud" @click="openLib">
       <span class="ic">☁️</span>
       <span>我的云盘</span>
     </div>
@@ -72,7 +75,7 @@ const menus: { key: ViewName; label: string; icon: string }[] = [
   height: 42px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: #1a1205;
+  color: #232631;
   font-weight: 800;
   font-size: 18px;
   display: flex;
@@ -84,15 +87,6 @@ const menus: { key: ViewName; label: string; icon: string }[] = [
   font-size: 14px;
   font-weight: 700;
   color: var(--text-0);
-}
-.vip {
-  margin-top: 4px;
-  display: inline-block;
-  font-size: 11px;
-  color: #fff;
-  background: var(--danger);
-  border-radius: 4px;
-  padding: 1px 6px;
 }
 .nav {
   display: flex;
@@ -119,7 +113,7 @@ const menus: { key: ViewName; label: string; icon: string }[] = [
 }
 .item.active {
   background: var(--accent);
-  color: #1a1205;
+  color: #232631;
 }
 .ic {
   font-size: 18px;

@@ -8,8 +8,8 @@
   --text-0: #ffffff; /* 主文字 */
   --text-1: #c8ccdd; /* 次文字 */
   --text-2: #999bb2; /* 说明文字 */
-  --accent: #ff9922; /* 橙黄主强调 */
-  --accent-2: #ffb347; /* 浅橙 */
+  --accent: #a9adba; /* 雅灰主强调 */
+  --accent-2: #c9cdd8; /* 浅雅灰 */
   --danger: #ff4d4f; /* VIP 红 / 删除 */
   --popup-bg: rgba(30, 33, 55, 0.92);
 }
@@ -78,7 +78,7 @@ body {
 .btn.accent {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   border: none;
-  color: #1a1205;
+  color: #232631;
   font-weight: 700;
 }
 

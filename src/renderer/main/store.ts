@@ -83,7 +83,7 @@ export const state = reactive<State>({
   playing: false,
   currentTime: 0,
   duration: 0,
-  volumes: { orig: 1, accomp: 1, master: 1 },
+  volumes: { orig: 1, accomp: 1, master: 1, mic: 1 },
   scanning: false,
   queue: [],
   history: [],
@@ -130,7 +130,8 @@ async function ensurePlay(song: Song) {
   state.currentSong = song
   state.currentTime = 0
   state.duration = song.duration || 0
-  await window.api.playSong(song)
+  // Vue reactive 会给对象包一层 Proxy，IPC 无法克隆，需转成纯数据
+  await window.api.playSong({ ...song })
   state.playing = true
 }
 
@@ -166,6 +167,23 @@ async function removeQueueAt(i: number) {
       state.playing = false
     }
   }
+}
+
+/** 置顶到下一首：把第 i 首排到当前歌曲之后，播完这首就轮到它 */
+function pinToNext(i: number) {
+  const song = state.queue[i]
+  if (!song) return
+  const cur = currentQueueIndex()
+  if (cur === -1) {
+    state.queue.splice(i, 1)
+    state.queue.unshift(song)
+    return
+  }
+  if (cur === i) return
+  if (cur + 1 === i) return // 本来就是下一首
+  state.queue.splice(i, 1)
+  const target = i < cur ? cur : cur + 1
+  state.queue.splice(target, 0, song)
 }
 
 /** 调整队列顺序 */
@@ -345,6 +363,7 @@ export const store = {
   topQueue,
   removeQueueAt,
   moveQueue,
+  pinToNext,
   playPrev,
   playNext,
   toggleMode,

@@ -10,6 +10,8 @@ export interface Song {
   accomp_path: string
   lrc_path: string
   duration: number
+  /** 歌词相对视频的偏移（秒），正=歌词延后，用于校正官方 MV 长前奏等错位 */
+  lyricOffset: number
   create_time: string
 }
 
@@ -17,6 +19,7 @@ export interface Volumes {
   orig: number // 0~1
   accomp: number // 0~1
   master: number // 0~1
+  mic: number // 0~1 麦克风增益
 }
 
 export interface AppConfig {
@@ -33,6 +36,8 @@ export interface Playload {
   lrc: string
   mode: VideoMode
   volumes: Volumes
+  /** 主进程注册好的 media:// token 播放地址 */
+  urls: { orig: string; accomp: string }
 }
 
 export type TransportAction = 'play' | 'pause' | 'seek'
@@ -49,6 +54,11 @@ export const IPC = {
   PLAYER_CONTROL: 'player:control',
   PLAYER_SET_VOLUMES: 'player:setVolumes',
   WINDOW_CONTROL: 'window:control',
+  LIBRARY_OPEN: 'library:open',
+  // 播放窗 -> 主进程：Esc 最小化播放屏，把控制权还给控制台
+  PLAYER_ESCAPE: 'player:escape',
+  // 播放窗 -> 主进程：保存当前歌曲的歌词偏移（按歌曲持久化，免得每次重调）
+  LYRIC_OFFSET_SET: 'lyric:setOffset',
 
   // 主进程 -> 控制窗 的推送（同步播放状态）
   SYNC_TIME: 'sync:time',
@@ -85,6 +95,11 @@ export interface KaraokeApi {
   control(action: TransportAction, payload?: number): Promise<void>
   setVolumes(vols: Volumes): Promise<void>
   windowControl(action: 'min' | 'max' | 'close'): Promise<void>
+  openLibFolder(): Promise<string>
+  /** 播放窗：Esc 退出/最小化，把控制权还给控制台 */
+  escape(): Promise<void>
+  /** 播放窗：保存当前歌曲的歌词偏移（秒） */
+  setLyricOffset(songId: number, offset: number): Promise<void>
 
   // —— 播放窗接收指令 ——
   onLoad(cb: (p: Playload) => void): () => void

@@ -47,11 +47,17 @@ export async function initDatabase(): Promise<void> {
       accomp_path TEXT NOT NULL,
       lrc_path TEXT NOT NULL DEFAULT '',
       duration REAL NOT NULL DEFAULT 0,
+      lyric_offset REAL NOT NULL DEFAULT 0,
       create_time TEXT NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_song_name ON song(name);
     CREATE INDEX IF NOT EXISTS idx_song_artist ON song(artist);
   `)
+  // 兼容旧库：已存在的表不会重跑 CREATE TABLE，需补齐 lyric_offset 列
+  const cols = all('PRAGMA table_info(song)') as Array<{ name: string }>
+  if (!cols.some((c) => c.name === 'lyric_offset')) {
+    run('ALTER TABLE song ADD COLUMN lyric_offset REAL NOT NULL DEFAULT 0')
+  }
   persist()
 }
 
@@ -119,4 +125,8 @@ export function countSongs(): number {
 
 export function updateDuration(id: number, duration: number): void {
   run('UPDATE song SET duration = ? WHERE id = ?', [duration, id])
+}
+
+export function updateLyricOffset(id: number, offset: number): void {
+  run('UPDATE song SET lyric_offset = ? WHERE id = ?', [offset, id])
 }
