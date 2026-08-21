@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { upsertSong, countSongs } from './database'
+import { mediaTokenFor } from './media'
 import type { RescanResult } from '../shared/types'
 
 interface LrcMeta {
@@ -52,14 +53,16 @@ export function scanLibrary(libPath: string): RescanResult {
     const accompFile = join(dir, 'accomp.mp4')
     const hasAccomp = existsSync(accompFile)
 
-    // 查找目录内第一个 .lrc 文件（忽略大小写）
+    // 歌词文件约定：优先使用 orig.lrc（与视频匹配的标准歌词），
+    // 其余 歌名.lrc 作为兼容回退（仅当某歌目录没有 orig.lrc 时）
     let lrcPath = ''
     let lrcTitle: string | undefined
     let lrcArtist: string | undefined
     try {
       const files = readdirSync(dir).filter((f) => f.toLowerCase().endsWith('.lrc'))
       if (files.length > 0) {
-        lrcPath = join(dir, files[0])
+        const preferred = files.find((f) => f.toLowerCase() === 'orig.lrc')
+        lrcPath = join(dir, preferred ?? files[0])
         const meta = parseLrcMeta(lrcPath)
         lrcTitle = meta.title
         lrcArtist = meta.artist
@@ -74,12 +77,40 @@ export function scanLibrary(libPath: string): RescanResult {
     const origPath = hasOrig ? orig : orig // 缺原唱时仍记录预期路径，便于播放窗提示
     const accomp = hasAccomp ? accompFile : origPath
 
+    // 作者名：优先读目录内 artist.txt（首行非空即作者），否则回退 LRC [ar:] 标签
+    let artistName = lrcArtist
+    try {
+      const at = join(dir, 'artist.txt')
+      if (existsSync(at)) {
+        const t = readFileSync(at, 'utf-8')
+        const line = t
+          .split('\n')
+          .map((s) => s.trim())
+          .find((s) => s.length > 0)
+        if (line) artistName = line
+      }
+    } catch {
+      /* ignore */
+    }
+
+    // 头像图：检测目录内 artist/avatar/cover + 图片后缀，签发 media:// token
+    let artistAvatar = ''
+    try {
+      const av = readdirSync(dir).find((f) =>
+        /^(artist|avatar|cover)\.(jpg|jpeg|png|webp|gif)$/i.test(f)
+      )
+      if (av) artistAvatar = mediaTokenFor(join(dir, av))
+    } catch {
+      /* ignore */
+    }
+
     const isNew = upsertSong({
       name: lrcTitle ?? name,
-      artist: lrcArtist ?? '',
+      artist: artistName ?? '',
       orig_path: origPath,
       accomp_path: accomp,
-      lrc_path: lrcPath
+      lrc_path: lrcPath,
+      artist_avatar: artistAvatar
     })
     if (isNew) result.added++
     else result.updated++

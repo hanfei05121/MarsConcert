@@ -1,11 +1,11 @@
 import { app, ipcMain, BrowserWindow, protocol, shell } from 'electron'
-import { createHash } from 'node:crypto'
 import { createReadStream, readFileSync, statSync, existsSync, mkdirSync } from 'node:fs'
 import { Readable } from 'node:stream'
 import { loadConfig, saveConfig } from './config'
 import { getSongs, updateDuration, updateLyricOffset, initDatabase } from './database'
 import { scanLibrary } from './scanner'
 import { createMainWindow, createPlayerWindow } from './windows'
+import { mediaTokens, mediaTokenFor, mimeOf } from './media'
 import { IPC } from '../shared/types'
 import type { AppConfig, Song, VideoMode, Volumes } from '../shared/types'
 
@@ -24,15 +24,7 @@ protocol.registerSchemesAsPrivileged([
   }
 ])
 
-// media:// token -> 真实路径。渲染进程只拿到不透明的 token，杜绝路径拼接注入
-const mediaTokens = new Map<string, string>()
-
-/** 为一个本地媒体文件签发 media://res/<token> 地址，并登记 token->路径 映射 */
-function mediaTokenFor(path: string): string {
-  const token = createHash('sha1').update(path).digest('base64url')
-  mediaTokens.set(token, path)
-  return `media://res/${token}`
-}
+// media:// token -> 真实路径 的映射与签发逻辑已抽到 ./media，避免与 scanner 循环依赖
 
 function readLrc(path: string): string {
   if (!path || !existsSync(path)) return ''
@@ -175,7 +167,6 @@ app.whenReady().then(async () => {
     if (!filePath) return new Response('not found', { status: 404 })
     try {
       const size = statSync(filePath).size
-      const isMp3 = /\.mp3$/i.test(filePath)
       const range = request.headers.get('Range')
       let start = 0
       let end = size - 1
@@ -192,7 +183,7 @@ app.whenReady().then(async () => {
         }
       }
       const headers: Record<string, string> = {
-        'Content-Type': isMp3 ? 'audio/mpeg' : 'video/mp4',
+        'Content-Type': mimeOf(filePath),
         'Accept-Ranges': 'bytes',
         'Content-Length': String(end - start + 1)
       }

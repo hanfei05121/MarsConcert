@@ -1,7 +1,7 @@
 import { reactive, computed } from 'vue'
 import type { AppConfig, Song, VideoMode, Volumes } from '../../shared/types'
 
-export type ViewName = 'recommend' | 'artists' | 'category' | 'playlists' | 'mine'
+export type ViewName = 'recommend' | 'artists' | 'category' | 'playlists' | 'mine' | 'search'
 export type QueueTab = 'queued' | 'sung'
 export type PlayMode = 'order' | 'random'
 export type Lang = '国语' | '英语' | '日语' | '韩语' | '其他'
@@ -116,9 +116,15 @@ async function refresh() {
   state.songs = await window.api.getSongs(state.search)
 }
 
+/** 顶部搜索：模糊查询本地曲库，并跳转到歌曲列表页展示结果 */
 async function doSearch(q: string) {
   state.search = q
-  await refresh()
+  state.songs = await window.api.getSongs(q)
+  // 无论在哪个页面，搜索都切到「歌曲」列表页；清空其他筛选态避免干扰
+  state.artistFilter = null
+  state.categoryFilter = '全部'
+  state.selectedPlaylist = null
+  state.view = 'search'
 }
 
 function currentQueueIndex(): number {
@@ -342,7 +348,8 @@ const artists = computed(() => {
   return Array.from(map.entries()).map(([name, list]) => ({
     name,
     count: list.length,
-    cover: list[0]
+    cover: list[0],
+    avatar: list[0]?.artistAvatar || ''
   }))
 })
 

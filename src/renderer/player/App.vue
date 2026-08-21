@@ -19,12 +19,17 @@ let volumes: Volumes = { orig: 1, accomp: 1, master: 1, mic: 1 }
 let wasPlaying = false
 let savedTime = 0
 
-// —— 麦克风增益（WebAudio 真实处理唱歌人声）——
+// —— 麦克风（WebAudio 真实处理唱歌人声）——
+// 仅在“伴奏模式且麦克风音量>0”时才把麦克风接到扬声器（监听），
+// 避免原唱/纯观看时麦克风常开，把环境噪声、回声、啸叫灌进音箱造成“杂音”。
 let micCtx: AudioContext | null = null
 let micGain: GainNode | null = null
 let micStream: MediaStream | null = null
+let micReady = false
+let micMonitoring = false
 
-async function initMic() {
+async function ensureMic(): Promise<boolean> {
+  if (micReady) return true
   try {
     micStream = await navigator.mediaDevices.getUserMedia({ audio: true })
     micCtx = new AudioContext()
@@ -32,9 +37,27 @@ async function initMic() {
     micGain = micCtx.createGain()
     micGain.gain.value = Math.max(0, volumes.mic ?? 1)
     src.connect(micGain)
-    micGain.connect(micCtx.destination)
+    // 注意：micGain 默认不接 destination，由 setMicMonitor 按需连接
+    micReady = true
+    return true
   } catch {
     micStream = null
+    micCtx = null
+    micGain = null
+    return false
+  }
+}
+
+// 开启/关闭麦克风监听（连接到 / 断开扬声器）
+async function setMicMonitor(on: boolean) {
+  micMonitoring = on
+  if (on) {
+    const ok = await ensureMic()
+    if (!ok || !micGain || !micCtx) return
+    try { micGain.disconnect(micCtx.destination) } catch {}
+    micGain.connect(micCtx.destination)
+  } else if (micGain && micCtx) {
+    try { micGain.disconnect(micCtx.destination) } catch {}
   }
 }
 
@@ -47,12 +70,19 @@ function applyMicVolume() {
   else g.gain.setTargetAtTime(target, c.currentTime, 0.02)
 }
 
+// 根据当前模式 + 麦克风音量决定是否需要监听：仅伴奏模式且音量>0 才开
+function refreshMicMonitor() {
+  setMicMonitor(mode.value === 'accomp' && (volumes.mic ?? 0) > 0)
+}
+
 function disposeMic() {
   if (micStream) micStream.getTracks().forEach((t) => t.stop())
   micStream = null
   if (micCtx) micCtx.close().catch(() => {})
   micCtx = null
   micGain = null
+  micReady = false
+  micMonitoring = false
 }
 
 const hasLyrics = computed(() => lyrics.value.length > 0)
@@ -85,6 +115,7 @@ function load(p: Playload) {
   mode.value = p.mode
   volumes = p.volumes
   applyMicVolume()
+  refreshMicMonitor()
   songName.value = `${p.song.name}${p.song.artist ? ' - ' + p.song.artist : ''}`
   lyrics.value = parseLrc(p.lrc)
   activeIndex.value = -1
@@ -102,6 +133,7 @@ function switchMode(next: VideoMode) {
   mode.value = next
   wasPlaying = !v || !v.paused
   setSource(savedTime)
+  refreshMicMonitor()
 }
 
 function handleControl(action: string, payload?: number) {
@@ -110,16 +142,6 @@ function handleControl(action: string, payload?: number) {
   if (action === 'play') v.play().catch(() => {})
   else if (action === 'pause') v.pause()
   else if (action === 'seek' && typeof payload === 'number') v.currentTime = payload
-}
-
-// 歌词整体偏移校正（秒）：正=歌词延后，用于视频与 LRC 不同步时现场对齐
-// 限幅 ±120s，调整后按歌曲持久化，免去每次重调
-function nudgeLyric(delta: number) {
-  const next = Math.round((lyricOffset.value + delta) * 10) / 10
-  lyricOffset.value = Math.min(120, Math.max(-120, next))
-  if (current?.song?.id != null) {
-    window.api.setLyricOffset(current.song.id, lyricOffset.value).catch(() => {})
-  }
 }
 
 // —— 注册播放窗指令 ——
@@ -133,15 +155,13 @@ onMounted(() => {
       volumes = vol
       applyVolume()
       applyMicVolume()
+      refreshMicMonitor()
     })
   )
-  initMic()
 
-  // Esc：最小化播放屏；[ / ]（或 ←/→）：歌词提前/延后 0.5s
+  // Esc：最小化播放屏，把控制权还给控制台
   const onKey = (e: KeyboardEvent) => {
     if (e.key === 'Escape') window.api.escape()
-    else if (e.key === ']' || e.key === 'ArrowRight') nudgeLyric(0.5)
-    else if (e.key === '[' || e.key === 'ArrowLeft') nudgeLyric(-0.5)
   }
   window.addEventListener('keydown', onKey)
   offs.push(() => window.removeEventListener('keydown', onKey))
@@ -197,21 +217,6 @@ function onError() {
 
     <LyricsOverlay :lines="lyrics" :active="activeIndex" />
     <div v-if="!hasLyrics && !errorMsg" class="no-lyric">♪</div>
-
-    <div v-if="hasLyrics" class="lyric-offset">
-      <div class="grp">
-        <button @click="nudgeLyric(-5)">提前5s</button>
-        <button @click="nudgeLyric(-0.5)">提前0.5s</button>
-      </div>
-      <span class="val">
-        {{ lyricOffset > 0 ? '延后' : lyricOffset < 0 ? '提前' : '已对齐' }}
-        {{ lyricOffset !== 0 ? ' ' + Math.abs(lyricOffset).toFixed(1) + 's' : '' }}
-      </span>
-      <div class="grp">
-        <button @click="nudgeLyric(0.5)">延后0.5s</button>
-        <button @click="nudgeLyric(5)">延后5s</button>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -276,40 +281,5 @@ function onError() {
   text-align: center;
   font-size: 60px;
   color: rgba(255, 255, 255, 0.18);
-}
-.lyric-offset {
-  position: absolute;
-  right: 24px;
-  bottom: 24px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.45);
-  color: #fff;
-  font-size: 13px;
-  pointer-events: auto;
-  z-index: 5;
-  user-select: none;
-}
-.lyric-offset button {
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  background: transparent;
-  color: #fff;
-  border-radius: 6px;
-  padding: 4px 10px;
-  cursor: pointer;
-}
-.lyric-offset button:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-.lyric-offset .val {
-  min-width: 88px;
-  text-align: center;
-}
-.lyric-offset .grp {
-  display: flex;
-  gap: 6px;
 }
 </style>

@@ -12,6 +12,8 @@ export interface Song {
   duration: number
   /** 歌词相对视频的偏移（秒），正=歌词延后，用于校正官方 MV 长前奏等错位 */
   lyricOffset: number
+  /** 歌手头像的 media:// 地址（由扫描器从歌目录内的 artist/avatar/cover 图片签发），为空表示无头像 */
+  artistAvatar: string
   create_time: string
 }
 

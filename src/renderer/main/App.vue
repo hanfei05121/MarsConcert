@@ -49,6 +49,12 @@ const categorySongs = computed<Song[]>(() =>
       })
 )
 
+// —— 歌曲列表 / 搜索结果视图 ——
+// 有搜索词时展示模糊查询结果，否则展示全部本地歌曲
+const searchList = computed<Song[]>(() =>
+  state.search.trim() ? state.songs : state.allSongs
+)
+
 // —— 歌单 / 我的 视图 ——
 function openPlaylist(key: string) {
   state.selectedPlaylist = key
@@ -88,7 +94,10 @@ const playlistTitle = computed(() => {
               class="card"
               @click="state.artistFilter = a.name"
             >
-              <div class="ava">{{ a.name.slice(0, 1) }}</div>
+              <div class="ava">
+                <img v-if="a.avatar" :src="a.avatar" :alt="a.name" />
+                <template v-else>{{ a.name.slice(0, 1) }}</template>
+              </div>
               <div class="an">{{ a.name }}</div>
               <div class="ac">{{ a.count }} 首</div>
             </button>
@@ -189,6 +198,33 @@ const playlistTitle = computed(() => {
           </div>
         </div>
 
+        <!-- 歌曲列表 / 搜索结果 -->
+        <div v-else-if="state.view === 'search'" class="scroll">
+          <div class="searchhead">
+            <h2 class="sh-title">
+              {{ state.search.trim() ? `搜索 “${state.search}”` : '歌曲列表' }}
+            </h2>
+            <span class="sh-count">{{ searchList.length }} 首</span>
+          </div>
+          <div class="list">
+            <SongRow
+              v-for="s in searchList"
+              :key="s.id"
+              :song="s"
+              :active="s.id === state.currentSong?.id"
+              @add="onAdd"
+              @play="onPlay"
+            />
+            <div v-if="searchList.length === 0" class="empty">
+              {{
+                state.search.trim()
+                  ? '没有找到匹配的歌曲，换个关键词试试'
+                  : '暂无歌曲，先去扫描素材库'
+              }}
+            </div>
+          </div>
+        </div>
+
         <!-- 我的 -->
         <div v-else-if="state.view === 'mine'" class="scroll">
           <div class="mine">
@@ -283,6 +319,13 @@ const playlistTitle = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+}
+.ava img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 .an {
   font-size: 15px;
@@ -429,5 +472,22 @@ const playlistTitle = computed(() => {
   padding: 40px 10px;
   font-size: 13px;
   grid-column: 1 / -1;
+}
+/* —— 歌曲列表 / 搜索结果头 —— */
+.searchhead {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.sh-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-0);
+  margin: 0;
+}
+.sh-count {
+  font-size: 13px;
+  color: var(--text-2);
 }
 </style>

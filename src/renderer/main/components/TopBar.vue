@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onBeforeUnmount } from 'vue'
 import { store } from '../store'
 
 const emit = defineEmits<{
@@ -8,13 +8,28 @@ const emit = defineEmits<{
 }>()
 
 const kw = ref('')
+let timer: ReturnType<typeof setTimeout> | null = null
 
+// 输入即搜：轻微防抖，避免每个按键都触发一次查询+切页
 function onInput() {
-  emit('search', kw.value)
+  if (timer) clearTimeout(timer)
+  const v = kw.value
+  timer = setTimeout(() => emit('search', v), 180)
 }
 function win(action: 'min' | 'max' | 'close') {
   window.api.windowControl(action)
 }
+function clearSearch() {
+  kw.value = ''
+  if (timer) {
+    clearTimeout(timer)
+    timer = null
+  }
+  emit('search', '')
+}
+onBeforeUnmount(() => {
+  if (timer) clearTimeout(timer)
+})
 </script>
 
 <template>
@@ -29,7 +44,7 @@ function win(action: 'min' | 'max' | 'close') {
         placeholder="搜索歌曲、歌星、歌单"
         @input="onInput"
       />
-      <button v-if="kw" class="clear" @click="kw = ''; emit('search', '')">✕</button>
+      <button v-if="kw" class="clear" @click="clearSearch">✕</button>
     </div>
 
     <div class="spacer" />

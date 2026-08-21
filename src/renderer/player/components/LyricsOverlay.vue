@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { computed } from 'vue'
 import type { LyricLine } from '../lrc'
 
 const props = defineProps<{
@@ -7,34 +7,41 @@ const props = defineProps<{
   active: number
 }>()
 
-const container = ref<HTMLElement | null>(null)
+// 当前行索引（未开始时取首行作为“即将开始”预览）
+const curIdx = computed(() => (props.active >= 0 ? props.active : 0))
+// 偶数行 → 当前行落在左上；奇数行 → 当前行落到右下（KTV 左右交替高亮）
+const isEven = computed(() => curIdx.value % 2 === 0)
 
-watch(
-  () => props.active,
-  async (idx) => {
-    await nextTick()
-    if (!container.value) return
-    const el = container.value.querySelector<HTMLElement>(`[data-i="${idx}"]`)
-    if (el) {
-      const top = el.offsetTop - container.value.clientHeight / 2 + el.clientHeight / 2
-      container.value.scrollTo({ top, behavior: 'smooth' })
-    }
-  }
-)
+// 上方槽（始终靠左）与下方槽（始终靠右）各自显示的内容
+const topText = computed(() => {
+  if (props.lines.length === 0) return ''
+  return isEven.value
+    ? props.lines[curIdx.value]?.text
+    : props.lines[curIdx.value + 1]?.text
+})
+const bottomText = computed(() => {
+  if (props.lines.length === 0) return ''
+  return isEven.value
+    ? props.lines[curIdx.value + 1]?.text
+    : props.lines[curIdx.value]?.text
+})
+
+// 哪个槽是当前行（高亮），哪个是下一句（预览）
+const topIsCur = computed(() => isEven.value)
+const bottomIsCur = computed(() => !isEven.value)
 </script>
 
 <template>
-  <div class="lyrics" ref="container">
+  <div class="lyrics">
     <div v-if="lines.length === 0" class="placeholder">暂无歌词</div>
-    <div
-      v-for="(line, i) in lines"
-      :key="i"
-      :data-i="i"
-      class="line"
-      :class="{ active: i === active }"
-    >
-      {{ line.text }}
-    </div>
+    <template v-else>
+      <div class="row top" :class="topIsCur ? 'cur' : 'nxt'">
+        {{ topText || (topIsCur ? '♪' : '') }}
+      </div>
+      <div v-if="bottomText" class="row bottom" :class="bottomIsCur ? 'cur' : 'nxt'">
+        {{ bottomText }}
+      </div>
+    </template>
   </div>
 </template>
 
@@ -43,33 +50,51 @@ watch(
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
-  height: 42%;
-  padding: 40px 6% 60px;
-  overflow: hidden;
-  text-align: center;
-  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.85) 70%);
-  mask-image: linear-gradient(180deg, transparent, #000 25%, #000 100%);
-  -webkit-mask-image: linear-gradient(180deg, transparent, #000 25%, #000 100%);
-  scroll-behavior: smooth;
+  bottom: 12%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 22px;
+  padding: 0 6% 6%;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.55) 80%);
 }
 .placeholder {
   color: rgba(255, 255, 255, 0.4);
   font-size: 20px;
+  text-align: center;
 }
-.line {
-  font-size: 26px;
-  line-height: 1.5;
-  padding: 6px 0;
-  color: rgba(255, 255, 255, 0.45);
-  transition: color 0.25s ease, transform 0.25s ease, opacity 0.25s ease;
-  transform: scale(0.96);
-}
-.line.active {
+.row {
+  width: 100%;
+  line-height: 1.35;
   color: #fff;
-  font-size: 34px;
+  /* 深色描边阴影：防止视频为白色背景时看不见字 */
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 3px rgba(0, 0, 0, 0.85);
+  transition: color 0.28s ease, text-shadow 0.28s ease, transform 0.28s ease,
+    opacity 0.28s ease;
+}
+/* 上槽：始终靠左 */
+.top {
+  text-align: left;
+}
+/* 下槽：始终靠右 */
+.bottom {
+  text-align: right;
+}
+/* 当前行（高亮，随行号奇偶在左上/右下交替） */
+.cur {
+  font-size: 42px;
   font-weight: 800;
-  transform: scale(1.04);
-  text-shadow: 0 0 24px rgba(255, 61, 139, 0.7), 0 0 8px rgba(124, 92, 255, 0.6);
+  /* 高亮行：在深色描边基础上叠加粉色辉光，仍保证白底下可见 */
+  text-shadow: 0 0 24px rgba(255, 61, 139, 0.7), 0 2px 6px rgba(0, 0, 0, 0.9),
+    0 0 3px rgba(0, 0, 0, 0.85);
+  transform: scale(1.03);
+}
+/* 下一句（预览，字号与高亮一致、正常白色，落在对角） */
+.nxt {
+  font-size: 42px;
+  font-weight: 600;
+  color: #fff;
+  transform: scale(1);
 }
 </style>

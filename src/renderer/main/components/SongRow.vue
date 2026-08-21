@@ -32,6 +32,8 @@ function fmt(d: number): string {
     <div class="rank" :class="{ top: rank && rank <= 3 }">
       {{ rank != null ? String(rank).padStart(2, '0') : '' }}
     </div>
+    <img v-if="song.artistAvatar" class="ava" :src="song.artistAvatar" :alt="song.artist" />
+    <div v-else class="ava ph">{{ (song.artist || song.name).slice(0, 1) }}</div>
     <div class="meta">
       <div class="name">{{ song.name }}</div>
       <div class="sub">
@@ -105,6 +107,22 @@ function fmt(d: number): string {
   font-size: 13px;
   color: var(--text-2);
   font-variant-numeric: tabular-nums;
+}
+.ava {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg-3);
+}
+.ava.ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-2);
+  font-weight: 700;
+  font-size: 14px;
 }
 .add {
   width: 30px;

@@ -30,7 +30,8 @@ function onMic(val: number) {
     <!-- 缩略 + 信息 -->
     <div class="left">
       <div class="thumb">
-        <span v-if="!state.currentSong">♪</span>
+        <img v-if="state.currentSong?.artistAvatar" :src="state.currentSong.artistAvatar" :alt="state.currentSong.artist" />
+        <span v-else-if="!state.currentSong">♪</span>
         <span v-else>🎵</span>
       </div>
       <div class="info">
@@ -149,6 +150,12 @@ function onMic(val: number) {
   justify-content: center;
   font-size: 24px;
   flex-shrink: 0;
+  overflow: hidden;
+}
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .info {
   min-width: 0;

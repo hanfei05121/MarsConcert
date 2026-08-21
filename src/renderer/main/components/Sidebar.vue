@@ -8,6 +8,7 @@ const emit = defineEmits<{
 
 const menus: { key: ViewName; label: string; icon: string }[] = [
   { key: 'recommend', label: '推荐', icon: '🏠' },
+  { key: 'search', label: '歌曲', icon: '🎵' },
   { key: 'artists', label: '歌星', icon: '🎤' },
   { key: 'category', label: '分类', icon: '🏷️' },
   { key: 'playlists', label: '歌单', icon: '📃' },
