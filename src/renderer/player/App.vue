@@ -117,15 +117,6 @@ function disposeMic() {
 
 const hasLyrics = computed(() => lyrics.value.length > 0)
 
-/** 当前正在输出的音频文件名（诊断用）：伴奏常播，原唱模式再叠加人声 */
-function currentAudioFiles(): string {
-  if (!current) return ''
-  const acc = current.song.accomp_path.split(/[\\/]/).pop() || ''
-  if (mode.value !== 'orig') return acc
-  const ori = current.song.orig_path.split(/[\\/]/).pop() || ''
-  return `${acc} + ${ori}`
-}
-
 // 音量按轨独立控制：伴奏轨 = accomp×总音量，人声轨 = orig×总音量
 function applyVolume() {
   const a = accompAudioRef.value
@@ -381,7 +372,6 @@ function onAudioError() {
       <div class="topbar">
         <span class="title">{{ songName || '等待点歌…' }}</span>
         <span class="mode" :class="mode">{{ mode === 'orig' ? '原唱' : '伴奏' }}</span>
-        <span class="afile" :title="currentAudioFiles()">🎵 {{ currentAudioFiles() }}</span>
         <span v-if="audioError" class="audio-warn">⚠️ 音频缺失</span>
       </div>
 
@@ -435,18 +425,6 @@ function onAudioError() {
 .mode.accomp {
   border-color: #21e6c1;
   color: #21e6c1;
-}
-.afile {
-  font-size: 12px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  color: rgba(255, 255, 255, 0.85);
-  background: rgba(0, 0, 0, 0.35);
-  max-width: 300px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .audio-warn {
   font-size: 13px;

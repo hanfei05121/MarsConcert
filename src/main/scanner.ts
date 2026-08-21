@@ -34,6 +34,18 @@ function findArtistImage(dir: string): string {
   }
 }
 
+/** 在歌曲目录内找歌曲专属展示图（logo.* / log.* + 图片后缀），签发 media:// token；找不到返回 '' */
+function findLogoImage(dir: string): string {
+  try {
+    const av = readdirSync(dir).find((f) =>
+      /^(logo|log)\.(jpg|jpeg|png|webp|gif)$/i.test(f)
+    )
+    return av ? mediaTokenFor(join(dir, av)) : ''
+  } catch {
+    return ''
+  }
+}
+
 /** 从 LRC 文本中提取元数据标签 [ti:] [ar:] */
 function parseLrcMeta(lrcPath: string): LrcMeta {
   try {
@@ -81,16 +93,19 @@ function scanSong(
   if (!origAudio) origAudio = legacyOrig // 原唱音频：优先 orig.m4a，回退旧 orig.mp4 的音轨
   if (!accompAudio) accompAudio = legacyAccomp // 伴奏音频：优先 accomp.m4a，回退旧 accomp.mp4
 
-  // 歌词文件约定：优先使用 orig.lrc（与视频匹配的标准歌词），
-  // 其余 歌名.lrc 作为兼容回退（仅当某歌目录没有 orig.lrc 时）
+  // 歌词文件约定：优先使用 video.lrc（统一命名），兼容旧的 orig.lrc，
+  // 其余 歌名.lrc 作为兜底（仅当目录内没有 video.lrc / orig.lrc 时）
   let lrcPath = ''
   let lrcTitle: string | undefined
   let lrcArtist: string | undefined
   try {
     const files = readdirSync(dir).filter((f) => f.toLowerCase().endsWith('.lrc'))
     if (files.length > 0) {
-      const preferred = files.find((f) => f.toLowerCase() === 'orig.lrc')
-      lrcPath = join(dir, preferred ?? files[0])
+      const preferred =
+        files.find((f) => f.toLowerCase() === 'video.lrc') ??
+        files.find((f) => f.toLowerCase() === 'orig.lrc') ??
+        files[0]
+      lrcPath = join(dir, preferred)
       const meta = parseLrcMeta(lrcPath)
       lrcTitle = meta.title
       lrcArtist = meta.artist
@@ -127,6 +142,9 @@ function scanSong(
   let artistAvatar = avatarFromDir || ''
   if (!artistAvatar) artistAvatar = findArtistImage(dir)
 
+  // 歌曲展示图：优先歌曲目录内 logo.jpg（歌曲专属 Logo），缺省回退歌手头像 artist.jpg
+  const logo = findLogoImage(dir) || artistAvatar
+
   const isNew = upsertSong({
     name: lrcTitle ?? songName,
     artist: artistName ?? '',
@@ -134,7 +152,8 @@ function scanSong(
     orig_path: origPath,
     accomp_path: accomp,
     lrc_path: lrcPath,
-    artist_avatar: artistAvatar
+    artist_avatar: artistAvatar,
+    logo
   })
   if (isNew) acc.added++
   else acc.updated++
@@ -143,9 +162,10 @@ function scanSong(
 /**
  * 扫描素材库目录，自动入库。
  * 支持两种布局：
- * - 新布局：<lib>/<歌手>/<歌曲>/{video.mp4, orig.m4a, accomp.m4a, orig.lrc}
+ * - 新布局：<lib>/<歌手>/<歌曲>/{video.mp4, orig.m4a, accomp.m4a, video.lrc}
  *   歌手文件夹内放一张照片（artist.jpg 等）即全歌手共享头像，无需每首歌配图。
  * - 旧布局（兼容）：<lib>/<歌曲>/{video.mp4, orig.mp4, ...}，歌手由 artist.txt / LRC [ar:] 推断。
+ * 歌词文件统一命名为 video.lrc（兼容旧 orig.lrc）。
  */
 export function scanLibrary(libPath: string): RescanResult {
   const result: RescanResult = { added: 0, updated: 0, total: 0 }

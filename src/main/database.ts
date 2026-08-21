@@ -31,6 +31,7 @@ export interface SongInput {
   accomp_path: string
   lrc_path: string
   artist_avatar?: string
+  logo?: string
   duration?: number
 }
 
@@ -55,6 +56,7 @@ export async function initDatabase(): Promise<void> {
       duration REAL NOT NULL DEFAULT 0,
       lyric_offset REAL NOT NULL DEFAULT 0,
       artist_avatar TEXT NOT NULL DEFAULT '',
+      logo TEXT NOT NULL DEFAULT '',
       create_time TEXT NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_song_name ON song(name);
@@ -67,6 +69,9 @@ export async function initDatabase(): Promise<void> {
   }
   if (!cols.some((c) => c.name === 'artist_avatar')) {
     run('ALTER TABLE song ADD COLUMN artist_avatar TEXT NOT NULL DEFAULT \'\'')
+  }
+  if (!cols.some((c) => c.name === 'logo')) {
+    run('ALTER TABLE song ADD COLUMN logo TEXT NOT NULL DEFAULT \'\'')
   }
   if (!cols.some((c) => c.name === 'video_path')) {
     // 旧库（双视频方案）没有 video_path：先把 orig_path 回填为视频画面，
@@ -105,11 +110,12 @@ export function upsertSong(song: SongInput): boolean {
   const existing = all('SELECT id FROM song WHERE orig_path = ?', [song.orig_path])
   if (existing.length > 0) {
     run(
-      `UPDATE song SET name=?, artist=?, artist_avatar=?, video_path=?, accomp_path=?, lrc_path=? WHERE orig_path=?`,
+      `UPDATE song SET name=?, artist=?, artist_avatar=?, logo=?, video_path=?, accomp_path=?, lrc_path=? WHERE orig_path=?`,
       [
         song.name,
         song.artist,
         song.artist_avatar ?? '',
+        song.logo ?? '',
         song.video_path,
         song.accomp_path,
         song.lrc_path,
@@ -119,12 +125,13 @@ export function upsertSong(song: SongInput): boolean {
     return false
   }
   run(
-    `INSERT INTO song (name, artist, artist_avatar, video_path, orig_path, accomp_path, lrc_path, duration, create_time)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO song (name, artist, artist_avatar, logo, video_path, orig_path, accomp_path, lrc_path, duration, create_time)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       song.name,
       song.artist,
       song.artist_avatar ?? '',
+      song.logo ?? '',
       song.video_path,
       song.orig_path,
       song.accomp_path,
@@ -159,6 +166,7 @@ function rowToSong(row: any): Song {
     duration: row.duration,
     lyricOffset: row.lyric_offset ?? 0,
     artistAvatar: row.artist_avatar ?? '',
+    logo: row.logo ?? '',
     create_time: row.create_time
   }
 }

@@ -30,7 +30,7 @@ function onMic(val: number) {
     <!-- 缩略 + 信息 -->
     <div class="left">
       <div class="thumb">
-        <img v-if="state.currentSong?.artistAvatar" :src="state.currentSong.artistAvatar" :alt="state.currentSong.artist" />
+        <img v-if="state.currentSong?.logo" :src="state.currentSong.logo" :alt="state.currentSong.artist" />
         <span v-else-if="!state.currentSong">♪</span>
         <span v-else>🎵</span>
       </div>

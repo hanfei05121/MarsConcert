@@ -57,7 +57,6 @@ const bottomIsCur = computed(() => !isEven.value)
   gap: 22px;
   padding: 0 6% 6%;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.55) 80%);
 }
 .placeholder {
   color: rgba(255, 255, 255, 0.4);

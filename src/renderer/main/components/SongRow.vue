@@ -32,7 +32,7 @@ function fmt(d: number): string {
     <div class="rank" :class="{ top: rank && rank <= 3 }">
       {{ rank != null ? String(rank).padStart(2, '0') : '' }}
     </div>
-    <img v-if="song.artistAvatar" class="ava" :src="song.artistAvatar" :alt="song.artist" />
+    <img v-if="song.logo" class="ava" :src="song.logo" :alt="song.artist" />
     <div v-else class="ava ph">{{ (song.artist || song.name).slice(0, 1) }}</div>
     <div class="meta">
       <div class="name">{{ song.name }}</div>

@@ -17,14 +17,16 @@
 - **正确构建姿势**：`NODE_OPTIONS= npm run build`（清空注入变量，需允许非沙箱执行）。
   vite 默认会清空 outDir，不需要手动删 dist。用户自己终端构建不受此限制。
 - DB 路径：`C:/Users/itoutsource.cz2147/AppData/Roaming/local-desktop-karaoke/app-data/karaoke.sqlite`
-- 曲库：`D:/song-lib/<歌名>/{video.mp4, orig.m4a, accomp.m4a, orig.lrc, artist.txt, artist.jpg}`
+- 曲库：`E:/song-lib/<歌手>/<歌曲>/{video.mp4, orig.m4a, accomp.m4a, video.lrc, artist.txt, artist.jpg}`（实际路径见 config.json；默认 D:/song-lib 已被用户改到 E:/）
 
 ## 素材规范速查
-- 歌词固定 `orig.lrc`（每目录仅一个 .lrc，备份用 .bak/.baked）；UTF-8；LF/CRLF 均可；时间戳与视频对齐。
-- 歌手名 `artist.txt` 首行（回退 LRC `[ar:]`）；头像 `artist.jpg/avatar.*/cover.*` → media:// token。
+- 歌词统一 `video.lrc`（每目录仅一个 .lrc，备份用 .bak/.baked）；scanner 优先 `video.lrc`，兼容旧 `orig.lrc`，其余 `.lrc` 兜底；UTF-8；LF/CRLF 均可；时间戳与视频对齐。
+- 歌手名 `artist.txt` 首行（回退 LRC `[ar:]`）；歌手头像 `artist.jpg/avatar.*/cover.*` → 存入 `artist_avatar`（歌星视图用）。
+- **歌曲展示图 `logo.jpg`（歌曲目录内，可选，也可简写 `log.jpg`）**：优先于歌手头像，`song.logo = logo/log 图 token || artist_avatar`。
+  底部栏缩略图 + 所有歌曲列表（SongRow）读 `song.logo`；「歌星」视图仍读 `artist_avatar`（artist.jpg）。
 - 生成素材：`ffmpeg -i 原视频.mp4 -an -c:v copy video.mp4`；`ffmpeg -i 原视频.mp4 -vn -c:a aac orig.m4a`。
 
 ## 用户偏好
 - KTV 式歌词左右角交替高亮、两行展示（不穿透填色）、白字+阴影、42px。
-- 不做手动偏移 UI（用对齐好的 orig.lrc）；`lyricOffset` 字段保留用于特殊情况。
+- 不做手动偏移 UI（用对齐好的 video.lrc）；`lyricOffset` 字段保留用于特殊情况。
 - Song 接口 snake/camel 混用是历史遗留，读取路径必须经 rowToSong 显式映射。
