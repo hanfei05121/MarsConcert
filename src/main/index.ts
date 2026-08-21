@@ -1,4 +1,4 @@
-import { app, ipcMain, BrowserWindow, protocol, shell } from 'electron'
+import { app, ipcMain, BrowserWindow, protocol, shell, dialog } from 'electron'
 import { createReadStream, readFileSync, statSync, existsSync, mkdirSync } from 'node:fs'
 import { Readable } from 'node:stream'
 import { loadConfig, saveConfig } from './config'
@@ -160,6 +160,30 @@ function registerIpc() {
     } catch (e) {
       return String(e)
     }
+  })
+
+  // 弹出目录选择器更换曲库路径：保存配置并立即重扫（取消返回 path=null）
+  ipcMain.handle(IPC.LIBRARY_CHOOSE, async () => {
+    const options: Electron.OpenDialogOptions = {
+      title: '选择曲库目录（song-lib）',
+      buttonLabel: '使用此目录',
+      properties: ['openDirectory', 'createDirectory'],
+      defaultPath: config.songLibPath
+    }
+    const res =
+      mainWindow && !mainWindow.isDestroyed()
+        ? await dialog.showOpenDialog(mainWindow, options)
+        : await dialog.showOpenDialog(options)
+    if (res.canceled || res.filePaths.length === 0) return { path: null, result: null }
+    const newPath = res.filePaths[0]
+    if (newPath === config.songLibPath) {
+      // 选的还是同一目录：只重扫一遍，不重复保存
+      return { path: newPath, result: scanLibrary(newPath) }
+    }
+    config.songLibPath = newPath
+    saveConfig(config)
+    const result = scanLibrary(newPath)
+    return { path: newPath, result }
   })
 
   // —— 播放窗事件 -> 主进程 -> 控制窗 ——

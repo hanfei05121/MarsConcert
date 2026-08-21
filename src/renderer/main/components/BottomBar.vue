@@ -206,10 +206,10 @@ function onMic(val: number) {
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: #232631;
+  color: var(--on-accent);
   padding: 0;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(169, 173, 184, 0.35);
+  box-shadow: var(--shadow-accent);
 }
 .play .ic {
   display: block;
@@ -234,7 +234,7 @@ function onMic(val: number) {
   border-color: var(--accent);
 }
 .f.on {
-  background: rgba(169, 173, 184, 0.16);
+  background: var(--accent-soft);
   color: var(--accent);
   border-color: var(--accent);
 }
@@ -326,7 +326,7 @@ function onMic(val: number) {
   background: var(--bg-1);
   border: 1px solid var(--line);
   border-radius: 14px;
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-panel);
 }
 .col {
   display: flex;

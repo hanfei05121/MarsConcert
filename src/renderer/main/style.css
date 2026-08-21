@@ -12,6 +12,17 @@
   --accent-2: #c9cdd8; /* 浅雅灰 */
   --danger: #ff4d4f; /* VIP 红 / 删除 */
   --popup-bg: rgba(30, 33, 55, 0.92);
+  --on-accent: #232631; /* accent 渐变背景上的文字色 */
+
+  /* —— 设计 token：光晕 / 阴影 / 过渡 / 派生色 —— */
+  --glow: rgba(245, 245, 220, 0.797); /* 霓虹光晕颜色 */
+  --shadow-glow: 0 0 5px var(--glow); /* 按钮/行/头像/卡片的光晕 */
+  --shadow-accent: 0 6px 18px rgba(169, 173, 184, 0.35); /* 主操作键的彩色投影 */
+  --shadow-panel: 0 14px 32px rgba(0, 0, 0, 0.5); /* 浮层面板（音量弹层等） */
+  --shadow-pop: 0 20px 60px rgba(0, 0, 0, 0.5); /* 大弹窗 */
+  --ease: all 0.3s ease; /* 统一悬停过渡 */
+  --accent-soft: rgba(169, 173, 184, 0.14); /* accent 半透明底（选中/hover 底） */
+  --accent-line: rgba(169, 173, 184, 0.5); /* accent 半透明描边 */
 }
 
 * {
@@ -78,7 +89,7 @@ body {
 .btn.accent {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   border: none;
-  color: #232631;
+  color: var(--on-accent);
   font-weight: 700;
 }
 
@@ -90,4 +101,42 @@ body {
 :deep(.ant-slider-handle::after),
 .ant-slider-handle::after {
   box-shadow: 0 0 0 2px var(--accent) !important;
+}
+
+/* —— 全局霓虹阴影 + 悬停动效（KTV 质感）—— */
+button {
+  box-shadow: var(--shadow-glow);
+  transition: var(--ease);
+}
+button:hover {
+  background: var(--bg-3);
+  transform: translateY(2px);
+}
+/* 非 button 的卡片 / 标签 / 头像也统一光晕 */
+.chip,
+.card,
+.plcard,
+.avatar,
+.ava,
+.thumb {
+  box-shadow: var(--shadow-glow);
+}
+/* 列表行（歌曲行等）：统一光晕 + 移入下沉 */
+.row {
+  box-shadow: var(--shadow-glow);
+}
+.row:hover {
+  transform: translateY(2px);
+}
+
+/* —— 工具类：模板中直接 class 复用 —— */
+.glow {
+  box-shadow: var(--shadow-glow);
+}
+.lift {
+  transition: var(--ease);
+}
+.lift:hover {
+  background: var(--bg-3);
+  transform: translateY(2px);
 }

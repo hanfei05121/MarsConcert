@@ -60,7 +60,7 @@ const emit = defineEmits<{
 .badge {
   font-size: 11px;
   font-weight: 700;
-  color: #232631;
+  color: var(--on-accent);
   background: var(--accent);
   border-radius: 4px;
   padding: 1px 6px;

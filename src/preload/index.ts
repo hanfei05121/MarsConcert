@@ -24,6 +24,7 @@ const api: KaraokeApi = {
   stopPlayback: () => ipcRenderer.invoke(IPC.PLAYER_STOP),
   windowControl: (action) => ipcRenderer.invoke(IPC.WINDOW_CONTROL, action),
   openLibFolder: () => ipcRenderer.invoke(IPC.LIBRARY_OPEN),
+  chooseLibFolder: () => ipcRenderer.invoke(IPC.LIBRARY_CHOOSE),
   escape: () => ipcRenderer.invoke(IPC.PLAYER_ESCAPE),
   setLyricOffset: (songId, offset) => ipcRenderer.invoke(IPC.LYRIC_OFFSET_SET, songId, offset),
 

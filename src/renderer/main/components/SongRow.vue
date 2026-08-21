@@ -50,18 +50,20 @@ function fmt(d: number): string {
 .row {
   display: flex;
   align-items: center;
+  box-shadow: var(--shadow-glow);
   gap: 12px;
   padding: 10px 14px;
   border-radius: 10px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: var(--ease);
 }
 .row:hover {
   background: var(--bg-3);
+  transform: translateY(2px);
 }
 .row.active {
-  background: rgba(169, 173, 184, 0.14);
-  box-shadow: inset 3px 0 0 var(--accent);
+  /* background: rgba(169, 173, 184, 0.14); */
+  /* box-shadow: inset 3px 0 0 var(--accent); */
 }
 .rank {
   width: 30px;
@@ -99,7 +101,7 @@ function fmt(d: number): string {
 .lang {
   font-size: 11px;
   color: var(--accent);
-  border: 1px solid rgba(169, 173, 184, 0.5);
+  border: 1px solid var(--accent-line);
   border-radius: 4px;
   padding: 0 5px;
 }
@@ -130,7 +132,7 @@ function fmt(d: number): string {
   border-radius: 50%;
   border: none;
   background: var(--accent);
-  color: #232631;
+  color: var(--on-accent);
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;

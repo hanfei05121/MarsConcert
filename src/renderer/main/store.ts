@@ -288,6 +288,16 @@ async function rescan() {
   }
 }
 
+/** 弹出目录选择器更换曲库：主进程保存配置并重扫，成功后刷新本地歌曲 */
+async function chooseLib() {
+  const res = await window.api.chooseLibFolder()
+  if (!res.path) return // 用户取消
+  state.config = { ...(state.config as AppConfig), songLibPath: res.path }
+  await loadAll()
+  await refresh()
+  showToast(`曲库已切换：${res.path}（${res.result?.total ?? 0} 首）`)
+}
+
 function togglePlayMode() {
   state.playMode = state.playMode === 'order' ? 'random' : 'order'
 }
@@ -416,6 +426,7 @@ export const store = {
   reSing,
   applyVolumes,
   rescan,
+  chooseLib,
   togglePlayMode,
   toggleQueueOpen,
   setQueueTab,

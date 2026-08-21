@@ -116,7 +116,7 @@ function onPin(i: number) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-pop);
 }
 .phead {
   display: flex;
@@ -169,7 +169,7 @@ function onPin(i: number) {
   background: var(--bg-3);
 }
 .prow.active {
-  background: rgba(169, 173, 184, 0.14);
+  background: var(--accent-soft);
 }
 .no {
   width: 24px;
@@ -193,7 +193,7 @@ function onPin(i: number) {
 .tag {
   font-size: 10px;
   color: var(--accent);
-  border: 1px solid rgba(169, 173, 184, 0.5);
+  border: 1px solid var(--accent-line);
   border-radius: 3px;
   padding: 0 4px;
   margin-left: 4px;
@@ -211,7 +211,7 @@ function onPin(i: number) {
 .req {
   font-size: 11px;
   color: var(--accent);
-  border: 1px solid rgba(169, 173, 184, 0.5);
+  border: 1px solid var(--accent-line);
   border-radius: 999px;
   padding: 1px 8px;
   flex-shrink: 0;

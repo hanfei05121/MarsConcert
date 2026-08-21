@@ -50,10 +50,13 @@ function go(p: number) {
 .pager {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 18px 0 6px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--line);
+  background: var(--bg-0);
+  flex-shrink: 0;
 }
 .pg {
   min-width: 34px;
@@ -75,7 +78,7 @@ function go(p: number) {
 .pg.on {
   background: var(--accent);
   border-color: var(--accent);
-  color: #232631;
+  color: var(--on-accent);
 }
 .pg:disabled {
   opacity: 0.4;

@@ -218,33 +218,36 @@ const playlistTitle = computed(() => {
           </div>
         </div>
 
-        <!-- 歌曲列表 / 搜索结果 -->
-        <div v-else-if="state.view === 'search'" class="scroll" ref="searchScroll">
-          <div class="searchhead">
-            <h2 class="sh-title">
-              {{ state.search.trim() ? `搜索 “${state.search}”` : '歌曲列表' }}
-            </h2>
-            <span class="sh-count">{{ searchList.length }} 首</span>
-          </div>
-          <div class="list grid2">
-            <SongRow
-              v-for="s in pagedSongs"
-              :key="s.id"
-              :song="s"
-              :active="s.id === state.currentSong?.id"
-              @add="onAdd"
-              @play="onPlay"
-            />
-            <div v-if="searchList.length === 0" class="empty">
-              {{
-                state.search.trim()
-                  ? '没有找到匹配的歌曲，换个关键词试试'
-                  : '暂无歌曲，先去扫描素材库'
-              }}
+        <!-- 歌曲列表 / 搜索结果：内容滚动区 + 底部固定分页条 -->
+        <div v-else-if="state.view === 'search'" class="searchwrap">
+          <div class="scroll" ref="searchScroll">
+            <div class="searchhead">
+              <h2 class="sh-title">
+                {{ state.search.trim() ? `搜索 “${state.search}”` : '歌曲列表' }}
+              </h2>
+              <span class="sh-count">{{ searchList.length }} 首</span>
+            </div>
+            <div class="list grid2">
+              <SongRow
+                v-for="s in pagedSongs"
+                :key="s.id"
+                :song="s"
+                :active="s.id === state.currentSong?.id"
+                @add="onAdd"
+                @play="onPlay"
+              />
+              <div v-if="searchList.length === 0" class="empty">
+                {{
+                  state.search.trim()
+                    ? '没有找到匹配的歌曲，换个关键词试试'
+                    : '暂无歌曲，先去扫描素材库'
+                }}
+              </div>
             </div>
           </div>
+          <!-- 有歌曲时始终显示分页条（仅 1 页时按钮禁用，方便知道有分页能力） -->
           <Pagination
-            v-if="totalPages > 1"
+            v-if="searchList.length > 0"
             :total="searchList.length"
             :page-size="PAGE_SIZE"
             :current="page"
@@ -311,6 +314,19 @@ const playlistTitle = computed(() => {
   overflow-y: auto;
   padding: 18px;
 }
+/* 歌曲列表视图：上方内容滚动区 + 底部固定分页条（压在底部操作栏上方） */
+.searchwrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.searchwrap > .scroll {
+  position: static;
+  flex: 1;
+  min-height: 0;
+}
 .charts {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -338,14 +354,14 @@ const playlistTitle = computed(() => {
 }
 .card:hover {
   border-color: var(--accent);
-  transform: translateY(-2px);
+  transform: translateY(2px);
 }
 .ava {
   width: 64px;
   height: 64px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: #232631;
+  color: var(--on-accent);
   font-size: 28px;
   font-weight: 800;
   display: flex;
@@ -386,7 +402,7 @@ const playlistTitle = computed(() => {
 }
 .chip.on {
   background: var(--accent);
-  color: #232631;
+  color: var(--on-accent);
   border-color: var(--accent);
 }
 .list {
@@ -430,7 +446,7 @@ const playlistTitle = computed(() => {
 }
 .plcard:hover {
   border-color: var(--accent);
-  transform: translateY(-2px);
+  transform: translateY(2px);
 }
 .pic {
   width: 56px;

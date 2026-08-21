@@ -71,6 +71,8 @@ export const IPC = {
   PLAYER_STOP: 'player:stop',
   WINDOW_CONTROL: 'window:control',
   LIBRARY_OPEN: 'library:open',
+  /** 控制窗 → 主进程：弹出目录选择器更换曲库路径，保存配置并立即重扫 */
+  LIBRARY_CHOOSE: 'library:choose',
   // 播放窗 -> 主进程：Esc 最小化播放屏，把控制权还给控制台
   PLAYER_ESCAPE: 'player:escape',
   // 播放窗 -> 主进程：保存当前歌曲的歌词偏移（按歌曲持久化，免得每次重调）
@@ -101,6 +103,12 @@ export interface RescanResult {
   total: number
 }
 
+/** 选择曲库目录的结果：path 为 null 表示用户取消 */
+export interface ChooseLibResult {
+  path: string | null
+  result: RescanResult | null
+}
+
 /** 暴露给渲染进程的桥接 API（由 preload 实现，主进程 / 播放窗 / 控制窗共用） */
 export interface KaraokeApi {
   // —— 控制窗 -> 主进程 ——
@@ -116,6 +124,8 @@ export interface KaraokeApi {
   stopPlayback(): Promise<void>
   windowControl(action: 'min' | 'max' | 'close'): Promise<void>
   openLibFolder(): Promise<string>
+  /** 弹出目录选择器更换曲库路径，保存配置并立即重扫；取消时 path 为 null */
+  chooseLibFolder(): Promise<ChooseLibResult>
   /** 播放窗：Esc 退出/最小化，把控制权还给控制台 */
   escape(): Promise<void>
   /** 播放窗：保存当前歌曲的歌词偏移（秒） */
