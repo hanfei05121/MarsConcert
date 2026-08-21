@@ -60,8 +60,15 @@ function onMic(val: number) {
     <!-- 功能按钮组 -->
     <div class="funcs">
       <button class="f" title="重唱" @click="store.reSing()">重唱</button>
-      <button class="f" :class="{ on: state.queueOpen }" title="已点歌单" @click="store.toggleQueueOpen()">
+      <button
+        id="queue-fab"
+        class="f"
+        :class="{ on: state.queueOpen }"
+        title="已点歌单"
+        @click="store.toggleQueueOpen()"
+      >
         已点
+        <span v-if="state.queue.length" class="qbadge">{{ state.queue.length }}</span>
       </button>
       <div class="orig">
         <span class="ol">原唱</span>
@@ -220,6 +227,7 @@ function onMic(val: number) {
   gap: 10px;
 }
 .f {
+  position: relative;
   height: 36px;
   padding: 0 14px;
   border-radius: 18px;
@@ -237,6 +245,39 @@ function onMic(val: number) {
   background: var(--accent-soft);
   color: var(--accent);
   border-color: var(--accent);
+}
+/* 已点数量徽标：按钮右上角 */
+.qbadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+/* 亮点落位后的弹跳，呼应数字 +1 */
+.f.bump {
+  animation: qbump 0.42s ease;
+}
+@keyframes qbump {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 .orig {
   display: flex;

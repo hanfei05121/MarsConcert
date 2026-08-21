@@ -9,8 +9,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'add', song: Song): void
-  (e: 'play', song: Song): void
+  (e: 'add', song: Song, ev: MouseEvent): void
+  (e: 'play', song: Song, ev: MouseEvent): void
 }>()
 </script>
 
@@ -30,8 +30,8 @@ const emit = defineEmits<{
         :song="song"
         :rank="i + 1"
         :show-lang="true"
-        @add="emit('add', $event)"
-        @play="emit('play', $event)"
+      @add="(s, e) => emit('add', s, e)"
+      @play="(s, e) => emit('play', s, e)"
       />
       <div v-if="songs.length === 0" class="empty">暂无歌曲，点右上角「重新扫描」导入素材</div>
     </div>

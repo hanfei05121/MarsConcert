@@ -10,8 +10,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'add', song: Song): void
-  (e: 'play', song: Song): void
+  (e: 'add', song: Song, ev: MouseEvent): void
+  (e: 'play', song: Song, ev: MouseEvent): void
 }>()
 
 function fmt(d: number): string {
@@ -26,8 +26,8 @@ function fmt(d: number): string {
   <div
     class="row"
     :class="{ active }"
-    @click="emit('add', song)"
-    @dblclick="emit('play', song)"
+    @click="emit('add', song, $event)"
+    @dblclick="emit('play', song, $event)"
   >
     <div class="rank" :class="{ top: rank && rank <= 3 }">
       {{ rank != null ? String(rank).padStart(2, '0') : '' }}
@@ -42,7 +42,7 @@ function fmt(d: number): string {
       </div>
     </div>
     <div class="dur">{{ fmt(song.duration) }}</div>
-    <button class="add" title="加入已点" @click.stop="emit('add', song)">＋</button>
+    <button class="add" title="加入已点" @click.stop="emit('add', song, $event)">＋</button>
   </div>
 </template>
 
