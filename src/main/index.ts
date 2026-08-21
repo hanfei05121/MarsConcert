@@ -73,7 +73,7 @@ function registerIpc() {
 
   ipcMain.handle(IPC.PLAYER_PLAY, (_e, song: Song) => {
     currentSong = song
-    // 首次点歌时再创建播放窗，避免启动就全屏盖住控制台
+    // 播放窗已在启动时创建；这里兜底：若用户把它关掉了，点歌时重新拉起
     if (!playerWindow || playerWindow.isDestroyed()) {
       playerWindow = createPlayerWindow(config)
       playerWindow.on('closed', () => {
@@ -82,7 +82,15 @@ function registerIpc() {
       })
     }
     const lrc = readLrc(song.lrc_path)
-    const payload = { song, lrc, mode: currentMode, volumes, urls: { orig: mediaTokenFor(song.orig_path), accomp: mediaTokenFor(song.accomp_path) } }
+    // 单视频 + 双音频：videoUrl 只出画面（无音轨），audioUrls 按模式切换（orig/accomp 独立 m4a）
+    const payload = {
+      song,
+      lrc,
+      mode: currentMode,
+      volumes,
+      videoUrl: mediaTokenFor(song.video_path || song.orig_path),
+      audioUrls: { orig: mediaTokenFor(song.orig_path), accomp: mediaTokenFor(song.accomp_path) }
+    }
     const wc = playerWindow.webContents
     // 若窗口还在加载，等就绪后再下达指令，避免消息丢失
     if (wc.isLoading()) wc.once('did-finish-load', () => sendToPlayer(IPC.TO_PLAYER_LOAD, payload))
@@ -93,7 +101,16 @@ function registerIpc() {
     currentMode = mode
     config.videoMode = mode
     saveConfig(config)
-    sendToPlayer(IPC.TO_PLAYER_SET_MODE, mode)
+    // 切模式时从 DB 重新读取当前歌曲，带上最新音频地址：
+    // 解决「点歌之后才补了 accomp.mp3 / 重扫」导致播放窗仍用旧路径的问题
+    let audioUrls: { orig: string; accomp: string } | undefined
+    try {
+      const fresh = currentSong ? getSongs().find((s) => s.id === currentSong!.id) : undefined
+      if (fresh) audioUrls = { orig: mediaTokenFor(fresh.orig_path), accomp: mediaTokenFor(fresh.accomp_path) }
+    } catch {
+      /* 兜底：沿用播放窗内的旧地址 */
+    }
+    sendToPlayer(IPC.TO_PLAYER_SET_MODE, { mode, audioUrls })
   })
 
   ipcMain.handle(IPC.PLAYER_CONTROL, (_e, action: string, payload?: unknown) => {
@@ -105,6 +122,11 @@ function registerIpc() {
     config.volumes = vols
     saveConfig(config)
     sendToPlayer(IPC.TO_PLAYER_VOLUMES, vols)
+  })
+
+  // 停止播放：让副屏回到待点歌页（点下一首但已点为空时）
+  ipcMain.handle(IPC.PLAYER_STOP, () => {
+    sendToPlayer(IPC.TO_PLAYER_STOP)
   })
 
   // 保存当前歌曲的歌词偏移（按歌曲持久化）
@@ -196,6 +218,13 @@ app.whenReady().then(async () => {
   })
 
   mainWindow = createMainWindow()
+
+  // 启动即打开副屏播放窗：无边框铺副屏（不置顶、不抢焦点），常驻显示“去点歌”待机页
+  playerWindow = createPlayerWindow(config)
+  playerWindow.on('closed', () => {
+    playerWindow = null
+    currentSong = null
+  })
 
   registerIpc()
 

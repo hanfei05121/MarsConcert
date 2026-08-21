@@ -19,6 +19,7 @@ function fmt(d: number): string {
 
 async function onRowClick(i: number) {
   if (state.queueTab === 'queued') await store.topQueue(i)
+  else await store.addToQueue(list.value[i]) // 已唱：再点一次 = 重新点歌，加到已点末尾
 }
 async function onRemove(i: number) {
   if (state.queueTab === 'queued') await store.removeQueueAt(i)
@@ -57,6 +58,7 @@ function onPin(i: number) {
           :key="song.id"
           class="prow"
           :class="{ active: song.id === state.currentSong?.id }"
+          :title="state.queueTab === 'sung' ? '点击重新点歌' : ''"
           @click="onRowClick(i)"
           @dblclick="onRowClick(i)"
         >
@@ -69,6 +71,7 @@ function onPin(i: number) {
             <div class="artist">{{ song.artist || '未知歌手' }}</div>
           </div>
           <span class="dur">{{ fmt(song.duration) }}</span>
+          <span v-if="state.queueTab === 'sung'" class="req">+ 重唱</span>
           <button
             v-if="state.queueTab === 'queued' && song.id !== state.currentSong?.id"
             class="pin"
@@ -204,6 +207,14 @@ function onPin(i: number) {
   font-size: 12px;
   color: var(--text-2);
   font-variant-numeric: tabular-nums;
+}
+.req {
+  font-size: 11px;
+  color: var(--accent);
+  border: 1px solid rgba(169, 173, 184, 0.5);
+  border-radius: 999px;
+  padding: 1px 8px;
+  flex-shrink: 0;
 }
 .pin {
   border: none;

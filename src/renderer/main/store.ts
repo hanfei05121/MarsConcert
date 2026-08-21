@@ -40,6 +40,8 @@ interface State {
   artistFilter: string | null
   categoryFilter: Lang | '全部'
   selectedPlaylist: string | null // 歌单详情标识：歌单名 | '__fav__' | '__history__'
+  /** 轻提示（自绘，替代 antd 静态 message） */
+  toast: { text: string; key: number } | null
 }
 
 function loadFavs(): number[] {
@@ -96,7 +98,8 @@ export const state = reactive<State>({
   viewHistory: [],
   artistFilter: null,
   categoryFilter: '全部',
-  selectedPlaylist: null
+  selectedPlaylist: null,
+  toast: null
 })
 
 async function init() {
@@ -129,7 +132,10 @@ async function doSearch(q: string) {
 
 function currentQueueIndex(): number {
   if (!state.currentSong) return -1
-  return state.queue.findIndex((s) => s.id === state.currentSong!.id)
+  const idx = state.queue.findIndex((s) => s.id === state.currentSong!.id)
+  // eslint-disable-next-line no-console
+  console.log('[debug] currentQueueIndex:', { idx, curId: state.currentSong!.id, queueIds: state.queue.map((s) => s.id), curName: state.currentSong!.name })
+  return idx
 }
 
 async function ensurePlay(song: Song) {
@@ -199,16 +205,50 @@ function moveQueue(from: number, to: number) {
   state.queue.splice(to, 0, item)
 }
 
+/** 把当前播放中的歌曲移入已唱（若它在已点中）。返回它在已点中的原下标，未在队列中返回 -1 */
+function moveCurrentToHistory(): number {
+  const i = currentQueueIndex()
+  if (i < 0) return i
+  const cur = state.queue[i]
+  state.history.unshift(cur)
+  if (state.history.length > 50) state.history.length = 50
+  state.queue.splice(i, 1)
+  return i
+}
+
 async function playPrev() {
   const i = currentQueueIndex()
   if (i > 0) await playQueueAt(i - 1)
   else if (i === -1 && state.queue.length) await playQueueAt(0)
   else if (i === 0) await seek(0)
 }
+
+/**
+ * 下一首：当前歌移入已唱，播放已点中的下一首（当前之后的第一首，无则回到队首）；
+ * 若已点已空，则副屏回到待点歌页并提示。
+ */
 async function playNext() {
-  const i = currentQueueIndex()
-  if (i >= 0 && i < state.queue.length - 1) await playQueueAt(i + 1)
-  else if (i === -1 && state.queue.length) await playQueueAt(0)
+  const i = moveCurrentToHistory()
+  if (state.queue.length === 0) {
+    state.currentSong = null
+    state.playing = false
+    await window.api.stopPlayback() // 副屏回到「请到控制台点歌」待机页
+    showToast('已点列表没有歌曲了，先点一首吧～')
+    return
+  }
+  // 移除当前后 i 位置即下一首；不存在（当前是最后一首）则回到队首
+  const next = state.queue[i] ?? state.queue[0]
+  await ensurePlay(next)
+}
+
+// —— 轻提示（自绘，避免 antd 静态 message 在打包后不渲染）——
+let toastTimer: ReturnType<typeof setTimeout> | null = null
+function showToast(text: string) {
+  state.toast = { text, key: Date.now() }
+  if (toastTimer) clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => {
+    state.toast = null
+  }, 2500)
 }
 
 async function toggleMode() {
@@ -319,12 +359,8 @@ window.api.onSyncState((d) => {
 })
 window.api.onSyncEnded(() => {
   state.playing = false
-  const idx = currentQueueIndex()
+  const idx = moveCurrentToHistory() // 当前歌移入已唱并从已点移除
   if (idx >= 0) {
-    const ended = state.queue[idx]
-    state.history.unshift(ended)
-    if (state.history.length > 50) state.history.length = 50
-    state.queue.splice(idx, 1) // 移除已播
     let next: Song | undefined
     if (state.playMode === 'random') {
       next = state.queue[Math.floor(Math.random() * state.queue.length)]
@@ -373,6 +409,7 @@ export const store = {
   pinToNext,
   playPrev,
   playNext,
+  showToast,
   toggleMode,
   togglePlay,
   seek,

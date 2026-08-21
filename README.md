@@ -54,24 +54,46 @@ npm run dev
 
 ## 素材规范（严格遵守，否则歌词错位 / 无法播放）
 
+**单视频 + 双音频方案**：画面只有一个视频文件（无音轨），原唱 / 伴奏是两段独立音频。
+切换原唱/伴奏时只换音频流，**视频不重新解码**，彻底解决以前双视频方案切换卡顿的问题。
+
+**目录按歌手组织**：一层是歌手文件夹（名字即歌手名），歌手照片放这一层、全歌手共享；
+二层是歌曲文件夹，放画面 + 双音频 + 歌词。
+
 ```
 D:/
 └─ song-lib\                 # 默认素材库（可在「重新扫描」前改配置）
-   ├─ 稻香\
-   │  ├─ orig.mp4            # 原唱 MV
-   │  ├─ accomp.mp4          # 同画面伴奏 MV（画面/时长须 100% 对齐）
-   │  ├─ orig.lrc            # 歌词（固定文件名 orig.lrc）
-   │  ├─ artist.txt          # 歌手名（首行，可选；缺省回退读取 orig.lrc 的 [ar:] 标签）
-   │  └─ artist.jpg          # 歌手头像（可选；也认 avatar.* / cover.* 等图片）
-   └─ 晴天\
-      ├─ orig.mp4
-      ├─ accomp.mp4
-      ├─ orig.lrc
-      ├─ artist.txt
-      └─ artist.jpg
+   ├─ 周杰伦\                # —— 歌手文件夹（名字即歌手名）——
+   │  ├─ artist.jpg          # 歌手照片（可选；也认 avatar.* / cover.*，全歌手共享一张）
+   │  ├─ 稻香\               # —— 歌曲文件夹 ——
+   │  │  ├─ video.mp4        # 【只有画面，必须删掉原生音轨！】H.264 视频流，不带音频
+   │  │  ├─ orig.mp3         # 原唱音频（AAC/MP3 等均可；建议用分离出的“人声干声”）
+   │  │  ├─ accomp.mp3       # 伴奏音频（AAC/MP3 等均可）
+   │  │  └─ orig.lrc         # 歌词（固定文件名 orig.lrc）
+   │  └─ 晴天\
+   │     ├─ video.mp4
+   │     ├─ orig.mp3
+   │     ├─ accomp.mp3
+   │     └─ orig.lrc
+   └─ 薛之谦\
+      ├─ artist.jpg
+      └─ 绅士 - 双音轨\
+         ├─ video.mp4
+         ├─ orig.mp3
+         ├─ accomp.mp3
+         └─ orig.lrc
 ```
 
+> 兼容旧布局：`song-lib/<歌名>/` 平铺结构（媒体文件直接放歌目录）仍可扫描入库，
+> 歌手由歌目录内 `artist.txt` 或 LRC `[ar:]` 推断，照片放歌目录。
+> **新歌一律用「歌手/歌曲」两级结构**，歌手名和照片只维护一次。
+
 ### 文件命名要求
+- **画面文件固定命名为 `video.mp4`**：只承载画面，**必须去掉原生音轨**（`ffmpeg -an` 导出），
+  原唱 / 伴奏共用这一个视频 → 切换模式只替换音频，不重新解码视频，不卡顿。
+  也兼容 `video.webm` / `video.mov` / `video.mkv`。
+- **音频文件固定命名 `orig.m4a`（原唱）/ `accomp.m4a`（伴奏）**：AAC 编码。
+  也兼容 `orig.mp3` / `orig.aac` / `orig.wav` 等同名前缀 + 音频扩展名。
 - **歌词文件固定命名为 `orig.lrc`**：扫描器优先加载每个歌目录下的 `orig.lrc`，**不再使用「歌名.lrc」**。
   仅当某歌目录下没有 `orig.lrc` 时，`歌名.lrc` 才作为兼容回退被读取。
 - **每个歌目录只允许存在一个 `.lrc`**：若目录里同时有 `orig.lrc` 与 `歌名.lrc`，
@@ -81,32 +103,33 @@ D:/
 - **编码 UTF-8**：否则中文乱码。
 - **换行符 LF / CRLF 均可**：LRC 解析按行切分，两种换行都不影响时间戳提取。
 
-### 歌手与头文件要求
-- **歌手名（`artist.txt`，可选）**：在歌目录下放 `artist.txt`，**首行**写歌手名，例如：
-  ```
-  薛之谦
-  ```
-  扫描器优先用 `artist.txt` 的内容作为 `song.artist`；若文件不存在，则回退读取
-  `orig.lrc` 里的 `[ar:歌手名]` 标签。两者都没有时歌手名留空。
-- **歌手头像（可选）**：在歌目录下放一张图片，文件名认以下任一个：
+### 歌手与头像要求
+- **歌手名 = 歌手文件夹名（新布局，推荐）**：`song-lib/<歌手>/<歌曲>/` 的一级目录名即歌手名，
+  所有歌曲自动归属该歌手，无需每首歌配 `artist.txt`。
+- **`artist.txt`（仅旧布局需要）**：平铺结构下，在歌目录放 `artist.txt`，**首行**写歌手名，
+  例如 `薛之谦`；扫描器优先用它，其次回退 LRC `[ar:]` 标签。
+- **歌手头像（可选）**：新布局把照片放在**歌手文件夹**一层（`song-lib/薛之谦/artist.jpg`），
+  该歌手所有歌曲共享；旧布局则放歌目录。文件名认：
   `artist.jpg` / `artist.png` / `avatar.jpg` / `avatar.png` / `cover.jpg` / `cover.png`
   （扫描器优先 `artist.*`，其次 `avatar.*`，再次 `cover.*`）。
   - 头像**不会**原样暴露给前端：扫描器会把它登记进 `media://res/<token>` 安全通道
     （与视频同一机制，真实文件路径不进渲染进程），存入 `song.artist_avatar`，
     由歌曲列表和「歌星」页以 `<img>` 圆形头像显示。
   - 无头像文件时，界面自动用歌手名**首字**作占位，不影响使用。
-- **每目录放一份即可**：同一歌手多首歌各自目录放一张图也能用（图片会重复存储）；
-  歌多了想省空间，再升级为独立的 `artist` 表 + `song.artist_id` 外键也不迟。
 
-- 数据库只存**路径**，绝不存视频 / 歌词二进制。
-- 开发调试偷懒方案：直接把 `orig.mp4` 复制为 `accomp.mp4`，先跑通代码，后期再替换真实伴奏。
-- 生成真实伴奏：`ffmpeg -i orig.mp4 -vn -acodec pcm_s16le audio.wav`，UVR5 分离伴奏后 `ffmpeg -i orig.mp4 -i 伴奏.wav -c:v copy -c:a aac accomp.mp4`。
+- 数据库只存**路径**，绝不存视频 / 音频 / 歌词二进制。
+- 生成素材（需 ffmpeg）：
+  1. 视频画面去音轨：`ffmpeg -i 原视频.mp4 -an -c:v copy video.mp4`
+  2. 提取原唱音频：`ffmpeg -i 原视频.mp4 -vn -c:a aac -b:a 192k orig.m4a`
+  3. 伴奏：UVR5 等工具分离人声后，`ffmpeg -i 伴奏.wav -c:a aac -b:a 192k accomp.m4a`
+  （若暂时没有真实伴奏，可先用 `ffmpeg -i orig.m4a -acodec copy accomp.m4a` 复制一份占位，
+   伴奏模式会播原唱，先跑通流程再替换。）
 
 ## 核心功能
 
 - ✅ 本地歌曲库自动扫描、歌名/歌手模糊搜索
 - ✅ 双屏分离：主屏点歌、副屏全屏播放 MV
-- ✅ 原唱 / 伴奏一键切换（动态替换视频源，保留播放进度）
+- ✅ 原唱 / 伴奏一键切换（单视频 + 双音频：只切换音频流，视频不重新解码、不卡顿）
 - ✅ 原唱 / 伴奏 / 总音量独立调节
 - ✅ LRC 歌词解析、实时滚动、当前行在左右两角交替高亮（KTV 风格）
 - ✅ 歌手信息：`artist.txt` 登记歌手名 + `artist.jpg` 头像，歌曲列表与「歌星」页圆形头像展示
@@ -122,14 +145,17 @@ npm run pack      # 先 build，再用 electron-builder 生成 nsis 安装包到
 ## 已知坑点
 
 - **双屏**：必须「扩展」模式，禁镜像。
-- **素材对齐**：orig 与 accomp 画面/时长必须一致，否则歌词严重错位。
+- **video.mp4 必须无音轨**：若视频仍带音频，可能出现两路声音同时响（视频自带音 + 独立音频），
+  制作时用 `ffmpeg -an` 去掉原生音轨。
+- **素材对齐**：orig.m4a 与 accomp.m4a 必须同源同长（同一首歌分离出来的），否则切换时音画错位。
 - **LRC 编码**：必须 UTF-8，否则中文乱码。
 - **原生模块**：本项目刻意选用 `sql.js`（SQLite 的 WASM 版）而非 `better-sqlite3`，原因是 `better-sqlite3` 在 Electron 中必须源码编译（需 MSVC/Python），极易导致 `npm install` 失败；`sql.js` 纯 JS/WASM，开箱即用。若你本机已装好编译工具且想用 `better-sqlite3`，可参考文档自行替换 `src/main/database.ts`。
 
 ## 版权声明
 
 本项目素材仅用于个人本地代码调试、学习研究，属合理使用范围。禁止将打包后的软件、素材包对外分发、上传网络、商用盈利。
-注解：声音分离助手：https://fenli.ftcxx.com/voice，lrc文件提取：https://subtitlekit.com/cn/lrc-editor
+
+注解：声音分离助手(accomp.mp3\orig.mp3 )：https://poppop.ai/ai-vocal-remover，lrc文件提取：https://subtitlekit.com/cn/lrc-editor
 视频下载地址：
 B站视频下载工具推荐
 工具名称	类型	支持平台	主要特点	适合用户

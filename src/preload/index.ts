@@ -21,6 +21,7 @@ const api: KaraokeApi = {
   setMode: (mode) => ipcRenderer.invoke(IPC.PLAYER_SET_MODE, mode),
   control: (action, payload) => ipcRenderer.invoke(IPC.PLAYER_CONTROL, action, payload),
   setVolumes: (vols) => ipcRenderer.invoke(IPC.PLAYER_SET_VOLUMES, vols),
+  stopPlayback: () => ipcRenderer.invoke(IPC.PLAYER_STOP),
   windowControl: (action) => ipcRenderer.invoke(IPC.WINDOW_CONTROL, action),
   openLibFolder: () => ipcRenderer.invoke(IPC.LIBRARY_OPEN),
   escape: () => ipcRenderer.invoke(IPC.PLAYER_ESCAPE),
@@ -31,6 +32,7 @@ const api: KaraokeApi = {
   onSetMode: (cb) => subscribe(IPC.TO_PLAYER_SET_MODE, cb),
   onControl: (cb) => subscribe(IPC.TO_PLAYER_CONTROL, cb),
   onVolumes: (cb) => subscribe(IPC.TO_PLAYER_VOLUMES, cb),
+  onStop: (cb) => subscribe(IPC.TO_PLAYER_STOP, cb),
 
   // 播放窗 -> 主进程 上报
   emitTime: (data) => ipcRenderer.send(IPC.FROM_PLAYER_TIME, data),

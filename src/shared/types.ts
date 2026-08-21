@@ -6,7 +6,11 @@ export interface Song {
   id: number
   name: string
   artist: string
+  /** 单视频画面文件（video.mp4，无音轨），所有模式共用，避免切换时重新解码 */
+  video_path: string
+  /** 原唱音频文件（orig.m4a） */
   orig_path: string
+  /** 伴奏音频文件（accomp.m4a） */
   accomp_path: string
   lrc_path: string
   duration: number
@@ -38,8 +42,16 @@ export interface Playload {
   lrc: string
   mode: VideoMode
   volumes: Volumes
-  /** 主进程注册好的 media:// token 播放地址 */
-  urls: { orig: string; accomp: string }
+  /** 视频画面地址（video.mp4，无音轨；主进程签发的 media:// token） */
+  videoUrl: string
+  /** 音频地址：orig=原唱 m4a，accomp=伴奏 m4a（主进程签发的 media:// token） */
+  audioUrls: { orig: string; accomp: string }
+}
+
+/** 切原唱/伴奏时下发给播放窗的指令：模式 + 最新音频地址（点歌后素材变化也能即时生效） */
+export interface ModePayload {
+  mode: VideoMode
+  audioUrls: { orig: string; accomp: string }
 }
 
 export type TransportAction = 'play' | 'pause' | 'seek'
@@ -55,6 +67,8 @@ export const IPC = {
   PLAYER_SET_MODE: 'player:setMode',
   PLAYER_CONTROL: 'player:control',
   PLAYER_SET_VOLUMES: 'player:setVolumes',
+  /** 控制窗 → 主进程：停止播放，让副屏回到待点歌页（点下一首但已点为空时用） */
+  PLAYER_STOP: 'player:stop',
   WINDOW_CONTROL: 'window:control',
   LIBRARY_OPEN: 'library:open',
   // 播放窗 -> 主进程：Esc 最小化播放屏，把控制权还给控制台
@@ -72,6 +86,8 @@ export const IPC = {
   TO_PLAYER_SET_MODE: 'player:setMode',
   TO_PLAYER_CONTROL: 'player:control',
   TO_PLAYER_VOLUMES: 'player:setVolumes',
+  /** 主进程 -> 播放窗：停止播放并回到待点歌页 */
+  TO_PLAYER_STOP: 'player:stop',
 
   // 播放窗 -> 主进程 的事件
   FROM_PLAYER_TIME: 'player:time',
@@ -96,6 +112,8 @@ export interface KaraokeApi {
   setMode(mode: VideoMode): Promise<void>
   control(action: TransportAction, payload?: number): Promise<void>
   setVolumes(vols: Volumes): Promise<void>
+  /** 停止播放并让副屏回到待点歌页（点下一首但已点为空时） */
+  stopPlayback(): Promise<void>
   windowControl(action: 'min' | 'max' | 'close'): Promise<void>
   openLibFolder(): Promise<string>
   /** 播放窗：Esc 退出/最小化，把控制权还给控制台 */
@@ -105,9 +123,11 @@ export interface KaraokeApi {
 
   // —— 播放窗接收指令 ——
   onLoad(cb: (p: Playload) => void): () => void
-  onSetMode(cb: (mode: VideoMode) => void): () => void
+  onSetMode(cb: (p: ModePayload) => void): () => void
   onControl(cb: (p: { action: TransportAction; payload?: number }) => void): () => void
   onVolumes(cb: (v: Volumes) => void): () => void
+  /** 播放窗：停止播放并回到待点歌页 */
+  onStop(cb: () => void): () => void
 
   // —— 播放窗 -> 主进程 上报 ——
   emitTime(data: { currentTime: number; duration: number }): void

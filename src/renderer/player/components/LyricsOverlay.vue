@@ -85,8 +85,10 @@ const bottomIsCur = computed(() => !isEven.value)
 .cur {
   font-size: 42px;
   font-weight: 800;
-  /* 高亮行：在深色描边基础上叠加粉色辉光，仍保证白底下可见 */
-  text-shadow: 0 0 24px rgba(255, 61, 139, 0.7), 0 2px 6px rgba(0, 0, 0, 0.9),
+  /* 高亮粉：与普通白字形成明显色差（经典 KTV 效果） */
+  color: #ff5ca8;
+  /* 粉色辉光 + 深色描边：白底下也清晰可见 */
+  text-shadow: 0 0 26px rgba(255, 61, 139, 0.65), 0 2px 6px rgba(0, 0, 0, 0.9),
     0 0 3px rgba(0, 0, 0, 0.85);
   transform: scale(1.03);
 }

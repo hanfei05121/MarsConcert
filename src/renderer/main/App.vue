@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { store } from './store'
 import type { Song } from '../../shared/types'
 import Sidebar from './components/Sidebar.vue'
 import TopBar from './components/TopBar.vue'
 import ChartBlock from './components/ChartBlock.vue'
 import SongRow from './components/SongRow.vue'
+import Pagination from './components/Pagination.vue'
 import PlaylistPopup from './components/PlaylistPopup.vue'
 import BottomBar from './components/BottomBar.vue'
+
+/** 歌曲列表每页条数（两列布局 = 每页 10 行） */
+const PAGE_SIZE = 20
 
 const state = store.state
 onMounted(() => store.init())
@@ -54,6 +58,22 @@ const categorySongs = computed<Song[]>(() =>
 const searchList = computed<Song[]>(() =>
   state.search.trim() ? state.songs : state.allSongs
 )
+
+// 分页：切页后回到列表顶部；列表内容变化时重置回第 1 页
+const searchScroll = ref<HTMLElement | null>(null)
+const page = ref(1)
+const totalPages = computed(() => Math.max(1, Math.ceil(searchList.value.length / PAGE_SIZE)))
+const pagedSongs = computed(() => {
+  const start = (page.value - 1) * PAGE_SIZE
+  return searchList.value.slice(start, start + PAGE_SIZE)
+})
+watch(searchList, () => {
+  page.value = 1
+})
+function onPageChange(p: number) {
+  page.value = p
+  searchScroll.value?.scrollTo({ top: 0 })
+}
 
 // —— 歌单 / 我的 视图 ——
 function openPlaylist(key: string) {
@@ -199,16 +219,16 @@ const playlistTitle = computed(() => {
         </div>
 
         <!-- 歌曲列表 / 搜索结果 -->
-        <div v-else-if="state.view === 'search'" class="scroll">
+        <div v-else-if="state.view === 'search'" class="scroll" ref="searchScroll">
           <div class="searchhead">
             <h2 class="sh-title">
               {{ state.search.trim() ? `搜索 “${state.search}”` : '歌曲列表' }}
             </h2>
             <span class="sh-count">{{ searchList.length }} 首</span>
           </div>
-          <div class="list">
+          <div class="list grid2">
             <SongRow
-              v-for="s in searchList"
+              v-for="s in pagedSongs"
               :key="s.id"
               :song="s"
               :active="s.id === state.currentSong?.id"
@@ -223,6 +243,13 @@ const playlistTitle = computed(() => {
               }}
             </div>
           </div>
+          <Pagination
+            v-if="totalPages > 1"
+            :total="searchList.length"
+            :page-size="PAGE_SIZE"
+            :current="page"
+            @change="onPageChange"
+          />
         </div>
 
         <!-- 我的 -->
@@ -250,6 +277,11 @@ const playlistTitle = computed(() => {
 
       <!-- 已点悬浮弹窗 -->
       <PlaylistPopup v-if="state.queueOpen" @close="store.toggleQueueOpen()" />
+
+      <!-- 轻提示 -->
+      <Transition name="toast">
+        <div v-if="state.toast" :key="state.toast.key" class="toast">{{ state.toast.text }}</div>
+      </Transition>
 
       <BottomBar />
     </div>
@@ -362,6 +394,16 @@ const playlistTitle = computed(() => {
   flex-direction: column;
   gap: 4px;
 }
+/* 歌曲列表两列布局 */
+.list.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+  align-items: start;
+}
+.list.grid2 :deep(.row) {
+  min-width: 0;
+}
 .back-link {
   border: none;
   background: transparent;
@@ -472,6 +514,33 @@ const playlistTitle = computed(() => {
   padding: 40px 10px;
   font-size: 13px;
   grid-column: 1 / -1;
+}
+/* —— 轻提示 —— */
+.toast {
+  position: fixed;
+  top: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: rgba(20, 24, 38, 0.92);
+  border: 1px solid var(--accent);
+  color: var(--text-0);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.toast-enter-active,
+.toast-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-8px);
 }
 /* —— 歌曲列表 / 搜索结果头 —— */
 .searchhead {

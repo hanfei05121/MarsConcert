@@ -73,7 +73,10 @@ export function createPlayerWindow(config: AppConfig): BrowserWindow {
       preload: PRELOAD,
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false
+      sandbox: false,
+      // 播放窗被控制台/其它窗口盖住时不节流，配合前端可见性恢复逻辑，
+      // 避免“切到别的页面就暂停”（Chromium 会对隐藏窗口的静音视频暂停）
+      backgroundThrottling: false
     }
   })
 

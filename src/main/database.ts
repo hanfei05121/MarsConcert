@@ -23,7 +23,11 @@ let db: Database | null = null
 export interface SongInput {
   name: string
   artist: string
+  /** 单视频画面文件（video.mp4，无音轨），所有模式共用 */
+  video_path: string
+  /** 原唱音频文件（orig.m4a） */
   orig_path: string
+  /** 伴奏音频文件（accomp.m4a） */
   accomp_path: string
   lrc_path: string
   artist_avatar?: string
@@ -44,6 +48,7 @@ export async function initDatabase(): Promise<void> {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       artist TEXT NOT NULL DEFAULT '',
+      video_path TEXT NOT NULL DEFAULT '',
       orig_path TEXT NOT NULL UNIQUE,
       accomp_path TEXT NOT NULL,
       lrc_path TEXT NOT NULL DEFAULT '',
@@ -62,6 +67,12 @@ export async function initDatabase(): Promise<void> {
   }
   if (!cols.some((c) => c.name === 'artist_avatar')) {
     run('ALTER TABLE song ADD COLUMN artist_avatar TEXT NOT NULL DEFAULT \'\'')
+  }
+  if (!cols.some((c) => c.name === 'video_path')) {
+    // 旧库（双视频方案）没有 video_path：先把 orig_path 回填为视频画面，
+    // 待下一次扫描用新素材规范（video.mp4 + orig.m4a + accomp.m4a）覆盖
+    run("ALTER TABLE song ADD COLUMN video_path TEXT NOT NULL DEFAULT ''")
+    run('UPDATE song SET video_path = orig_path')
   }
   persist()
 }
@@ -94,11 +105,12 @@ export function upsertSong(song: SongInput): boolean {
   const existing = all('SELECT id FROM song WHERE orig_path = ?', [song.orig_path])
   if (existing.length > 0) {
     run(
-      `UPDATE song SET name=?, artist=?, artist_avatar=?, accomp_path=?, lrc_path=? WHERE orig_path=?`,
+      `UPDATE song SET name=?, artist=?, artist_avatar=?, video_path=?, accomp_path=?, lrc_path=? WHERE orig_path=?`,
       [
         song.name,
         song.artist,
         song.artist_avatar ?? '',
+        song.video_path,
         song.accomp_path,
         song.lrc_path,
         song.orig_path
@@ -107,12 +119,13 @@ export function upsertSong(song: SongInput): boolean {
     return false
   }
   run(
-    `INSERT INTO song (name, artist, artist_avatar, orig_path, accomp_path, lrc_path, duration, create_time)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO song (name, artist, artist_avatar, video_path, orig_path, accomp_path, lrc_path, duration, create_time)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       song.name,
       song.artist,
       song.artist_avatar ?? '',
+      song.video_path,
       song.orig_path,
       song.accomp_path,
       song.lrc_path,
@@ -139,6 +152,7 @@ function rowToSong(row: any): Song {
     id: row.id,
     name: row.name,
     artist: row.artist,
+    video_path: row.video_path ?? '',
     orig_path: row.orig_path,
     accomp_path: row.accomp_path,
     lrc_path: row.lrc_path,
@@ -147,6 +161,24 @@ function rowToSong(row: any): Song {
     artistAvatar: row.artist_avatar ?? '',
     create_time: row.create_time
   }
+}
+
+/** 清理磁盘上已不存在的旧歌曲行（素材被删除或旧双视频格式残留），保持列表与磁盘一致 */
+export function pruneSongs(keepPaths: string[]): number {
+  let before = 0
+  try {
+    before = (all('SELECT COUNT(*) AS c FROM song')[0]?.c as number) ?? 0
+  } catch {
+    return 0
+  }
+  if (keepPaths.length === 0) {
+    run('DELETE FROM song')
+  } else {
+    const marks = keepPaths.map(() => '?').join(',')
+    run(`DELETE FROM song WHERE orig_path NOT IN (${marks})`, keepPaths)
+  }
+  const after = (all('SELECT COUNT(*) AS c FROM song')[0]?.c as number) ?? 0
+  return before - after
 }
 
 export function countSongs(): number {
