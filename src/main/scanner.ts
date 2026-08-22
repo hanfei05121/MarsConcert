@@ -9,17 +9,56 @@ interface LrcMeta {
   artist?: string
 }
 
-// 新素材规范：单视频 + 双音频（切换原唱/伴奏只换音频、不重新解码视频）
-const VIDEO_EXTS = ['mp4', 'webm', 'mov', 'mkv']
-const AUDIO_EXTS = ['m4a', 'aac', 'mp3', 'wav', 'ogg', 'flac']
+// 只认这几种素材文件，其余一律不碰：logo.jpg / *.lrc / *.mp4 / *_vocals.mp3 / *_instrumental.mp3
+const VIDEO_EXTS = ['mp4']
+const AUDIO_EXTS = ['mp3']
 
-/** 在歌目录下按 basename + 扩展名列表找文件，返回存在的完整路径（找不到返回 ''） */
-function findFile(dir: string, base: string, exts: string[]): string {
-  for (const ext of exts) {
-    const p = join(dir, `${base}.${ext}`)
-    if (existsSync(p)) return p
+/**
+ * 在歌目录下按「候选基名 + 扩展名列表」找第一个存在的文件，返回完整路径（找不到返回 ''）。
+ * bases 支持多个候选（按优先级），例如 ['<基名>_vocals', '<基名>']：命中前者优先。
+ */
+function findFile(dir: string, bases: string | string[], exts: string[]): string {
+  const list = Array.isArray(bases) ? bases : [bases]
+  for (const base of list) {
+    for (const ext of exts) {
+      const p = join(dir, `${base}.${ext}`)
+      if (existsSync(p)) return p
+    }
   }
   return ''
+}
+
+/**
+ * 在歌目录内按「<分隔符><后缀>.<扩展名>」直扫文件（不依赖基名/前缀猜测）。
+ * 分隔符 `-` 或 `_` 均可（兼容下载源写法，如 华晨宇 - 怪诞心理学-vocal.mp3）；
+ * suffixPattern 支持正则（如 'vocals?' 同时认 vocal / vocals 单复数）。
+ */
+function findBySuffix(dir: string, suffixPattern: string, exts: string[]): string {
+  try {
+    const re = new RegExp(`[-_](?:${suffixPattern})\\.(?:${exts.join('|')})$`, 'i')
+    const f = readdirSync(dir).find((n) => re.test(n))
+    return f ? join(dir, f) : ''
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * 在歌目录内兜底找任意背景视频文件（只看扩展名、不看基名/前缀），
+ * 排除 vocals/instrumental 等音轨文件，兼容目录名与文件名不一致的场景
+ * （如目录《不重逢》内文件实际叫「华晨宇 - 不重逢.mp4」）。
+ */
+function findAnyVideo(dir: string, exts: string[]): string {
+  try {
+    const f = readdirSync(dir).find((n) => {
+      if (/[-_](vocals?|instrumental|原唱|伴奏)\./i.test(n)) return false
+      const e = n.toLowerCase().split('.').pop() ?? ''
+      return exts.includes(e)
+    })
+    return f ? join(dir, f) : ''
+  } catch {
+    return ''
+  }
 }
 
 /** 在目录下找歌手照片（artist/avatar/cover + 图片后缀），签发 media:// token */
@@ -34,12 +73,10 @@ function findArtistImage(dir: string): string {
   }
 }
 
-/** 在歌曲目录内找歌曲专属展示图（logo.* / log.* + 图片后缀），签发 media:// token；找不到返回 '' */
+/** 在歌曲目录内找歌曲展示图（只认 logo.jpg），签发 media:// token；找不到返回 '' */
 function findLogoImage(dir: string): string {
   try {
-    const av = readdirSync(dir).find((f) =>
-      /^(logo|log)\.(jpg|jpeg|png|webp|gif)$/i.test(f)
-    )
+    const av = readdirSync(dir).find((f) => f.toLowerCase() === 'logo.jpg')
     return av ? mediaTokenFor(join(dir, av)) : ''
   } catch {
     return ''
@@ -81,17 +118,24 @@ function scanSong(
   avatarFromDir: string | undefined,
   acc: ScanAcc
 ): void {
-  // —— 素材识别（单视频 + 双音频，兼容旧「双视频」素材）——
-  // 新规范：video.mp4(无音轨) + orig.m4a + accomp.m4a
-  // 旧规范回退：orig.mp4/accomp.mp4 自带音轨，<audio> 也能直接播其音轨
-  const videoNew = findFile(dir, 'video', VIDEO_EXTS)
-  const legacyOrig = findFile(dir, 'orig', VIDEO_EXTS) // orig.mp4 等（旧格式）
-  const legacyAccomp = findFile(dir, 'accomp', VIDEO_EXTS)
-  let origAudio = findFile(dir, 'orig', AUDIO_EXTS) // orig.m4a 等（新格式）
-  let accompAudio = findFile(dir, 'accomp', AUDIO_EXTS)
-  const video = videoNew || legacyOrig // 画面：优先 video.mp4，缺省回退旧 orig.mp4
-  if (!origAudio) origAudio = legacyOrig // 原唱音频：优先 orig.m4a，回退旧 orig.mp4 的音轨
-  if (!accompAudio) accompAudio = legacyAccomp // 伴奏音频：优先 accomp.m4a，回退旧 accomp.mp4
+  // —— 素材识别（只认这几种文件，其余一律不碰）——
+  //   logo.jpg / *.lrc / *.mp4 / *_vocals.mp3 / *_instrumental.mp3
+  // 基名候选：新布局下文件名带歌手前缀（"华晨宇 - 烟火里的尘埃"），旧布局下即歌曲目录名
+  const baseCandidates = artistFromDir
+    ? [`${artistFromDir} - ${songName}`, `${artistFromDir}${songName}`, songName]
+    : [songName]
+
+  // 视频画面：<基名>.mp4 → 目录内任意 .mp4（只看后缀、不看前缀，兼容目录名与文件名不一致）
+  let video = findFile(dir, baseCandidates, VIDEO_EXTS)
+  if (!video) video = findAnyVideo(dir, VIDEO_EXTS)
+
+  // 原唱音频：<基名>_vocals.mp3 → 目录内任意 -vocal(s).mp3 / _vocal(s).mp3（不依赖基名/分隔符猜测）
+  let origAudio = findFile(dir, baseCandidates.map((b) => `${b}_vocals`), AUDIO_EXTS)
+  if (!origAudio) origAudio = findBySuffix(dir, 'vocals?', AUDIO_EXTS)
+
+  // 伴奏音频：<基名>_instrumental.mp3 → 目录内任意 -instrumental.mp3 / _instrumental.mp3
+  let accompAudio = findFile(dir, baseCandidates.map((b) => `${b}_instrumental`), AUDIO_EXTS)
+  if (!accompAudio) accompAudio = findBySuffix(dir, 'instrumental', AUDIO_EXTS)
 
   // 歌词文件约定：优先使用 video.lrc（统一命名），兼容旧的 orig.lrc，
   // 其余 歌名.lrc 作为兜底（仅当目录内没有 video.lrc / orig.lrc 时）
@@ -104,6 +148,9 @@ function scanSong(
       const preferred =
         files.find((f) => f.toLowerCase() === 'video.lrc') ??
         files.find((f) => f.toLowerCase() === 'orig.lrc') ??
+        files.find((f) =>
+          baseCandidates.some((b) => f.toLowerCase() === `${b.toLowerCase()}.lrc`)
+        ) ??
         files[0]
       lrcPath = join(dir, preferred)
       const meta = parseLrcMeta(lrcPath)
@@ -117,8 +164,8 @@ function scanSong(
   // 必须有视频画面或音频或歌词，才算一首可入库的歌
   if (!video && !origAudio && !lrcPath) return
 
-  // 缺原唱时仍记录预期路径，便于播放窗提示
-  const origPath = origAudio || join(dir, 'orig.m4a')
+  // 缺原唱时仍记录预期路径（<基名>_vocals.mp3），便于播放窗提示与 prune 比对
+  const origPath = origAudio || join(dir, `${baseCandidates[0]}_vocals.mp3`)
   const accomp = accompAudio || origPath
   acc.seenPaths.push(origPath)
 
@@ -161,11 +208,15 @@ function scanSong(
 
 /**
  * 扫描素材库目录，自动入库。
+ * 只识别这几种素材文件（其余一律不碰）：
+ *   logo.jpg（歌曲展示图）、*.lrc（歌词）、*.mp4（背景视频）、
+ *   *_vocals.mp3（原唱）、*_instrumental.mp3（伴奏）。
  * 支持两种布局：
- * - 新布局：<lib>/<歌手>/<歌曲>/{video.mp4, orig.m4a, accomp.m4a, video.lrc}
- *   歌手文件夹内放一张照片（artist.jpg 等）即全歌手共享头像，无需每首歌配图。
- * - 旧布局（兼容）：<lib>/<歌曲>/{video.mp4, orig.mp4, ...}，歌手由 artist.txt / LRC [ar:] 推断。
- * 歌词文件统一命名为 video.lrc（兼容旧 orig.lrc）。
+ * - 新布局：<lib>/<歌手>/<歌曲>/，素材以「歌手 - 歌曲」为基名
+ *   （如 华晨宇 - 烟火里的尘埃.mp4 / _vocals.mp3 / _instrumental.mp3），
+ *   歌手文件夹内放一张 artist.jpg 即全歌手共享头像。
+ * - 旧扁平布局（兼容）：<lib>/<歌曲>/，基名即目录名，歌手由 artist.txt / LRC [ar:] 推断。
+ * 歌词文件优先 video.lrc，兼容 orig.lrc / <基名>.lrc。
  */
 export function scanLibrary(libPath: string): RescanResult {
   const result: RescanResult = { added: 0, updated: 0, total: 0 }
@@ -197,7 +248,9 @@ export function scanLibrary(libPath: string): RescanResult {
       /* ignore */
     }
     const hasDirectMedia =
-      !!findFile(dir, 'video', VIDEO_EXTS) || !!findFile(dir, 'orig', AUDIO_EXTS)
+      !!findAnyVideo(dir, VIDEO_EXTS) ||
+      !!findBySuffix(dir, 'vocals?', AUDIO_EXTS) ||
+      !!findBySuffix(dir, 'instrumental', AUDIO_EXTS)
 
     if (subDirs.length > 0 && !hasDirectMedia) {
       // —— 新布局：<lib>/<歌手>/<歌曲>/ ——

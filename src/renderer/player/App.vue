@@ -13,6 +13,7 @@ const accompSrc = ref('') // 伴奏音频（常播）
 const origSrc = ref('') // 人声音频（原唱时叠加）
 const lyrics = ref<LyricLine[]>([])
 const activeIndex = ref(-1)
+const lyricNow = ref(0) // 当前歌词时间（视频时间 - 歌词偏移），供长前奏时隐藏歌词用
 const mode = ref<VideoMode>('orig')
 const errorMsg = ref('')
 const audioError = ref(false)
@@ -50,8 +51,8 @@ function showIdle() {
 }
 
 // —— 麦克风（WebAudio 真实处理唱歌人声）——
-// 仅在“伴奏模式且麦克风音量>0”时才把麦克风接到扬声器（监听），
-// 避免原唱/纯观看时麦克风常开，把环境噪声、回声、啸叫灌进音箱造成“杂音”。
+// 麦克风常开：只要麦克风音量 >0，就把麦克风接到扬声器（监听），
+// 原唱/伴奏模式都能听到自己的声音（用户需求：不管开不开伴奏，麦克风一直有声音）。
 let micCtx: AudioContext | null = null
 let micGain: GainNode | null = null
 let micStream: MediaStream | null = null
@@ -100,9 +101,9 @@ function applyMicVolume() {
   else g.gain.setTargetAtTime(target, c.currentTime, 0.02)
 }
 
-// 根据当前模式 + 麦克风音量决定是否需要监听：仅伴奏模式且音量>0 才开
+// 麦克风常开：只要麦克风音量 >0 就监听（与原唱/伴奏模式无关），音量调 0 才静音
 function refreshMicMonitor() {
-  setMicMonitor(mode.value === 'accomp' && (volumes.mic ?? 0) > 0)
+  setMicMonitor((volumes.mic ?? 0) > 0)
 }
 
 function disposeMic() {
@@ -177,6 +178,7 @@ function load(p: Playload) {
   songName.value = `${p.song.name}${p.song.artist ? ' - ' + p.song.artist : ''}`
   lyrics.value = parseLrc(p.lrc)
   activeIndex.value = -1
+  lyricNow.value = 0
   // 恢复该歌曲已保存的歌词偏移（官方 MV 长前奏等错位，调一次永久生效）
   lyricOffset.value = p.song.lyricOffset ?? 0
   errorMsg.value = ''
@@ -284,7 +286,9 @@ function onTimeUpdate() {
   const v = videoRef.value
   if (!v) return
   window.api.emitTime({ currentTime: v.currentTime, duration: v.duration || 0 })
-  activeIndex.value = findActiveLine(lyrics.value, v.currentTime - lyricOffset.value)
+  const lt = v.currentTime - lyricOffset.value // 歌词时间（含偏移）
+  activeIndex.value = findActiveLine(lyrics.value, lt)
+  lyricNow.value = lt
   // 视频为时间主源：两条音频漂移超过阈值时拉回
   const t = v.currentTime
   const a = accompAudioRef.value
@@ -315,7 +319,7 @@ function onEnded() {
   }, 2500)
 }
 function onVideoError() {
-  errorMsg.value = '无法播放该视频，请检查素材文件是否存在（video.mp4 / orig.m4a / accomp.m4a）'
+  errorMsg.value = '无法播放该视频，请检查素材文件是否存在（<歌曲名>.mp4 / <歌曲名>_vocals.mp3 / <歌曲名>_instrumental.mp3）'
 }
 function onAudioError() {
   audioError.value = true
@@ -375,7 +379,7 @@ function onAudioError() {
         <span v-if="audioError" class="audio-warn">⚠️ 音频缺失</span>
       </div>
 
-      <LyricsOverlay :lines="lyrics" :active="activeIndex" />
+      <LyricsOverlay :lines="lyrics" :active="activeIndex" :now="lyricNow" />
       <div v-if="!hasLyrics && !errorMsg" class="no-lyric">♪</div>
     </template>
   </div>

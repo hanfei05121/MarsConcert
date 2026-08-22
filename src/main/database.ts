@@ -23,11 +23,11 @@ let db: Database | null = null
 export interface SongInput {
   name: string
   artist: string
-  /** 单视频画面文件（video.mp4，无音轨），所有模式共用 */
+  /** 视频画面文件（<基名>.mp4，无音轨），所有模式共用 */
   video_path: string
-  /** 原唱音频文件（orig.m4a） */
+  /** 原唱音频文件（<基名>_vocals.<ext>） */
   orig_path: string
-  /** 伴奏音频文件（accomp.m4a） */
+  /** 伴奏音频文件（<基名>_instrumental.<ext>） */
   accomp_path: string
   lrc_path: string
   artist_avatar?: string

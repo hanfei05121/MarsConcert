@@ -6,11 +6,11 @@ export interface Song {
   id: number
   name: string
   artist: string
-  /** 单视频画面文件（video.mp4，无音轨），所有模式共用，避免切换时重新解码 */
+  /** 视频画面文件（<基名>.mp4，无音轨），所有模式共用，避免切换时重新解码 */
   video_path: string
-  /** 原唱音频文件（orig.m4a） */
+  /** 原唱音频文件（<基名>_vocals.<ext>） */
   orig_path: string
-  /** 伴奏音频文件（accomp.m4a） */
+  /** 伴奏音频文件（<基名>_instrumental.<ext>） */
   accomp_path: string
   lrc_path: string
   duration: number
@@ -44,9 +44,9 @@ export interface Playload {
   lrc: string
   mode: VideoMode
   volumes: Volumes
-  /** 视频画面地址（video.mp4，无音轨；主进程签发的 media:// token） */
+  /** 视频画面地址（<基名>.mp4，无音轨；主进程签发的 media:// token） */
   videoUrl: string
-  /** 音频地址：orig=原唱 m4a，accomp=伴奏 m4a（主进程签发的 media:// token） */
+  /** 音频地址：orig=原唱（_vocals），accomp=伴奏（_instrumental），主进程签发的 media:// token */
   audioUrls: { orig: string; accomp: string }
 }
 

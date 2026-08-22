@@ -82,7 +82,7 @@ function registerIpc() {
       })
     }
     const lrc = readLrc(song.lrc_path)
-    // 单视频 + 双音频：videoUrl 只出画面（无音轨），audioUrls 按模式切换（orig/accomp 独立 m4a）
+    // 单视频 + 双音频：videoUrl 只出画面（无音轨），audioUrls 按模式切换（orig=原唱_vocals / accomp=伴奏_instrumental）
     const payload = {
       song,
       lrc,
