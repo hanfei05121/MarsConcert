@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, computed } from 'vue'
+import { AudioOutlined, CustomerServiceOutlined, WarningOutlined } from '@ant-design/icons-vue'
 import { parseLrc, findActiveLine } from './lrc'
 import type { LyricLine } from './lrc'
 import LyricsOverlay from './components/LyricsOverlay.vue'
@@ -331,7 +332,7 @@ function onAudioError() {
     <!-- 空闲态：启动/播完无下一首时，副屏提示点歌，而不是黑屏挂着上一句歌词 -->
     <div v-if="idle" class="idle">
       <div class="idle-box">
-        <div class="idle-icon">🎤</div>
+        <div class="idle-icon"><CustomerServiceOutlined /></div>
         <div class="idle-title">请到控制台点歌</div>
         <div class="idle-sub">搜索或浏览歌曲，点击即可在副屏播放</div>
       </div>
@@ -376,11 +377,11 @@ function onAudioError() {
       <div class="topbar">
         <span class="title">{{ songName || '等待点歌…' }}</span>
         <span class="mode" :class="mode">{{ mode === 'orig' ? '原唱' : '伴奏' }}</span>
-        <span v-if="audioError" class="audio-warn">⚠️ 音频缺失</span>
+        <span v-if="audioError" class="audio-warn"><WarningOutlined /> 音频缺失</span>
       </div>
 
       <LyricsOverlay :lines="lyrics" :active="activeIndex" :now="lyricNow" />
-      <div v-if="!hasLyrics && !errorMsg" class="no-lyric">♪</div>
+      <div v-if="!hasLyrics && !errorMsg" class="no-lyric"><AudioOutlined /></div>
     </template>
   </div>
 </template>
@@ -423,12 +424,12 @@ function onAudioError() {
   font-size: 13px;
   padding: 3px 12px;
   border-radius: 999px;
-  border: 1px solid #ff3d8b;
-  color: #ff3d8b;
+  border: 1px solid #ff5a2e;
+  color: #ff5a2e;
 }
 .mode.accomp {
-  border-color: #21e6c1;
-  color: #21e6c1;
+  border-color: #ff8c42;
+  color: #ff8c42;
 }
 .audio-warn {
   font-size: 13px;
@@ -465,7 +466,7 @@ function onAudioError() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at center, #141826 0%, #05060a 70%);
+  background: radial-gradient(ellipse at center, #1a120f 0%, #0a0605 70%);
 }
 .idle-box {
   text-align: center;
@@ -475,14 +476,14 @@ function onAudioError() {
   font-size: 96px;
   line-height: 1;
   margin-bottom: 26px;
-  filter: drop-shadow(0 0 30px rgba(255, 92, 168, 0.45));
+  filter: drop-shadow(0 0 30px rgba(255, 77, 46, 0.5));
 }
 .idle-title {
   font-size: 46px;
   font-weight: 800;
   color: #fff;
   letter-spacing: 6px;
-  text-shadow: 0 0 28px rgba(255, 92, 168, 0.5), 0 4px 14px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 0 28px rgba(255, 77, 46, 0.55), 0 4px 14px rgba(0, 0, 0, 0.8);
 }
 .idle-sub {
   margin-top: 16px;

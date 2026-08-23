@@ -1,28 +1,35 @@
 :root {
-  /* 深紫蓝 KTV 主题 */
-  --bg-0: #1a1d2e; /* 应用底色 */
-  --bg-1: #222438; /* 面板 */
-  --bg-2: #2a2e45; /* 卡片 */
-  --bg-3: #323753; /* hover / 高亮底 */
-  --line: #3a3f5c; /* 描边 */
-  --text-0: #ffffff; /* 主文字 */
-  --text-1: #c8ccdd; /* 次文字 */
-  --text-2: #999bb2; /* 说明文字 */
-  --accent: #a9adba; /* 雅灰主强调 */
-  --accent-2: #c9cdd8; /* 浅雅灰 */
-  --danger: #ff4d4f; /* VIP 红 / 删除 */
-  --popup-bg: rgba(30, 33, 55, 0.92);
-  --on-accent: #232631; /* accent 渐变背景上的文字色 */
+  /* —— 火星人专属主题 · MARS EDITION —— */
+  /* 暖炭黑底（黑煤球 / 火星夜空）*/
+  --bg-0: #14100e; /* 应用底色 */
+  --bg-1: #1e1815; /* 面板 */
+  --bg-2: #271f1a; /* 卡片 */
+  --bg-3: #332620; /* hover / 高亮底 */
+  --line: #413026; /* 暖描边 */
+
+  /* 文字：暖白 → 暖灰 */
+  --text-0: #fff6f0; /* 主文字 */
+  --text-1: #e9d6c8; /* 次文字 */
+  --text-2: #ab8f7c; /* 说明文字 */
+
+  /* 火星红 / 熔岩橙（粉丝代表色红 + 燃烧煤球）*/
+  --accent: #ff4d2e; /* 火星红主强调 */
+  --accent-2: #ff8c42; /* 熔岩橙 */
+  --accent-3: #ffd166; /* 火星尘埃金（星点/点缀）*/
+  --on-accent: #1c0d08; /* accent 渐变背景上的文字色 */
+
+  --danger: #ff3b30; /* 删除 / 红 */
+  --popup-bg: rgba(20, 15, 12, 0.92);
 
   /* —— 设计 token：光晕 / 阴影 / 过渡 / 派生色 —— */
-  --glow: rgba(245, 245, 220, 0.797); /* 霓虹光晕颜色 */
-  --shadow-glow: 0 0 5px var(--glow); /* 按钮/行/头像/卡片的光晕 */
-  --shadow-accent: 0 6px 18px rgba(169, 173, 184, 0.35); /* 主操作键的彩色投影 */
-  --shadow-panel: 0 14px 32px rgba(0, 0, 0, 0.5); /* 浮层面板（音量弹层等） */
-  --shadow-pop: 0 20px 60px rgba(0, 0, 0, 0.5); /* 大弹窗 */
+  --glow: rgba(255, 95, 55, 0.78); /* 炽光晕颜色 */
+  --shadow-glow: 0 0 6px var(--glow); /* 按钮/行/头像/卡片的光晕 */
+  --shadow-accent: 0 6px 20px rgba(255, 77, 46, 0.5); /* 主操作键的彩色投影 */
+  --shadow-panel: 0 14px 32px rgba(0, 0, 0, 0.6); /* 浮层面板（音量弹层等）*/
+  --shadow-pop: 0 20px 60px rgba(0, 0, 0, 0.6); /* 大弹窗 */
   --ease: all 0.3s ease; /* 统一悬停过渡 */
-  --accent-soft: rgba(169, 173, 184, 0.14); /* accent 半透明底（选中/hover 底） */
-  --accent-line: rgba(169, 173, 184, 0.5); /* accent 半透明描边 */
+  --accent-soft: rgba(255, 77, 46, 0.14); /* accent 半透明底（选中/hover 底）*/
+  --accent-line: rgba(255, 95, 55, 0.5); /* accent 半透明描边 */
 }
 
 * {
@@ -35,12 +42,40 @@ body,
   margin: 0;
 }
 body {
-  background: var(--bg-0);
+  background:
+    radial-gradient(1200px 620px at 50% 122%, rgba(255, 77, 46, 0.16), transparent 60%),
+    radial-gradient(820px 520px at 88% -12%, rgba(255, 140, 66, 0.1), transparent 55%),
+    var(--bg-0);
   color: var(--text-0);
   font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
   user-select: none;
+  position: relative;
+}
+/* 星尘：火星夜空（固定层，浮在底色之上、内容之下）*/
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1.6px 1.6px at 12% 22%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1.4px 1.4px at 28% 64%, rgba(255, 236, 214, 0.7), transparent),
+    radial-gradient(1px 1px at 44% 14%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1.2px 1.2px at 63% 38%, rgba(255, 214, 180, 0.65), transparent),
+    radial-gradient(1.6px 1.6px at 78% 72%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 90% 28%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1.2px 1.2px at 52% 86%, rgba(255, 236, 214, 0.6), transparent),
+    radial-gradient(1px 1px at 8% 84%, rgba(255, 255, 255, 0.5), transparent);
+  background-repeat: repeat;
+  background-size: 360px 360px;
+  opacity: 0.9;
+}
+#app {
+  position: relative;
+  z-index: 1;
 }
 
 ::-webkit-scrollbar {
@@ -52,7 +87,7 @@ body {
   border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #4a5170;
+  background: #5a4030;
 }
 
 .glass {
@@ -103,7 +138,7 @@ body {
   box-shadow: 0 0 0 2px var(--accent) !important;
 }
 
-/* —— 全局霓虹阴影 + 悬停动效（KTV 质感）—— */
+/* —— 全局炽光阴影 + 悬停动效（火星质感）—— */
 button {
   box-shadow: var(--shadow-glow);
   transition: var(--ease);

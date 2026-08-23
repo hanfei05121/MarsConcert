@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import {
+  AudioOutlined,
+  CustomerServiceOutlined,
+  SoundOutlined,
+  StepBackwardOutlined,
+  StepForwardOutlined
+} from '@ant-design/icons-vue'
 import { store } from '../store'
 
 const state = store.state
@@ -31,8 +38,8 @@ function onMic(val: number) {
     <div class="left">
       <div class="thumb">
         <img v-if="state.currentSong?.logo" :src="state.currentSong.logo" :alt="state.currentSong.artist" />
-        <span v-else-if="!state.currentSong">♪</span>
-        <span v-else>🎵</span>
+        <span v-else-if="!state.currentSong"><AudioOutlined /></span>
+        <span v-else><CustomerServiceOutlined /></span>
       </div>
       <div class="info">
         <div class="name">{{ state.currentSong?.name || '等待点歌…' }}</div>
@@ -45,7 +52,7 @@ function onMic(val: number) {
 
     <!-- 播放控制 -->
     <div class="center">
-      <button class="ctl" title="上一曲" @click="store.playPrev()">⏮</button>
+      <button class="ctl" title="上一曲" @click="store.playPrev()"><StepBackwardOutlined /></button>
       <button class="play" :title="state.playing ? '暂停' : '播放'" @click="store.togglePlay()">
         <svg v-if="state.playing" class="ic" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
           <path d="M6 5h4v14H6zM14 5h4v14h-4z" fill="currentColor" />
@@ -54,7 +61,7 @@ function onMic(val: number) {
           <path d="M8 5v14l11-7z" fill="currentColor" />
         </svg>
       </button>
-      <button class="ctl" title="下一曲" @click="store.playNext()">⏭</button>
+      <button class="ctl" title="下一曲" @click="store.playNext()"><StepForwardOutlined /></button>
     </div>
 
     <!-- 功能按钮组 -->
@@ -85,11 +92,11 @@ function onMic(val: number) {
     <!-- 音量 + 麦克风 + 总时长 -->
     <div class="right">
       <button class="vbtn" title="音量" @click="popOpen = !popOpen">
-        <span class="spk">🔊</span>
+        <span class="spk"><SoundOutlined /></span>
         <span class="vt">{{ masterPct }}</span>
       </button>
       <button class="vbtn" title="麦克风音量" @click="popOpen = !popOpen">
-        <span class="spk">🎙️</span>
+        <span class="spk"><CustomerServiceOutlined /></span>
         <span class="vt">{{ micPct }}</span>
       </button>
       <span class="total">{{ fmt(state.duration) }}</span>

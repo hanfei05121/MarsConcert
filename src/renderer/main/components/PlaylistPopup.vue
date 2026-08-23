@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { ArrowUpOutlined, CloseOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import type { Song } from '../../../shared/types'
 import { store } from '../store'
 
@@ -49,7 +50,7 @@ function onPin(i: number) {
             已唱 ({{ state.history.length }})
           </button>
         </div>
-        <button class="x" @click="emit('close')">✕</button>
+        <button class="x" title="关闭" @click="emit('close')"><CloseOutlined /></button>
       </header>
 
       <div class="plist">
@@ -78,7 +79,7 @@ function onPin(i: number) {
             title="置顶：下一首就唱它"
             @click.stop="onPin(i)"
           >
-            ⬆
+            <ArrowUpOutlined />
           </button>
           <button
             v-if="state.queueTab === 'queued'"
@@ -86,7 +87,7 @@ function onPin(i: number) {
             title="删除"
             @click.stop="onRemove(i)"
           >
-            🗑
+            <DeleteOutlined />
           </button>
         </div>
         <div v-if="list.length === 0" class="empty">

@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import { ref, onBeforeUnmount } from 'vue'
+import {
+  ArrowLeftOutlined,
+  SearchOutlined,
+  CloseOutlined,
+  MinusOutlined,
+  BorderOutlined
+} from '@ant-design/icons-vue'
 import { store } from '../store'
 
 const emit = defineEmits<{
@@ -34,26 +41,28 @@ onBeforeUnmount(() => {
 
 <template>
   <header class="topbar">
-    <button class="back" title="返回" @click="emit('back')">‹</button>
+    <button class="back" title="返回" @click="emit('back')"><ArrowLeftOutlined /></button>
+
+    <div class="brand"><span class="bdot" />火星点歌台</div>
 
     <div class="search">
-      <span class="si">🔍</span>
+      <span class="si"><SearchOutlined /></span>
       <input
         v-model="kw"
         class="sinput"
         placeholder="搜索歌曲、歌星、歌单"
         @input="onInput"
       />
-      <button v-if="kw" class="clear" @click="clearSearch">✕</button>
+      <button v-if="kw" class="clear" title="清空" @click="clearSearch"><CloseOutlined /></button>
     </div>
 
     <div class="spacer" />
 
     <div class="icons">
       <span class="sep" />
-      <button class="ic" title="最小化" @click="win('min')">—</button>
-      <button class="ic" title="最大化" @click="win('max')">▢</button>
-      <button class="ic close" title="关闭" @click="win('close')">✕</button>
+      <button class="ic" title="最小化" @click="win('min')"><MinusOutlined /></button>
+      <button class="ic" title="最大化" @click="win('max')"><BorderOutlined /></button>
+      <button class="ic close" title="关闭" @click="win('close')"><CloseOutlined /></button>
     </div>
   </header>
 </template>
@@ -81,6 +90,22 @@ onBeforeUnmount(() => {
 }
 .back:hover {
   border-color: var(--accent);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--text-0);
+  white-space: nowrap;
+}
+.bdot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--accent-3), var(--accent));
+  box-shadow: 0 0 8px var(--accent);
 }
 .search {
   position: relative;

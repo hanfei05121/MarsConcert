@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <radialGradient id="ball" cx="38%" cy="32%" r="78%">
+      <stop offset="0%" stop-color="#4a3b33"/>
+      <stop offset="55%" stop-color="#241c18"/>
+      <stop offset="100%" stop-color="#0f0a08"/>
+    </radialGradient>
+    <radialGradient id="spark" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff3ea"/>
+      <stop offset="100%" stop-color="#ffb38a"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 煤球本体 -->
+  <circle cx="60" cy="66" r="44" fill="url(#ball)"/>
+  <!-- 顶部高光 -->
+  <ellipse cx="46" cy="48" rx="14" ry="9" fill="#5c4a40" opacity="0.45"/>
+
+  <!-- 眼睛 -->
+  <ellipse cx="46" cy="62" rx="8" ry="11" fill="#fff"/>
+  <ellipse cx="74" cy="62" rx="8" ry="11" fill="#fff"/>
+  <circle cx="48" cy="64" r="4.6" fill="#1a120f"/>
+  <circle cx="72" cy="64" r="4.6" fill="#1a120f"/>
+  <circle cx="46.4" cy="62" r="1.6" fill="#fff"/>
+  <circle cx="70.4" cy="62" r="1.6" fill="#fff"/>
+
+  <!-- 微笑 -->
+  <path d="M48 82 Q60 92 72 82" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+  <!-- 顶上一朵小红花（火星人梗）-->
+  <g transform="translate(82,26)">
+    <circle cx="0" cy="-9" r="6" fill="#ff3b30"/>
+    <circle cx="8.5" cy="-3" r="6" fill="#ff4d2e"/>
+    <circle cx="5.3" cy="7.3" r="6" fill="#ff5a2e"/>
+    <circle cx="-5.3" cy="7.3" r="6" fill="#ff4d2e"/>
+    <circle cx="-8.5" cy="-3" r="6" fill="#ff3b30"/>
+    <circle cx="0" cy="0" r="4.5" fill="#ffd166"/>
+  </g>
+
+  <!-- 零星火星 -->
+  <circle cx="22" cy="40" r="2" fill="url(#spark)"/>
+  <circle cx="96" cy="78" r="2.4" fill="url(#spark)"/>
+  <circle cx="30" cy="98" r="1.6" fill="url(#spark)"/>
+</svg>

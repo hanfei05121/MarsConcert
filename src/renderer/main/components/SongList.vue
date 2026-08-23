@@ -63,8 +63,8 @@ function fmt(d: number): string {
   background: var(--bg-3);
 }
 .song.active {
-  background: linear-gradient(92deg, rgba(255, 61, 139, 0.18), rgba(124, 92, 255, 0.18));
-  border-color: rgba(255, 61, 139, 0.5);
+  background: linear-gradient(92deg, rgba(255, 77, 46, 0.18), rgba(255, 140, 66, 0.14));
+  border-color: rgba(255, 77, 46, 0.5);
 }
 .meta .name {
   font-size: 15px;

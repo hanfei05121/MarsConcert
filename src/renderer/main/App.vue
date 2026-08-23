@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { ArrowLeftOutlined, HeartOutlined, ClockCircleOutlined, ProfileOutlined } from '@ant-design/icons-vue'
 import { store } from './store'
 import type { Song } from '../../shared/types'
 import Sidebar from './components/Sidebar.vue'
@@ -9,6 +10,7 @@ import SongRow from './components/SongRow.vue'
 import Pagination from './components/Pagination.vue'
 import PlaylistPopup from './components/PlaylistPopup.vue'
 import BottomBar from './components/BottomBar.vue'
+import coalBall from '../assets/coal-ball.jpg'
 
 /** 歌曲列表每页条数（两列布局 = 每页 10 行） */
 const PAGE_SIZE = 20
@@ -134,6 +136,16 @@ const playlistTitle = computed(() => {
       <main class="content">
         <!-- 推荐首页 -->
         <div v-if="state.view === 'recommend'" class="scroll">
+          <!-- 火星人专属 Hero -->
+          <div class="mars-hero">
+            <img class="hero-mascot" :src="coalBall" alt="黑煤球" />
+            <div class="hero-text">
+              <div class="hero-kicker">MARS EDITION · 火星人专属点歌台</div>
+              <h1 class="hero-title">火星人，欢迎回家 🔥</h1>
+              <p class="hero-sub">黑煤球已就位。点一首歌，把整座火星唱成你的主场。</p>
+            </div>
+          </div>
+
           <div class="charts">
             <ChartBlock title="飙升榜" badge="日榜" :songs="rising" @add="onAdd" @play="onPlay" />
             <ChartBlock title="新歌排行榜" badge="日榜" :songs="fresh" @add="onAdd" @play="onPlay" />
@@ -159,7 +171,7 @@ const playlistTitle = computed(() => {
             <div v-if="store.artists.value.length === 0" class="empty">暂无歌手，先去扫描素材库</div>
           </div>
           <div v-else>
-            <button class="back-link" @click="state.artistFilter = null">‹ 返回歌手列表</button>
+            <button class="back-link" @click="state.artistFilter = null"><ArrowLeftOutlined /> 返回歌手列表</button>
             <div class="list">
               <SongRow
                 v-for="s in artistSongs"
@@ -204,12 +216,12 @@ const playlistTitle = computed(() => {
         <div v-else-if="state.view === 'playlists'" class="scroll">
           <div v-if="!state.selectedPlaylist" class="grid pls">
             <button class="plcard fav" @click="openPlaylist('__fav__')">
-              <div class="pic">❤️</div>
+              <div class="pic"><HeartOutlined /></div>
               <div class="pn">我的收藏</div>
               <div class="pc">{{ store.favSongs.value.length }} 首</div>
             </button>
             <button class="plcard" @click="openPlaylist('__history__')">
-              <div class="pic">🕒</div>
+              <div class="pic"><ClockCircleOutlined /></div>
               <div class="pn">最近播放</div>
               <div class="pc">{{ state.history.length }} 首</div>
             </button>
@@ -219,7 +231,7 @@ const playlistTitle = computed(() => {
               class="plcard"
               @click="openPlaylist(p.name)"
             >
-              <div class="pic">📃</div>
+              <div class="pic"><ProfileOutlined /></div>
               <div class="pn">{{ p.name }}</div>
               <div class="pc">{{ p.songs.length }} 首</div>
             </button>
@@ -229,7 +241,7 @@ const playlistTitle = computed(() => {
           </div>
           <div v-else>
             <div class="plhead">
-              <button class="back-link" @click="backToPlaylistList">‹ 返回歌单</button>
+              <button class="back-link" @click="backToPlaylistList"><ArrowLeftOutlined /> 返回歌单</button>
               <span class="ptitle">{{ playlistTitle }}</span>
               <button
                 v-if="state.selectedPlaylist && !state.selectedPlaylist.startsWith('__')"
@@ -368,6 +380,46 @@ const playlistTitle = computed(() => {
   gap: 18px;
   margin-top: 18px;
 }
+/* —— 火星人 Hero —— */
+.mars-hero {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 22px 24px;
+  margin-bottom: 4px;
+  border-radius: 18px;
+  background:
+    radial-gradient(560px 200px at 0% 0%, rgba(255, 77, 46, 0.18), transparent 60%),
+    linear-gradient(120deg, var(--bg-2), var(--bg-1));
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-glow);
+}
+.hero-mascot {
+  width: 92px;
+  height: 92px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  filter: drop-shadow(0 6px 18px rgba(255, 77, 46, 0.4));
+}
+.hero-kicker {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent-2);
+  text-transform: uppercase;
+}
+.hero-title {
+  margin: 6px 0 4px;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-0);
+}
+.hero-sub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
 .grid {
   display: grid;
   gap: 14px;
@@ -456,13 +508,41 @@ const playlistTitle = computed(() => {
   min-width: 0;
 }
 .back-link {
-  border: none;
-  background: transparent;
-  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--text-1);
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  margin-bottom: 12px;
-  padding: 4px 0;
+  margin-bottom: 14px;
+  padding: 8px 16px 8px 13px;
+  border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  transition: all 0.2s ease;
+}
+.back-link:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text-0);
+  box-shadow: 0 4px 16px var(--accent-soft);
+}
+.back-link:active {
+  transform: scale(0.96);
+}
+/* 悬停时箭头向左轻移，强化「返回」语义 */
+.back-link :deep(.anticon) {
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+.back-link:hover :deep(.anticon) {
+  transform: translateX(-3px);
+}
+/* 歌单页：返回键与标题在同一行，去掉多余下边距 */
+.plhead .back-link {
+  margin-bottom: 0;
 }
 .pls {
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));

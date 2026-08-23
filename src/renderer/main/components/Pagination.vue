@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons-vue'
 
 const props = defineProps<{
   total: number
@@ -36,12 +37,12 @@ function go(p: number) {
 
 <template>
   <div class="pager">
-    <button class="pg" :disabled="current <= 1" @click="go(current - 1)">‹ 上一页</button>
+    <button class="pg" :disabled="current <= 1" @click="go(current - 1)"><ArrowLeftOutlined /> 上一页</button>
     <template v-for="(p, i) in pages" :key="i">
       <span v-if="p === '...'" class="dots">…</span>
       <button v-else class="pg num" :class="{ on: p === current }" @click="go(p)">{{ p }}</button>
     </template>
-    <button class="pg" :disabled="current >= totalPages" @click="go(current + 1)">下一页 ›</button>
+    <button class="pg" :disabled="current >= totalPages" @click="go(current + 1)">下一页 <ArrowRightOutlined /></button>
     <span class="info">共 {{ total }} 首 · 第 {{ current }}/{{ totalPages }} 页</span>
   </div>
 </template>

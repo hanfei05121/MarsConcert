@@ -16,8 +16,8 @@ export function createMainWindow(): BrowserWindow {
     height: 760,
     minWidth: 900,
     minHeight: 600,
-    title: '桌面系统测试 · 控制台',
-    backgroundColor: '#0b0e14',
+    title: '火星点歌台 · MARS KTV',
+    backgroundColor: '#14100e',
     webPreferences: {
       preload: PRELOAD,
       contextIsolation: true,

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>火星点歌台 · MARS EDITION 预览</title>
+<style>
+  :root{
+    --bg-0:#14100e; --bg-1:#1e1815; --bg-2:#271f1a; --bg-3:#332620; --line:#413026;
+    --text-0:#fff6f0; --text-1:#e9d6c8; --text-2:#ab8f7c;
+    --accent:#ff4d2e; --accent-2:#ff8c42; --accent-3:#ffd166; --on-accent:#1c0d08;
+    --danger:#ff3b30;
+    --glow:rgba(255,95,55,.78); --shadow-glow:0 0 6px var(--glow);
+    --shadow-accent:0 6px 20px rgba(255,77,46,.5); --accent-soft:rgba(255,77,46,.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    background:
+      radial-gradient(1200px 620px at 50% 122%, rgba(255,77,46,.16), transparent 60%),
+      radial-gradient(820px 520px at 88% -12%, rgba(255,140,66,.10), transparent 55%),
+      var(--bg-0);
+    color:var(--text-0);
+    font-family:'Inter','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased; overflow:hidden; user-select:none;
+  }
+  body::before{
+    content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      radial-gradient(1.6px 1.6px at 12% 22%, rgba(255,255,255,.85), transparent),
+      radial-gradient(1.4px 1.4px at 28% 64%, rgba(255,236,214,.7), transparent),
+      radial-gradient(1px 1px at 44% 14%, rgba(255,255,255,.6), transparent),
+      radial-gradient(1.2px 1.2px at 63% 38%, rgba(255,214,180,.65), transparent),
+      radial-gradient(1.6px 1.6px at 78% 72%, rgba(255,255,255,.7), transparent),
+      radial-gradient(1px 1px at 90% 28%, rgba(255,255,255,.5), transparent),
+      radial-gradient(1.2px 1.2px at 52% 86%, rgba(255,236,214,.6), transparent),
+      radial-gradient(1px 1px at 8% 84%, rgba(255,255,255,.5), transparent);
+    background-repeat:repeat; background-size:360px 360px; opacity:.9;
+  }
+  .app{position:relative; z-index:1; height:100%; display:flex;}
+
+  /* —— 侧边栏 —— */
+  .sidebar{width:184px; flex-shrink:0; background:var(--bg-1); border-right:1px solid var(--line);
+    display:flex; flex-direction:column; padding:16px 12px;}
+  .user{display:flex; align-items:center; gap:10px; padding:10px; border-radius:12px; background:var(--bg-2); margin-bottom:18px;}
+  .avatar{width:42px; height:42px; border-radius:50%; flex-shrink:0;
+    background:url('coal-ball.jpg') center/cover no-repeat;
+    box-shadow:0 0 0 2px var(--accent-soft), 0 0 14px var(--accent-soft);}
+  .avatar.fallback{background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:var(--on-accent);
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px;}
+  .nick{font-size:14px; font-weight:700; color:var(--text-0);}
+  .nav{display:flex; flex-direction:column; gap:6px; flex:1;}
+  .item{display:flex; align-items:center; gap:12px; padding:14px 16px; border:none; border-radius:12px;
+    background:transparent; color:var(--text-1); font-size:16px; font-weight:600; cursor:pointer; transition:all .3s ease;}
+  .item:hover{background:var(--bg-3); transform:translateY(2px);}
+  .item.active{background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:var(--on-accent);}
+  .ic{font-size:18px; width:18px; text-align:center;}
+  .cloud{display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:12px; background:var(--bg-2);
+    color:var(--text-1); font-size:14px; font-weight:600; cursor:pointer; box-shadow:var(--shadow-glow);}
+  .clbpath{font-size:11px; color:var(--text-2);}
+
+  /* —— 主区 —— */
+  .main{flex:1; display:flex; flex-direction:column; min-width:0;}
+  .topbar{height:56px; flex-shrink:0; display:flex; align-items:center; gap:14px; padding:0 18px;
+    background:var(--bg-1); border-bottom:1px solid var(--line);}
+  .back{width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:var(--bg-2);
+    color:var(--text-0); font-size:22px; cursor:pointer;}
+  .brand{display:flex; align-items:center; gap:8px; font-weight:800; font-size:15px; color:var(--text-0); white-space:nowrap;}
+  .bdot{width:9px; height:9px; border-radius:50%; background:radial-gradient(circle at 35% 35%, var(--accent-3), var(--accent));
+    box-shadow:0 0 8px var(--accent);}
+  .search{flex:1; max-width:520px; position:relative; display:flex; align-items:center;}
+  .sinput{width:100%; height:40px; border-radius:20px; border:1px solid var(--line); background:var(--bg-0);
+    color:var(--text-0); padding:0 16px 0 40px; font-size:14px; outline:none;}
+  .sinput:focus{border-color:var(--accent);}
+  .si{position:absolute; left:14px; font-size:14px; opacity:.7;}
+  .spacer{flex:1;}
+  .win{display:flex; gap:8px;}
+  .wic{width:34px; height:34px; border-radius:9px; border:1px solid var(--line); background:var(--bg-2); color:var(--text-0); font-size:15px; cursor:pointer;}
+
+  .content{flex:1; position:relative; overflow:hidden; min-height:0;}
+  .scroll{position:absolute; inset:0; overflow-y:auto; padding:18px;}
+
+  /* Hero */
+  .mars-hero{display:flex; align-items:center; gap:22px; padding:22px 24px; margin-bottom:18px; border-radius:18px;
+    background:
+      linear-gradient(100deg, rgba(20,15,12,.85) 28%, rgba(20,15,12,.4) 100%),
+      url('Dark_cosmic_Mars_concert_atmos_2026-08-23T12-46-54.png') center/cover no-repeat;
+    border:1px solid var(--line); box-shadow:var(--shadow-glow); position:relative; overflow:hidden;}
+  .mars-hero::after{content:''; position:absolute; inset:0; background:radial-gradient(600px 240px at 0% 0%, rgba(255,77,46,.22), transparent 60%); pointer-events:none;}
+  .hero-mascot{width:92px; height:92px; flex-shrink:0; filter:drop-shadow(0 6px 18px rgba(255,77,46,.4)); position:relative; z-index:1;}
+  .hero-text{position:relative; z-index:1;}
+  .hero-kicker{font-size:12px; font-weight:700; letter-spacing:.12em; color:var(--accent-2); text-transform:uppercase;}
+  .hero-title{margin:6px 0 4px; font-size:26px; font-weight:800; color:var(--text-0);}
+  .hero-sub{margin:0; font-size:13px; color:var(--text-2); line-height:1.5;}
+
+  .charts{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  .chart{background:var(--bg-1); border:1px solid var(--line); border-radius:14px; padding:16px; box-shadow:var(--shadow-glow);}
+  .chart h3{margin:0 0 12px; font-size:16px; font-weight:800; display:flex; align-items:center; gap:8px;}
+  .badge{font-size:11px; font-weight:700; color:var(--on-accent); background:linear-gradient(135deg,var(--accent),var(--accent-2)); padding:2px 8px; border-radius:999px;}
+  .row{display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; cursor:pointer; transition:all .15s ease; box-shadow:var(--shadow-glow);}
+  .row:hover{background:var(--bg-3); transform:translateY(2px);}
+  .rank{width:22px; text-align:center; font-weight:800; color:var(--accent-2); font-size:14px; flex-shrink:0;}
+  .rname{font-size:14px; font-weight:600; color:var(--text-0);}
+  .rartist{font-size:12px; color:var(--text-2); margin-top:2px;}
+  .radd{margin-left:auto; width:30px; height:30px; border-radius:50%; border:1px solid var(--line); background:var(--bg-2); color:var(--text-0); cursor:pointer; font-size:16px;}
+  .radd:hover{border-color:var(--accent);}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; margin-top:18px;}
+  .sec-title{font-size:18px; font-weight:800; margin:18px 0 12px;}
+
+  /* 底栏 */
+  .bottombar{height:84px; flex-shrink:0; display:flex; align-items:center; gap:18px; padding:0 22px;
+    background:var(--bg-1); border-top:1px solid var(--line);}
+  .left{display:flex; align-items:center; gap:12px; width:260px;}
+  .thumb{width:52px; height:52px; border-radius:10px; background:linear-gradient(135deg,var(--bg-3),var(--bg-2));
+    display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden; box-shadow:var(--shadow-glow);}
+  .name{font-size:15px; font-weight:700; color:var(--text-0);}
+  .sub{font-size:12px; color:var(--text-2); margin-top:3px;}
+  .time{color:var(--accent); font-variant-numeric:tabular-nums; margin-left:8px;}
+  .center{display:flex; align-items:center; gap:14px;}
+  .ctl{width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:var(--bg-2); color:var(--text-0); font-size:18px; cursor:pointer;}
+  .play{width:56px; height:56px; border-radius:50%; border:none; background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:var(--on-accent); font-size:22px; cursor:pointer; box-shadow:var(--shadow-accent);}
+  .funcs{display:flex; align-items:center; gap:10px;}
+  .f{height:36px; padding:0 14px; border-radius:18px; border:1px solid var(--line); background:var(--bg-2); color:var(--text-1); font-size:13px; font-weight:600; cursor:pointer;}
+  .f.on{background:var(--accent-soft); color:var(--accent); border-color:var(--accent);}
+  .orig{display:flex; align-items:center; gap:8px;}
+  .toggle{width:50px; height:28px; border-radius:999px; border:none; background:var(--bg-3); position:relative; cursor:pointer;}
+  .toggle.on{background:linear-gradient(135deg,var(--accent),var(--accent-2));}
+  .knob{position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:left .15s;}
+  .toggle.on .knob{left:25px;}
+  .right{margin-left:auto; display:flex; align-items:center; gap:10px;}
+  .vbtn{display:flex; flex-direction:column; align-items:center; gap:2px; min-width:44px; padding:4px 8px; border-radius:10px; border:1px solid var(--line); background:var(--bg-2); color:var(--text-0); cursor:pointer;}
+  .vt{font-size:10px; color:var(--text-2);}
+  .total{font-size:13px; color:var(--text-2); width:44px; text-align:right;}
+
+  .note{position:fixed; bottom:14px; right:16px; z-index:5; font-size:11px; color:var(--text-2);
+    background:rgba(20,15,12,.8); border:1px solid var(--line); padding:6px 10px; border-radius:8px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- 侧边栏 -->
+  <aside class="sidebar">
+    <div class="user">
+      <div class="avatar" title="火星人 · 黑煤球"></div>
+      <div class="nick">火星人</div>
+    </div>
+    <nav class="nav">
+      <button class="item active"><span class="ic">🏠</span>推荐</button>
+      <button class="item"><span class="ic">🎵</span>歌曲</button>
+      <button class="item"><span class="ic">🎤</span>歌星</button>
+      <button class="item"><span class="ic">🏷️</span>分类</button>
+      <button class="item"><span class="ic">📜</span>歌单</button>
+      <button class="item"><span class="ic">👤</span>我的</button>
+    </nav>
+    <div class="cloud">
+      <span class="ic">📁</span>
+      <div>
+        <div>我的资源</div>
+        <div class="clbpath">E:/song-lib</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 主区 -->
+  <div class="main">
+    <header class="topbar">
+      <button class="back">‹</button>
+      <div class="brand"><span class="bdot"></span>火星点歌台</div>
+      <div class="search">
+        <span class="si">🔍</span>
+        <input class="sinput" placeholder="搜索歌曲、歌星、歌单" />
+      </div>
+      <div class="spacer"></div>
+      <div class="win">
+        <button class="wic">—</button>
+        <button class="wic">▢</button>
+        <button class="wic">✕</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="scroll">
+        <!-- Hero -->
+        <div class="mars-hero">
+          <svg class="hero-mascot" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="ball" cx="38%" cy="32%" r="78%">
+                <stop offset="0%" stop-color="#4a3b33"/><stop offset="55%" stop-color="#241c18"/><stop offset="100%" stop-color="#0f0a08"/>
+              </radialGradient>
+              <radialGradient id="spark" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#fff3ea"/><stop offset="100%" stop-color="#ffb38a"/>
+              </radialGradient>
+            </defs>
+            <circle cx="60" cy="66" r="44" fill="url(#ball)"/>
+            <ellipse cx="46" cy="48" rx="14" ry="9" fill="#5c4a40" opacity="0.45"/>
+            <ellipse cx="46" cy="62" rx="8" ry="11" fill="#fff"/><ellipse cx="74" cy="62" rx="8" ry="11" fill="#fff"/>
+            <circle cx="48" cy="64" r="4.6" fill="#1a120f"/><circle cx="72" cy="64" r="4.6" fill="#1a120f"/>
+            <circle cx="46.4" cy="62" r="1.6" fill="#fff"/><circle cx="70.4" cy="62" r="1.6" fill="#fff"/>
+            <path d="M48 82 Q60 92 72 82" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <g transform="translate(82,26)">
+              <circle cx="0" cy="-9" r="6" fill="#ff3b30"/><circle cx="8.5" cy="-3" r="6" fill="#ff4d2e"/>
+              <circle cx="5.3" cy="7.3" r="6" fill="#ff5a2e"/><circle cx="-5.3" cy="7.3" r="6" fill="#ff4d2e"/>
+              <circle cx="-8.5" cy="-3" r="6" fill="#ff3b30"/><circle cx="0" cy="0" r="4.5" fill="#ffd166"/>
+            </g>
+            <circle cx="22" cy="40" r="2" fill="url(#spark)"/><circle cx="96" cy="78" r="2.4" fill="url(#spark)"/>
+          </svg>
+          <div class="hero-text">
+            <div class="hero-kicker">MARS EDITION · 火星人专属点歌台</div>
+            <h1 class="hero-title">火星人，欢迎回家 🔥</h1>
+            <p class="hero-sub">黑煤球已就位。点一首歌，把整座火星唱成你的主场。</p>
+          </div>
+        </div>
+
+        <!-- 榜单 -->
+        <div class="charts">
+          <div class="chart">
+            <h3>飙升榜 <span class="badge">日榜</span></h3>
+            <div class="row"><span class="rank">1</span><div><div class="rname">好想爱这个世界啊</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+            <div class="row"><span class="rank">2</span><div><div class="rname">齐天</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+            <div class="row"><span class="rank">3</span><div><div class="rname">烟火里的尘埃</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+            <div class="row"><span class="rank">4</span><div><div class="rname">异类</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+          </div>
+          <div class="chart">
+            <h3>新歌排行榜 <span class="badge">日榜</span></h3>
+            <div class="row"><span class="rank">1</span><div><div class="rname">黑白之间</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+            <div class="row"><span class="rank">2</span><div><div class="rname">向阳</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+            <div class="row"><span class="rank">3</span><div><div class="rname">怪诞心理学</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+            <div class="row"><span class="rank">4</span><div><div class="rname">斗牛</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+          </div>
+        </div>
+
+        <div class="sec-title">全部歌曲</div>
+        <div class="grid2">
+          <div class="row"><div><div class="rname">国王与乞丐</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+          <div class="row"><div><div class="rname">我管你</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+          <div class="row"><div><div class="rname">蜉蝣</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+          <div class="row"><div><div class="rname">疯人院</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+          <div class="row"><div><div class="rname">在这儿请你随意</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+          <div class="row"><div><div class="rname">你要相信这不是最后一天</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+          <div class="row"><div><div class="rname">神树</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+          <div class="row"><div><div class="rname">七重人格</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+          <div class="row"><div><div class="rname">新世界</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+          <div class="row"><div><div class="rname">消失的昨天</div><div class="rartist">华晨宇</div></div><button class="radd">＋</button></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 底栏 -->
+    <footer class="bottombar">
+      <div class="left">
+        <div class="thumb">🎤</div>
+        <div>
+          <div class="name">好想爱这个世界啊</div>
+          <div class="sub">华晨宇<span class="time">01:24</span></div>
+        </div>
+      </div>
+      <div class="center">
+        <button class="ctl">⏮</button>
+        <button class="play">▶</button>
+        <button class="ctl">⏭</button>
+      </div>
+      <div class="funcs">
+        <button class="f">重唱</button>
+        <button class="f on">已点 3</button>
+        <div class="orig"><span>原唱</span><button class="toggle on"><span class="knob"></span></button></div>
+      </div>
+      <div class="right">
+        <button class="vbtn">🔊<span class="vt">80</span></button>
+        <button class="vbtn">🎙️<span class="vt">60</span></button>
+        <span class="total">04:12</span>
+      </div>
+    </footer>
+  </div>
+</div>
+<div class="note">火星人专属主题预览 · 配色来自粉丝代表色红 + 黑煤球燃烧成火人</div>
+<script>
+  // 侧栏高亮切换（仅预览交互）
+  document.querySelectorAll('.nav .item').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelector('.nav .item.active')?.classList.remove('active');
+      b.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

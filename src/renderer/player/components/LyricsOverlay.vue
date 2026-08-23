@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { AudioOutlined } from '@ant-design/icons-vue'
 import type { LyricLine } from '../lrc'
 
 const props = defineProps<{
@@ -85,7 +86,8 @@ const countdownRight = computed(() => props.active >= 0 && props.active % 2 === 
         <span v-for="n in PAUSE_COUNTDOWN_SEC" :key="n" class="dot" :class="{ on: n <= countdown }" />
       </div>
       <div class="row top" :class="topIsCur ? 'cur' : 'nxt'">
-        {{ topText || (topIsCur ? '♪' : '') }}
+        {{ topText }}
+        <AudioOutlined v-if="!topText && topIsCur" class="ph-note" />
       </div>
       <div v-if="bottomText" class="row bottom" :class="bottomIsCur ? 'cur' : 'nxt'">
         {{ bottomText }}
@@ -121,6 +123,11 @@ const countdownRight = computed(() => props.active >= 0 && props.active % 2 === 
   transition: color 0.28s ease, text-shadow 0.28s ease, transform 0.28s ease,
     opacity 0.28s ease;
 }
+/* 当前句为空时的音符占位（继承行高亮色） */
+.ph-note {
+  vertical-align: -0.12em;
+  opacity: 0.85;
+}
 /* 上槽：始终靠左 */
 .top {
   text-align: left;
@@ -133,10 +140,10 @@ const countdownRight = computed(() => props.active >= 0 && props.active % 2 === 
 .cur {
   font-size: 42px;
   font-weight: 800;
-  /* 高亮粉：与普通白字形成明显色差（经典 KTV 效果） */
-  color: #ff5ca8;
-  /* 粉色辉光 + 深色描边：白底下也清晰可见 */
-  text-shadow: 0 0 26px rgba(255, 61, 139, 0.65), 0 2px 6px rgba(0, 0, 0, 0.9),
+  /* 火星炽红：与普通白字形成明显色差（经典 KTV 效果） */
+  color: #ff5a2e;
+  /* 炽红辉光 + 深色描边：白底下也清晰可见 */
+  text-shadow: 0 0 26px rgba(255, 77, 46, 0.7), 0 2px 6px rgba(0, 0, 0, 0.9),
     0 0 3px rgba(0, 0, 0, 0.85);
   transform: scale(1.03);
 }
@@ -165,10 +172,10 @@ const countdownRight = computed(() => props.active >= 0 && props.active % 2 === 
   transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease,
     transform 0.3s ease;
 }
-/* 亮着的格：粉色高亮 + 辉光（与当前句高亮色一致） */
+/* 亮着的格：火星炽红 + 辉光（与当前句高亮色一致） */
 .dot.on {
-  background: #ff5ca8;
-  border-color: #ff5ca8;
-  box-shadow: 0 0 14px rgba(255, 61, 139, 0.8);
+  background: #ff5a2e;
+  border-color: #ff5a2e;
+  box-shadow: 0 0 14px rgba(255, 77, 46, 0.85);
 }
 </style>

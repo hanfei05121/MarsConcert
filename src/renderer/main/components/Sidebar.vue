@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, type Component } from 'vue'
+import {
+  HomeOutlined,
+  AudioOutlined,
+  CustomerServiceOutlined,
+  TagsOutlined,
+  ProfileOutlined,
+  UserOutlined,
+  FolderOutlined
+} from '@ant-design/icons-vue'
 import type { ViewName } from '../store'
 import { store } from '../store'
 
@@ -8,13 +17,13 @@ const emit = defineEmits<{
   (e: 'nav', view: ViewName): void
 }>()
 
-const menus: { key: ViewName; label: string; icon: string }[] = [
-  { key: 'recommend', label: '推荐', icon: '🏠' },
-  { key: 'search', label: '歌曲', icon: '🎵' },
-  { key: 'artists', label: '歌星', icon: '🎤' },
-  { key: 'category', label: '分类', icon: '🏷️' },
-  { key: 'playlists', label: '歌单', icon: '📃' },
-  { key: 'mine', label: '我的', icon: '👤' }
+const menus: { key: ViewName; label: string; icon: Component }[] = [
+  { key: 'recommend', label: '推荐', icon: HomeOutlined },
+  { key: 'search', label: '歌曲', icon: AudioOutlined },
+  { key: 'artists', label: '歌星', icon: CustomerServiceOutlined },
+  { key: 'category', label: '分类', icon: TagsOutlined },
+  { key: 'playlists', label: '歌单', icon: ProfileOutlined },
+  { key: 'mine', label: '我的', icon: UserOutlined }
 ]
 
 /** 当前曲库目录的文件夹名（D:\song-lib → song-lib），左下角展示用 */
@@ -29,9 +38,9 @@ const libName = computed(() => {
   <aside class="sidebar">
     <!-- 用户区 -->
     <div class="user">
-      <div class="avatar">花</div>
+      <div class="avatar coal" title="火星人 · 黑煤球"></div>
       <div class="uinfo">
-        <div class="nick">花花</div>
+        <div class="nick">火星人</div>
       </div>
     </div>
 
@@ -44,14 +53,14 @@ const libName = computed(() => {
         :class="{ active: props.view === m.key }"
         @click="emit('nav', m.key)"
       >
-        <span class="ic">{{ m.icon }}</span>
+        <span class="ic"><component :is="m.icon" /></span>
         <span class="lb">{{ m.label }}</span>
       </button>
     </nav>
 
     <!-- 我的资源：点击选择曲库目录 -->
     <div class="cloud" title="点击选择曲库目录" @click="store.chooseLib()">
-      <span class="ic">📂</span>
+      <span class="ic"><FolderOutlined /></span>
       <div class="clbinfo">
         <span class="clbtitle">我的资源</span>
         <span class="clbpath">{{ libName }}</span>
@@ -91,6 +100,11 @@ const libName = computed(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+/* 火星人吉祥物：黑煤球 */
+.avatar.coal {
+  background: url(../../assets/coal-ball.jpg) center / cover no-repeat;
+  box-shadow: 0 0 0 2px var(--accent-soft), 0 0 14px var(--accent-soft);
 }
 .nick {
   font-size: 14px;
