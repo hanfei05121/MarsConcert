@@ -189,6 +189,7 @@ export interface RemoteInfo {
 /** 手机遥控：播放状态快照（控制窗实时推送到主进程，再广播给手机） */
 export interface RemoteState {
   queue: RemoteSong[]
+  history: RemoteSong[]
   currentSong: RemoteSong | null
   playing: boolean
   mode: VideoMode
@@ -202,6 +203,8 @@ export interface RemoteSong {
   id: number
   name: string
   artist: string
+  /** 时长（秒，用于列表展示） */
+  duration?: number
 }
 
 /** 手机遥控：手机下达的指令（主进程 -> 控制窗，转交 store 执行） */
@@ -215,7 +218,10 @@ export type RemoteCommand =
   /** 点歌：完整的 Song 对象（主进程已按 id 从曲库解析） */
   | { cmd: 'playSong'; song: Song }
   | { cmd: 'removeAt'; index: number }
+  /** 置顶并立即播放（点击已点行） */
   | { cmd: 'topAt'; index: number }
+  /** 置顶到下一首（当前播完后即唱，不打断当前） */
+  | { cmd: 'pinAt'; index: number }
 
 /** 弹幕：主进程 -> 播放窗（副屏叠加显示） */
 export interface DanmakuItem {

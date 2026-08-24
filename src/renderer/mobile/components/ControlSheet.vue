@@ -38,12 +38,12 @@ function onVol(key: 'master' | 'mic', val: number) {
 
       <div class="func-row">
         <button class="fbtn" @click="control('reSing')"><RedoOutlined /> 重唱</button>
-        <button class="fbtn" :class="{ on: mobile.mode === 'orig' }" @click="control('toggleMode')">
-          原唱
-        </button>
-        <button class="fbtn" :class="{ on: mobile.mode === 'accomp' }" @click="control('toggleMode')">
-          伴奏
-        </button>
+        <div class="orig">
+          <span class="ol">原唱</span>
+          <button class="toggle" :class="{ on: mobile.mode === 'orig' }" @click="control('toggleMode')">
+            <span class="knob" />
+          </button>
+        </div>
       </div>
 
       <div class="vol">
@@ -130,6 +130,8 @@ function onVol(key: 'master' | 'mic', val: number) {
 }
 .func-row {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
   margin-bottom: 16px;
 }
@@ -143,10 +145,47 @@ function onVol(key: 'master' | 'mic', val: number) {
   font-size: 13px;
   font-weight: 600;
 }
-.fbtn.on {
+.orig {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 14px;
+  height: 40px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+}
+.ol {
+  font-size: 13px;
+  color: var(--text-1);
+  font-weight: 600;
+}
+.toggle {
+  width: 50px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: none;
+  background: var(--bg-3);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.toggle.on {
   background: var(--accent);
-  color: var(--on-accent);
-  border-color: var(--accent);
+}
+.knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.15s ease;
+}
+.toggle.on .knob {
+  left: 25px;
 }
 .vol {
   display: flex;

@@ -15,6 +15,7 @@ export const mobile = reactive({
   /** 最新的完整状态快照（推送目标） */
   state: null as RemoteState | null,
   queue: [] as RemoteSong[],
+  history: [] as RemoteSong[],
   currentSong: null as RemoteSong | null,
   playing: false,
   mode: 'orig' as VideoMode,
@@ -52,6 +53,7 @@ function handle(d: Record<string, any>) {
     const s: RemoteState = d.state
     mobile.state = s
     mobile.queue = s.queue
+    mobile.history = s.history
     mobile.currentSong = s.currentSong
     mobile.playing = s.playing
     mobile.mode = s.mode
@@ -60,10 +62,11 @@ function handle(d: Record<string, any>) {
     mobile.duration = s.duration ?? 0
   } else if (d.type === 'danmaku') {
     mobile.danmakus.push({ id: d.id, text: d.text })
+    // 等滚动动画播完再移除（最长 ~11s）
     window.setTimeout(() => {
       const i = mobile.danmakus.findIndex((x) => x.id === d.id)
       if (i >= 0) mobile.danmakus.splice(i, 1)
-    }, 5000)
+    }, 12000)
   }
 }
 
@@ -86,5 +89,5 @@ export const api = {
   control: (name: string) => command({ op: 'control', name }),
   volume: (vols: Partial<Volumes>) => command({ op: 'volume', vols }),
   danmaku: (text: string) => command({ op: 'danmaku', text }),
-  queueAction: (action: 'remove' | 'top', index: number) => command({ op: 'queue', action, index })
+  queueAction: (action: 'remove' | 'top' | 'pin', index: number) => command({ op: 'queue', action, index })
 }

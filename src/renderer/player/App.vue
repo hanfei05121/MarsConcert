@@ -375,12 +375,12 @@ function onAudioError() {
     <div v-if="idle" class="idle">
       <div class="idle-box">
         <div class="idle-icon"><CustomerServiceOutlined /></div>
-        <div class="idle-title">请到控制台点歌</div>
-        <div class="idle-sub">搜索或浏览歌曲，点击即可在副屏播放</div>
+        <div class="idle-title">没有歌曲啦，请点歌 ~ ~</div>
+        <div class="idle-sub">搜索或浏览歌曲，点击即可</div>
         <!-- 手机遥控扫码入口 -->
         <div v-if="remoteInfo" class="idle-remote">
           <img v-if="remoteInfo.qrDataUrl" :src="remoteInfo.qrDataUrl" class="idle-qr" alt="扫码用手机遥控" />
-          <div class="idle-qr-label">📱 扫码用手机 · 点歌 / 控制 / 弹幕</div>
+          <div class="idle-qr-label">扫码用手机 · 点歌</div>
         </div>
       </div>
     </div>

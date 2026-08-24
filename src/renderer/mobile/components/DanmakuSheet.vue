@@ -1,9 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { mobile, api } from '../remote'
+import { DANMAKU_PRESETS } from '../danmaku-presets'
 
 defineEmits<{ (e: 'close'): void }>()
+
 const text = ref('')
+const active = ref(DANMAKU_PRESETS[0].key)
+
+const activeGroup = () => DANMAKU_PRESETS.find((g) => g.key === active.value) ?? DANMAKU_PRESETS[0]
+
+/** 点击快捷语：填入输入框，可再编辑后发送 */
+function pick(item: string) {
+  text.value = item
+}
 
 async function send() {
   const t = text.value.trim()
@@ -17,22 +27,36 @@ async function send() {
   <div class="backdrop" @click="$emit('close')">
     <div class="sheet" @click.stop>
       <div class="grab" />
-      <div class="title">发弹幕 · 副屏会实时滚动</div>
+      <div class="title">发个弹幕看看吧</div>
 
       <div class="input-row">
         <input
           v-model="text"
           class="dm-input"
-          placeholder="想说点什么，发到副屏上…"
+          placeholder="给他/她写点什么呢……"
           maxlength="80"
           @keydown.enter="send"
         />
         <button class="send" :disabled="!text.trim()" @click="send">发送</button>
       </div>
+      <div class="tip">点下方快捷语即可填入，可再编辑后发送</div>
 
-      <div class="hint">支持回车发送 · 弹幕会从副屏右侧向左滚动</div>
-      <div v-if="mobile.danmakus.length" class="recent">
-        <div v-for="d in [...mobile.danmakus].slice(-3).reverse()" :key="d.id" class="rdm">{{ d.text }}</div>
+      <!-- 快捷语分类 -->
+      <div class="cats">
+        <button
+          v-for="g in DANMAKU_PRESETS"
+          :key="g.key"
+          class="cat"
+          :class="{ on: active === g.key }"
+          @click="active = g.key"
+        >
+          {{ g.icon }} {{ g.label }}
+        </button>
+      </div>
+
+      <!-- 快捷语列表 -->
+      <div class="quick">
+        <button v-for="p in activeGroup().items" :key="p" class="q" @click="pick(p)">{{ p }}</button>
       </div>
     </div>
   </div>
@@ -49,9 +73,12 @@ async function send() {
 }
 .sheet {
   width: 100%;
+  max-height: 78vh;
+  display: flex;
+  flex-direction: column;
   background: linear-gradient(160deg, var(--bg-1), var(--bg-0));
   border-radius: 20px 20px 0 0;
-  padding: 10px 18px calc(22px + env(safe-area-inset-bottom));
+  padding: 10px 18px calc(20px + env(safe-area-inset-bottom));
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
 }
 .grab {
@@ -64,7 +91,7 @@ async function send() {
 .title {
   font-size: 16px;
   font-weight: 800;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 .input-row {
   display: flex;
@@ -94,22 +121,54 @@ async function send() {
 .send:disabled {
   opacity: 0.4;
 }
-.hint {
-  margin-top: 10px;
+.tip {
+  margin: 8px 0 10px;
   font-size: 12px;
   color: var(--text-2);
 }
-.recent {
-  margin-top: 10px;
+.cats {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  flex-shrink: 0;
 }
-.rdm {
-  padding: 6px 12px;
-  border-radius: 8px;
-  background: var(--accent-soft);
-  border-left: 3px solid var(--accent);
+.cat {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--text-1);
+  font-size: 12px;
+  font-weight: 600;
+}
+.cat.on {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+.quick {
+  flex: 1;
+  overflow-y: auto;
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-content: flex-start;
+}
+.q {
+  padding: 8px 13px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--text-1);
   font-size: 13px;
+  max-width: 100%;
+  text-align: left;
+}
+.q:active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
 }
 </style>

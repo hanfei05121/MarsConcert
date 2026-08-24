@@ -7,14 +7,15 @@
 import { store } from './store'
 import type { RemoteCommand, RemoteState, RemoteSong } from '../../shared/types'
 
-function toRemoteSong(s: { id: number; name: string; artist: string }): RemoteSong {
-  return { id: s.id, name: s.name, artist: s.artist }
+function toRemoteSong(s: { id: number; name: string; artist: string; duration?: number }): RemoteSong {
+  return { id: s.id, name: s.name, artist: s.artist, duration: s.duration }
 }
 
 function snapshot(): RemoteState {
   const st = store.state
   return {
     queue: st.queue.map(toRemoteSong),
+    history: st.history.map(toRemoteSong),
     currentSong: st.currentSong ? toRemoteSong(st.currentSong) : null,
     playing: st.playing,
     mode: st.mode,
@@ -61,6 +62,9 @@ function dispatch(cmd: RemoteCommand) {
       break
     case 'topAt':
       store.topQueue(cmd.index)
+      break
+    case 'pinAt':
+      store.pinToNext(cmd.index)
       break
   }
   // 指令执行后立刻回推一次，让手机界面马上反映结果（不用等下一个周期）

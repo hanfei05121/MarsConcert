@@ -148,6 +148,7 @@ export function startRemoteServer(opts: RemoteServerOptions): RemoteServerHandle
           const index = Number(msg.index)
           if (action === 'remove') opts.forwardToControl({ cmd: 'removeAt', index })
           else if (action === 'top') opts.forwardToControl({ cmd: 'topAt', index })
+          else if (action === 'pin') opts.forwardToControl({ cmd: 'pinAt', index })
           else return res.writeHead(400).end(JSON.stringify({ ok: false, error: 'unknown queue action' }))
           res.end(JSON.stringify({ ok: true }))
           return

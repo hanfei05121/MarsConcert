@@ -42,10 +42,47 @@ async function runSearch(q: string) {
 onMounted(() => runSearch(''))
 onBeforeUnmount(() => sTimer && clearTimeout(sTimer))
 
-/** 手机点歌：转发主进程 -> 控制窗 store.addToQueue */
-async function order(s: RemoteSong) {
+/** 手机点歌：转发主进程 -> 控制窗 store.addToQueue，并飞一个亮点到「已点」Tab */
+async function order(s: RemoteSong, ev: Event) {
   const r = await api.play(s.id)
-  showToast(r.ok ? `已点：${s.name}` : '点歌失败，请稍后再试')
+  if (r.ok) {
+    flyToQueue(ev)
+    showToast(`已点：${s.name}`)
+  } else {
+    showToast('点歌失败，请稍后再试')
+  }
+}
+
+/** 从被点歌曲行飞一个亮点到「已点」Tab，呼应数字 +1 */
+function flyToQueue(ev: Event) {
+  const src = ev.currentTarget as HTMLElement | null
+  const btn = document.getElementById('qtab')
+  if (!src || !btn) return
+  const s = src.getBoundingClientRect()
+  const t = btn.getBoundingClientRect()
+  const x0 = s.left + s.width / 2
+  const y0 = s.top + s.height / 2
+  const x1 = t.left + t.width / 2
+  const y1 = t.top + t.height / 2
+  const dot = document.createElement('div')
+  dot.className = 'fly-dot'
+  dot.style.left = `${x0}px`
+  dot.style.top = `${y0}px`
+  document.body.appendChild(dot)
+  const anim = dot.animate(
+    [
+      { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+      { transform: `translate(calc(${x1 - x0}px - 50%), calc(${y1 - y0}px - 50%)) scale(0.35)`, opacity: 0.85 }
+    ],
+    { duration: 620, easing: 'cubic-bezier(.45,.05,.3,1)' }
+  )
+  anim.onfinish = () => {
+    dot.remove()
+    btn.classList.remove('bump')
+    void btn.offsetWidth
+    btn.classList.add('bump')
+    window.setTimeout(() => btn.classList.remove('bump'), 420)
+  }
 }
 
 function tapTab(name: Sheet) {
@@ -64,6 +101,21 @@ const curPlaySub = computed(() => {
   if (!mobile.currentSong) return '扫码到这里，点一首歌吧'
   return `${mobile.currentSong.artist || ''}  ·  ${fmtSec(mobile.currentTime)} / ${fmtSec(mobile.duration)}`
 })
+
+// —— 弹幕回显的稳定随机参数（以 id 为种子，避免每次渲染跳动）——
+function seeded(n: number): number {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453
+  return x - Math.floor(x)
+}
+function dkTop(id: number): number {
+  return 6 + seeded(id) * 52
+}
+function dkSize(id: number): number {
+  return 22 + Math.floor(seeded(id + 1) * 8)
+}
+function dkDur(id: number): number {
+  return 7 + seeded(id + 2) * 4
+}
 </script>
 
 <template>
@@ -102,7 +154,7 @@ const curPlaySub = computed(() => {
         <span class="lh-c">{{ songs.length }} 首</span>
       </div>
       <div v-if="loading" class="empty">加载中…</div>
-      <button v-else v-for="s in songs" :key="s.id" class="row" @click="order(s)">
+      <button v-else v-for="s in songs" :key="s.id" class="row" @click="order(s, $event)">
         <div class="r-info">
           <div class="r-name">{{ s.name }}</div>
           <div class="r-art">{{ s.artist || '未知歌手' }}</div>
@@ -112,10 +164,17 @@ const curPlaySub = computed(() => {
       <div v-if="!loading && songs.length === 0" class="empty">没有找到相关歌曲</div>
     </main>
 
-    <!-- 弹幕角标：本机收发弹幕的即时提醒 -->
-    <TransitionGroup v-if="mobile.danmakus.length" name="dk" tag="div" class="dk-float">
-      <div v-for="d in mobile.danmakus" :key="d.id" class="dk">{{ d.text }}</div>
-    </TransitionGroup>
+    <!-- 弹幕回显：和副屏一样从右向左滚动，多条不互相遮挡 -->
+    <div v-if="mobile.danmakus.length" class="dk-layer">
+      <div
+        v-for="d in mobile.danmakus"
+        :key="d.id"
+        class="dk-item"
+        :style="{ top: dkTop(d.id) + '%', fontSize: dkSize(d.id) + 'px', animationDuration: dkDur(d.id) + 's' }"
+      >
+        {{ d.text }}
+      </div>
+    </div>
 
     <!-- 轻提示 -->
     <Transition name="toast">
@@ -125,12 +184,12 @@ const curPlaySub = computed(() => {
     <!-- 底部三键：控制 / 发弹幕 / 已点歌曲 -->
     <nav class="nav">
       <button class="tab" :class="{ on: sheet === 'control' }" @click="tapTab('control')">
-        <span class="ti"><ControlOutlined /></span><span class="tt">控制</span>
+        <span class="ti"><ControlOutlined /></span><span class="tt">控制台</span>
       </button>
       <button class="tab" :class="{ on: sheet === 'danmaku' }" @click="tapTab('danmaku')">
         <span class="ti"><CommentOutlined /></span><span class="tt">发弹幕</span>
       </button>
-      <button class="tab" :class="{ on: sheet === 'queue' }" @click="tapTab('queue')">
+      <button id="qtab" class="tab" :class="{ on: sheet === 'queue' }" @click="tapTab('queue')">
         <span class="ti"><CustomerServiceOutlined /></span>
         <span class="tt">已点
           <span v-if="mobile.queue.length" class="badge">{{ mobile.queue.length }}</span>
@@ -359,37 +418,36 @@ const curPlaySub = computed(() => {
   font-size: 11px;
   text-align: center;
 }
-/* 弹幕回显角标 */
-.dk-float {
+/* 弹幕回显层：从右向左滚动，覆盖在主内容上方、底部栏下方 */
+.dk-layer {
   position: fixed;
-  top: 84px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 90;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
+  left: 0;
+  right: 0;
+  top: 64px;
+  bottom: 78px;
+  z-index: 80;
+  overflow: hidden;
   pointer-events: none;
 }
-.dk {
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid var(--accent);
-  color: var(--text-0);
-  font-size: 13px;
+.dk-item {
+  position: absolute;
+  left: 0;
+  white-space: nowrap;
+  color: #fff;
+  font-weight: 600;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.9),
+    0 0 10px rgba(255, 77, 46, 0.55);
+  will-change: transform;
+  animation: dkfly linear forwards;
 }
-.dk-enter-active,
-.dk-leave-active {
-  transition: all 0.3s ease;
-}
-.dk-enter-from {
-  opacity: 0;
-  transform: translateY(-6px);
-}
-.dk-leave-to {
-  opacity: 0;
+@keyframes dkfly {
+  from {
+    transform: translateX(100vw);
+  }
+  to {
+    transform: translateX(-100vw);
+  }
 }
 /* 轻提示 */
 .toastbar {
@@ -416,5 +474,34 @@ const curPlaySub = computed(() => {
 .toast-enter-from,
 .toast-leave-to {
   opacity: 0;
+}
+</style>
+
+<!-- 飞入「已点」的亮点：动态插入 body，scoped 样式不生效，故用全局块 -->
+<style>
+.fly-dot {
+  position: fixed;
+  z-index: 9999;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, var(--accent) 70%);
+  box-shadow: 0 0 14px 5px var(--accent);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+#qtab.bump .badge {
+  animation: mobile-bump 0.42s ease;
+}
+@keyframes mobile-bump {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 </style>
