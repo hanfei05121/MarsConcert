@@ -1,8 +1,14 @@
-import { BrowserWindow, screen } from 'electron'
+import { app, BrowserWindow, screen } from 'electron'
 import { join } from 'node:path'
 import type { AppConfig } from '../shared/types'
 
 const PRELOAD = join(__dirname, '../preload/index.js')
+
+/** 开发态窗口图标：本地运行的是 electron 默认 exe，需显式指定才显示自定义图标；打包后 exe 已内嵌图标，无需传 */
+function devIcon(): string | undefined {
+  if (app.isPackaged) return undefined
+  return join(app.getAppPath(), 'build/icon.ico')
+}
 
 function rendererUrl(page: 'index' | 'player'): string | undefined {
   const base = process.env.ELECTRON_RENDERER_URL
@@ -18,6 +24,7 @@ export function createMainWindow(): BrowserWindow {
     minHeight: 600,
     title: '火星点歌台 · MARS KTV',
     backgroundColor: '#14100e',
+    icon: devIcon(),
     webPreferences: {
       preload: PRELOAD,
       contextIsolation: true,
@@ -69,6 +76,7 @@ export function createPlayerWindow(config: AppConfig): BrowserWindow {
     fullscreen: false,
     title: '桌面系统测试 · 播放屏',
     backgroundColor: '#000000',
+    icon: devIcon(),
     webPreferences: {
       preload: PRELOAD,
       contextIsolation: true,
