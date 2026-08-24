@@ -72,6 +72,8 @@ export const IPC = {
   /** 控制窗 → 主进程：停止播放，让副屏回到待点歌页（点下一首但已点为空时用） */
   PLAYER_STOP: 'player:stop',
   WINDOW_CONTROL: 'window:control',
+  /** 播放窗（副屏）自身的最小化/最大化/关闭控制 */
+  PLAYER_WINDOW_CONTROL: 'player-window:control',
   LIBRARY_OPEN: 'library:open',
   /** 控制窗 → 主进程：弹出目录选择器更换曲库路径，保存配置并立即重扫 */
   LIBRARY_CHOOSE: 'library:choose',
@@ -96,7 +98,17 @@ export const IPC = {
   // 播放窗 -> 主进程 的事件
   FROM_PLAYER_TIME: 'player:time',
   FROM_PLAYER_STATE: 'player:state',
-  FROM_PLAYER_ENDED: 'player:ended'
+  FROM_PLAYER_ENDED: 'player:ended',
+
+  // —— 手机遥控（手机 H5 <-> 主进程 HTTP 服务；主进程 <-> 控制窗/播放窗 转接）——
+  /** 控制窗 -> 主进程：推送遥控状态快照 */
+  REMOTE_PUSH_STATE: 'remote:pushState',
+  /** 主进程 -> 控制窗：手机下达的遥控指令 */
+  REMOTE_COMMAND: 'remote:command',
+  /** 任意窗 -> 主进程：取手机遥控的服务地址 + 二维码（控制窗顶部/播放窗待机页展示用） */
+  REMOTE_GET_INFO: 'remote:getInfo',
+  /** 主进程 -> 播放窗：展示弹幕（副屏叠加） */
+  DANMAKU: 'danmaku'
 } as const
 
 export interface RescanResult {
@@ -125,6 +137,8 @@ export interface KaraokeApi {
   /** 停止播放并让副屏回到待点歌页（点下一首但已点为空时） */
   stopPlayback(): Promise<void>
   windowControl(action: 'min' | 'max' | 'close'): Promise<void>
+  /** 播放窗（副屏）：最小化 / 最大化 / 关闭 */
+  playerWindowControl(action: 'min' | 'max' | 'close'): Promise<void>
   openLibFolder(): Promise<string>
   /** 弹出目录选择器更换曲库路径，保存配置并立即重扫；取消时 path 为 null */
   chooseLibFolder(): Promise<ChooseLibResult>
@@ -150,4 +164,61 @@ export interface KaraokeApi {
   onSyncTime(cb: (d: { currentTime: number; duration: number }) => void): () => void
   onSyncState(cb: (d: { playing: boolean }) => void): () => void
   onSyncEnded(cb: () => void): () => void
+
+  // —— 手机遥控 ——
+  /** 控制窗 -> 主进程：推送遥控状态快照（手机通过 HTTP/SSE 实时获取） */
+  remotePushState(state: RemoteState): void
+  /** 任意窗 -> 主进程：取手机遥控服务信息（访问地址 + 扫码二维码） */
+  getRemoteInfo(): Promise<RemoteInfo>
+  /** 控制窗接收主进程转发的手机遥控指令 */
+  onRemoteCommand(cb: (cmd: RemoteCommand) => void): () => void
+  /** 播放窗接收主进程转来的弹幕（副屏叠加） */
+  onDanmaku(cb: (d: DanmakuItem) => void): () => void
+}
+
+/** 手机遥控：主进程本地 HTTP 服务信息 */
+export interface RemoteInfo {
+  /** 手机访问的完整地址，如 http://192.168.1.100:17890/mobile.html */
+  url: string
+  /** 监听端口 */
+  port: number
+  /** 二维码图片 dataURL（PNG），渲染进 <img src> 即可 */
+  qrDataUrl: string
+}
+
+/** 手机遥控：播放状态快照（控制窗实时推送到主进程，再广播给手机） */
+export interface RemoteState {
+  queue: RemoteSong[]
+  currentSong: RemoteSong | null
+  playing: boolean
+  mode: VideoMode
+  volumes: Volumes
+  currentTime: number
+  duration: number
+}
+
+/** 手机遥控：歌曲的精简字段（手机端只需名称/歌手用于点歌与展示） */
+export interface RemoteSong {
+  id: number
+  name: string
+  artist: string
+}
+
+/** 手机遥控：手机下达的指令（主进程 -> 控制窗，转交 store 执行） */
+export type RemoteCommand =
+  | { cmd: 'togglePlay' }
+  | { cmd: 'prev' }
+  | { cmd: 'next' }
+  | { cmd: 'reSing' }
+  | { cmd: 'toggleMode' }
+  | { cmd: 'setVolume'; vols: Partial<Volumes> }
+  /** 点歌：完整的 Song 对象（主进程已按 id 从曲库解析） */
+  | { cmd: 'playSong'; song: Song }
+  | { cmd: 'removeAt'; index: number }
+  | { cmd: 'topAt'; index: number }
+
+/** 弹幕：主进程 -> 播放窗（副屏叠加显示） */
+export interface DanmakuItem {
+  id: number
+  text: string
 }

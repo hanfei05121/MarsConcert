@@ -6,12 +6,14 @@ import { getSongs, updateDuration, updateLyricOffset, initDatabase } from './dat
 import { scanLibrary } from './scanner'
 import { createMainWindow, createPlayerWindow } from './windows'
 import { mediaTokens, mediaTokenFor, mimeOf } from './media'
+import { startRemoteServer, type RemoteServerHandle } from './remote'
 import { IPC } from '../shared/types'
-import type { AppConfig, Song, VideoMode, Volumes } from '../shared/types'
+import type { AppConfig, RemoteState, Song, VideoMode, Volumes } from '../shared/types'
 
 let mainWindow: BrowserWindow | null = null
 let playerWindow: BrowserWindow | null = null
 let config: AppConfig = loadConfig()
+let remoteServer: RemoteServerHandle | null = null
 let currentSong: Song | null = null
 let currentMode: VideoMode = config.videoMode
 let volumes: Volumes = config.volumes
@@ -57,6 +59,19 @@ function sendToMain(channel: string, ...args: unknown[]) {
   }
 }
 
+/** 确保播放窗（副屏）存在：若用户关闭了它，重新创建并挂好关闭回调。
+ *  这样点歌/恢复时副屏能再次启动，且只挂一次 closed 监听。 */
+function ensurePlayerWindow(): BrowserWindow {
+  if (!playerWindow || playerWindow.isDestroyed()) {
+    playerWindow = createPlayerWindow(config)
+    playerWindow.on('closed', () => {
+      playerWindow = null
+      currentSong = null
+    })
+  }
+  return playerWindow
+}
+
 function registerIpc() {
   // —— 控制窗调用 ——
   ipcMain.handle(IPC.SONGS_LIST, (_e, search?: string) => getSongs(search))
@@ -74,13 +89,7 @@ function registerIpc() {
   ipcMain.handle(IPC.PLAYER_PLAY, (_e, song: Song) => {
     currentSong = song
     // 播放窗已在启动时创建；这里兜底：若用户把它关掉了，点歌时重新拉起
-    if (!playerWindow || playerWindow.isDestroyed()) {
-      playerWindow = createPlayerWindow(config)
-      playerWindow.on('closed', () => {
-        playerWindow = null
-        currentSong = null
-      })
-    }
+    const pw = ensurePlayerWindow()
     const lrc = readLrc(song.lrc_path)
     // 单视频 + 双音频：videoUrl 只出画面（无音轨），audioUrls 按模式切换（orig=原唱_vocals / accomp=伴奏_instrumental）
     const payload = {
@@ -91,7 +100,7 @@ function registerIpc() {
       videoUrl: mediaTokenFor(song.video_path || song.orig_path),
       audioUrls: { orig: mediaTokenFor(song.orig_path), accomp: mediaTokenFor(song.accomp_path) }
     }
-    const wc = playerWindow.webContents
+    const wc = pw.webContents
     // 若窗口还在加载，等就绪后再下达指令，避免消息丢失
     if (wc.isLoading()) wc.once('did-finish-load', () => sendToPlayer(IPC.TO_PLAYER_LOAD, payload))
     else sendToPlayer(IPC.TO_PLAYER_LOAD, payload)
@@ -137,6 +146,18 @@ function registerIpc() {
   // 窗口控制（最小化 / 最大化 / 关闭）
   ipcMain.handle(IPC.WINDOW_CONTROL, (_e, action: string) => {
     const w = mainWindow
+    if (!w || w.isDestroyed()) return
+    if (action === 'min') w.minimize()
+    else if (action === 'max') {
+      if (w.isMaximized()) w.unmaximize()
+      else w.maximize()
+    } else if (action === 'close') w.close()
+  })
+
+  // 播放窗（副屏）自身的窗口控制：关闭后 playerWindow 会被 closed 回调置空，
+  // 下次点歌时由 ensurePlayerWindow 重新拉起。
+  ipcMain.handle(IPC.PLAYER_WINDOW_CONTROL, (_e, action: string) => {
+    const w = playerWindow
     if (!w || w.isDestroyed()) return
     if (action === 'min') w.minimize()
     else if (action === 'max') {
@@ -197,6 +218,12 @@ function registerIpc() {
   ipcMain.on(IPC.FROM_PLAYER_ENDED, () => {
     sendToMain(IPC.SYNC_ENDED)
   })
+
+  // —— 手机遥控 ——
+  ipcMain.on(IPC.REMOTE_PUSH_STATE, (_e, state: RemoteState) => {
+    remoteServer?.setState(state)
+  })
+  ipcMain.handle(IPC.REMOTE_GET_INFO, () => remoteServer?.getInfo() ?? null)
 }
 
 app.whenReady().then(async () => {
@@ -244,13 +271,16 @@ app.whenReady().then(async () => {
   mainWindow = createMainWindow()
 
   // 启动即打开副屏播放窗：无边框铺副屏（不置顶、不抢焦点），常驻显示“去点歌”待机页
-  playerWindow = createPlayerWindow(config)
-  playerWindow.on('closed', () => {
-    playerWindow = null
-    currentSong = null
-  })
+  playerWindow = ensurePlayerWindow()
 
   registerIpc()
+
+  // 手机遥控服务：HTTP + SSE。
+  // 手机指令转发给控制窗 Vue store 执行；弹幕转发给副屏播放窗叠加显示。
+  remoteServer = startRemoteServer({
+    forwardToControl: (cmd) => sendToMain(IPC.REMOTE_COMMAND, cmd),
+    onDanmaku: (item) => sendToPlayer(IPC.DANMAKU, item)
+  })
 
   // 素材库目录不存在则先创建，保证应用可正常启动，用户可直接拖入素材
   if (!existsSync(config.songLibPath)) mkdirSync(config.songLibPath, { recursive: true })

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, computed } from 'vue'
-import { AudioOutlined, CustomerServiceOutlined, WarningOutlined } from '@ant-design/icons-vue'
+import { AudioOutlined, CustomerServiceOutlined, WarningOutlined, MinusOutlined, BorderOutlined, CloseOutlined } from '@ant-design/icons-vue'
 import { parseLrc, findActiveLine } from './lrc'
 import type { LyricLine } from './lrc'
 import LyricsOverlay from './components/LyricsOverlay.vue'
-import type { Playload, VideoMode, Volumes, ModePayload } from '../../shared/types'
+import type { Playload, VideoMode, Volumes, ModePayload, DanmakuItem, RemoteInfo } from '../../shared/types'
 
 const videoRef = ref<HTMLVideoElement | null>(null)
 const accompAudioRef = ref<HTMLAudioElement | null>(null) // 伴奏轨：一直播放
@@ -21,6 +21,32 @@ const audioError = ref(false)
 const songName = ref('')
 const lyricOffset = ref(0) // 歌词整体偏移（秒）：正=歌词延后，校正音画/歌词错位
 const idle = ref(true) // 空闲态：无歌曲/播完无下一首时，副屏显示“去点歌”提示而不是黑屏挂歌词
+
+// —— 弹幕（手机发来的文字，副屏叠加滚动）——
+interface DanmakuLine {
+  id: number
+  text: string
+  top: number // 垂直位置(百分比)
+  dur: number // 滚动时长(秒)
+  size: number // 字号
+}
+const danmakus = ref<DanmakuLine[]>([])
+function pushDanmaku(d: DanmakuItem) {
+  const line: DanmakuLine = {
+    id: d.id,
+    text: d.text,
+    top: 8 + Math.random() * 62,
+    dur: 8 + Math.random() * 4,
+    size: 26 + Math.floor(Math.random() * 10)
+  }
+  danmakus.value.push(line)
+  window.setTimeout(() => {
+    danmakus.value = danmakus.value.filter((x) => x.id !== d.id)
+  }, (line.dur + 1) * 1000)
+}
+
+// —— 待机页展示手机遥控二维码 ——
+const remoteInfo = ref<RemoteInfo | null>(null)
 
 let current: Playload | null = null
 let audioUrls: { orig: string; accomp: string } = { orig: '', accomp: '' }
@@ -251,8 +277,12 @@ onMounted(() => {
       applyMicVolume()
       refreshMicMonitor()
     }),
-    window.api.onStop(() => showIdle()) // 已点为空时点下一首 → 回到待点歌页
+    window.api.onStop(() => showIdle()), // 已点为空时点下一首 → 回到待点歌页
+    window.api.onDanmaku((d) => pushDanmaku(d))
   )
+
+  // 待机页展示手机遥控二维码
+  window.api.getRemoteInfo().then((r) => (remoteInfo.value = r)).catch(() => {})
 
   // Esc：最小化播放屏，把控制权还给控制台
   const onKey = (e: KeyboardEvent) => {
@@ -322,6 +352,11 @@ function onEnded() {
 function onVideoError() {
   errorMsg.value = '无法播放该视频，请检查素材文件是否存在（<歌曲名>.mp4 / <歌曲名>_vocals.mp3 / <歌曲名>_instrumental.mp3）'
 }
+
+// 副屏窗口控制：最小化 / 最大化 / 关闭（关闭后下次点歌自动重开）
+function pwin(action: 'min' | 'max' | 'close') {
+  window.api.playerWindowControl(action)
+}
 function onAudioError() {
   audioError.value = true
 }
@@ -329,12 +364,24 @@ function onAudioError() {
 
 <template>
   <div class="stage">
+    <!-- 副屏窗口控制：最小化 / 最大化 / 关闭（无边框窗口没有系统标题栏） -->
+    <div class="pctrl">
+      <button class="pic" title="最小化" @click="pwin('min')"><MinusOutlined /></button>
+      <button class="pic" title="最大化" @click="pwin('max')"><BorderOutlined /></button>
+      <button class="pic close" title="关闭" @click="pwin('close')"><CloseOutlined /></button>
+    </div>
+
     <!-- 空闲态：启动/播完无下一首时，副屏提示点歌，而不是黑屏挂着上一句歌词 -->
     <div v-if="idle" class="idle">
       <div class="idle-box">
         <div class="idle-icon"><CustomerServiceOutlined /></div>
         <div class="idle-title">请到控制台点歌</div>
         <div class="idle-sub">搜索或浏览歌曲，点击即可在副屏播放</div>
+        <!-- 手机遥控扫码入口 -->
+        <div v-if="remoteInfo" class="idle-remote">
+          <img v-if="remoteInfo.qrDataUrl" :src="remoteInfo.qrDataUrl" class="idle-qr" alt="扫码用手机遥控" />
+          <div class="idle-qr-label">📱 扫码用手机 · 点歌 / 控制 / 弹幕</div>
+        </div>
       </div>
     </div>
 
@@ -383,6 +430,18 @@ function onAudioError() {
       <LyricsOverlay :lines="lyrics" :active="activeIndex" :now="lyricNow" />
       <div v-if="!hasLyrics && !errorMsg" class="no-lyric"><AudioOutlined /></div>
     </template>
+
+    <!-- 弹幕层：手机发来的文字从右向左滚动叠加在画面上方 -->
+    <div v-if="!idle && danmakus.length" class="danmaku-layer">
+      <div
+        v-for="d in danmakus"
+        :key="d.id"
+        class="dan"
+        :style="{ top: d.top + '%', fontSize: d.size + 'px', animationDuration: d.dur + 's' }"
+      >
+        {{ d.text }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -491,6 +550,23 @@ function onAudioError() {
   color: rgba(255, 255, 255, 0.55);
   letter-spacing: 2px;
 }
+.idle-remote {
+  margin-top: 28px;
+}
+.idle-qr {
+  width: 180px;
+  height: 180px;
+  border-radius: 14px;
+  background: #fff;
+  padding: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.idle-qr-label {
+  margin-top: 14px;
+  font-size: 16px;
+  color: #ffd166;
+  letter-spacing: 1px;
+}
 @keyframes idleFloat {
   0%,
   100% {
@@ -499,5 +575,71 @@ function onAudioError() {
   50% {
     transform: translateY(-10px);
   }
+}
+/* —— 弹幕 —— */
+.danmaku-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.dan {
+  position: absolute;
+  left: 0;
+  white-space: nowrap;
+  color: #fff;
+  font-weight: 700;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.9),
+    0 0 10px rgba(255, 77, 46, 0.6);
+  will-change: transform;
+  animation: danfly linear forwards;
+}
+@keyframes danfly {
+  from {
+    transform: translateX(100vw);
+  }
+  to {
+    transform: translateX(-100vw);
+  }
+}
+/* —— 副屏窗口控制按钮（无边框窗口无系统标题栏） —— */
+.pctrl {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  pointer-events: auto;
+  opacity: 0.25;
+  transition: opacity 0.25s ease;
+}
+.pctrl:hover {
+  opacity: 1;
+}
+.pic {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.pic:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: #ff5a2e;
+}
+.pic.close:hover {
+  background: #e5484d;
+  border-color: #e5484d;
 }
 </style>

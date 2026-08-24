@@ -23,6 +23,7 @@ const api: KaraokeApi = {
   setVolumes: (vols) => ipcRenderer.invoke(IPC.PLAYER_SET_VOLUMES, vols),
   stopPlayback: () => ipcRenderer.invoke(IPC.PLAYER_STOP),
   windowControl: (action) => ipcRenderer.invoke(IPC.WINDOW_CONTROL, action),
+  playerWindowControl: (action) => ipcRenderer.invoke(IPC.PLAYER_WINDOW_CONTROL, action),
   openLibFolder: () => ipcRenderer.invoke(IPC.LIBRARY_OPEN),
   chooseLibFolder: () => ipcRenderer.invoke(IPC.LIBRARY_CHOOSE),
   escape: () => ipcRenderer.invoke(IPC.PLAYER_ESCAPE),
@@ -43,7 +44,13 @@ const api: KaraokeApi = {
   // 控制窗接收同步事件
   onSyncTime: (cb) => subscribe(IPC.SYNC_TIME, cb),
   onSyncState: (cb) => subscribe(IPC.SYNC_STATE, cb),
-  onSyncEnded: (cb) => subscribe(IPC.SYNC_ENDED, cb)
+  onSyncEnded: (cb) => subscribe(IPC.SYNC_ENDED, cb),
+
+  // 手机遥控
+  remotePushState: (state) => ipcRenderer.send(IPC.REMOTE_PUSH_STATE, state),
+  getRemoteInfo: () => ipcRenderer.invoke(IPC.REMOTE_GET_INFO),
+  onRemoteCommand: (cb) => subscribe(IPC.REMOTE_COMMAND, cb),
+  onDanmaku: (cb) => subscribe(IPC.DANMAKU, cb)
 }
 
 contextBridge.exposeInMainWorld('api', api)

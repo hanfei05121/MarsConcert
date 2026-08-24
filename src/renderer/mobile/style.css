@@ -1,0 +1,55 @@
+:root {
+  --bg-0: #14100e;
+  --bg-1: #1e1815;
+  --bg-2: #271f1a;
+  --bg-3: #332620;
+  --line: #413026;
+  --text-0: #fff6f0;
+  --text-1: #e9d6c8;
+  --text-2: #ab8f7c;
+  --accent: #ff4d2e;
+  --accent-2: #ff8c42;
+  --accent-3: #ffd166;
+  --on-accent: #1c0d08;
+  --danger: #ff3b30;
+  --accent-soft: rgba(255, 77, 46, 0.14);
+  --glow: rgba(255, 95, 55, 0.78);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+body {
+  background:
+    radial-gradient(600px 400px at 50% 130%, rgba(255, 77, 46, 0.16), transparent 60%),
+    var(--bg-0);
+  color: var(--text-0);
+  font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  position: relative;
+  overscroll-behavior: none;
+}
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+input,
+textarea {
+  font-family: inherit;
+  outline: none;
+}

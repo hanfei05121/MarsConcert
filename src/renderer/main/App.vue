@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { ArrowLeftOutlined, HeartOutlined, ClockCircleOutlined, ProfileOutlined } from '@ant-design/icons-vue'
+import { ArrowLeftOutlined, HeartOutlined, ClockCircleOutlined, ProfileOutlined, QrcodeOutlined } from '@ant-design/icons-vue'
 import { store } from './store'
 import type { Song } from '../../shared/types'
 import Sidebar from './components/Sidebar.vue'
@@ -10,7 +10,11 @@ import SongRow from './components/SongRow.vue'
 import Pagination from './components/Pagination.vue'
 import PlaylistPopup from './components/PlaylistPopup.vue'
 import BottomBar from './components/BottomBar.vue'
+import RemoteQrPopup from './components/RemoteQrPopup.vue'
 import coalBall from '../assets/coal-ball.jpg'
+
+/** 「手机遥控」二维码弹窗开关 */
+const remoteOpen = ref(false)
 
 /** 歌曲列表每页条数（两列布局 = 每页 10 行） */
 const PAGE_SIZE = 20
@@ -335,6 +339,12 @@ const playlistTitle = computed(() => {
 
       <BottomBar />
     </div>
+
+    <!-- 手机遥控：扫码进入手机端（右上角悬浮按钮 + 弹窗） -->
+    <button class="remote-fab" title="手机遥控 · 扫码" @click="remoteOpen = true">
+      <QrcodeOutlined />
+    </button>
+    <RemoteQrPopup v-if="remoteOpen" @close="remoteOpen = false" />
   </div>
 </template>
 
@@ -354,6 +364,26 @@ const playlistTitle = computed(() => {
   position: relative;
   overflow: hidden;
   min-height: 0;
+}
+/* —— 手机遥控悬浮按钮 —— */
+.remote-fab {
+  position: fixed;
+  top: 70px;
+  right: 14px;
+  z-index: 90;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid var(--accent-line);
+  background: linear-gradient(135deg, var(--bg-2), var(--bg-1));
+  color: var(--accent);
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: var(--shadow-glow);
+}
+.remote-fab:hover {
+  background: var(--accent-soft);
+  transform: translateY(-2px) scale(1.05);
 }
 .scroll {
   position: absolute;
