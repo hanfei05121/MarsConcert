@@ -74,7 +74,7 @@ export function createPlayerWindow(config: AppConfig): BrowserWindow {
     frame: false,
     transparent: false,
     fullscreen: false,
-    title: '桌面系统测试 · 播放屏',
+    title: '火星点歌台 · MARS KTV',
     backgroundColor: '#000000',
     icon: devIcon(),
     webPreferences: {

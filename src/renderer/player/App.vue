@@ -4,6 +4,7 @@ import { AudioOutlined, CustomerServiceOutlined, WarningOutlined, MinusOutlined,
 import { parseLrc, findActiveLine } from './lrc'
 import type { LyricLine } from './lrc'
 import LyricsOverlay from './components/LyricsOverlay.vue'
+import MarsIdleBackground from './components/MarsIdleBackground.vue'
 import type { Playload, VideoMode, Volumes, ModePayload, DanmakuItem, RemoteInfo } from '../../shared/types'
 
 const videoRef = ref<HTMLVideoElement | null>(null)
@@ -35,7 +36,7 @@ function pushDanmaku(d: DanmakuItem) {
   const line: DanmakuLine = {
     id: d.id,
     text: d.text,
-    top: 8 + Math.random() * 62,
+    top: 4 + Math.random() * 38,
     dur: 8 + Math.random() * 4,
     size: 26 + Math.floor(Math.random() * 10)
   }
@@ -373,6 +374,8 @@ function onAudioError() {
 
     <!-- 空闲态：启动/播完无下一首时，副屏提示点歌，而不是黑屏挂着上一句歌词 -->
     <div v-if="idle" class="idle">
+      <!-- 火星主题星空背景特效 -->
+      <MarsIdleBackground />
       <div class="idle-box">
         <div class="idle-icon"><CustomerServiceOutlined /></div>
         <div class="idle-title">没有歌曲啦，请点歌 ~ ~</div>
@@ -522,12 +525,15 @@ function onAudioError() {
 .idle {
   position: absolute;
   inset: 0;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at center, #1a120f 0%, #0a0605 70%);
+  background: radial-gradient(ellipse at center, #241611 0%, #0a0605 70%);
 }
 .idle-box {
+  position: relative;
+  z-index: 2;
   text-align: center;
   animation: idleFloat 3s ease-in-out infinite;
 }
@@ -587,7 +593,7 @@ function onAudioError() {
   position: absolute;
   left: 0;
   white-space: nowrap;
-  color: #fff;
+  color: #ff8c42;
   font-weight: 700;
   text-shadow:
     0 2px 4px rgba(0, 0, 0, 0.9),
