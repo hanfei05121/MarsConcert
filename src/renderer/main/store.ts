@@ -35,8 +35,6 @@ interface State {
   playMode: PlayMode
   queueOpen: boolean
   queueTab: QueueTab
-  view: ViewName
-  viewHistory: ViewName[]
   artistFilter: string | null
   categoryFilter: Lang | '全部'
   selectedPlaylist: string | null // 歌单详情标识：歌单名 | '__fav__' | '__history__'
@@ -94,8 +92,6 @@ export const state = reactive<State>({
   playMode: 'order',
   queueOpen: false,
   queueTab: 'queued',
-  view: 'recommend',
-  viewHistory: [],
   artistFilter: null,
   categoryFilter: '全部',
   selectedPlaylist: null,
@@ -119,15 +115,12 @@ async function refresh() {
   state.songs = await window.api.getSongs(state.search)
 }
 
-/** 顶部搜索：模糊查询本地曲库，并跳转到歌曲列表页展示结果 */
+/** 顶部搜索：模糊查询本地曲库，供搜索页展示结果 */
 async function doSearch(q: string) {
   state.search = q
   state.songs = await window.api.getSongs(q)
-  // 无论在哪个页面，搜索都切到「歌曲」列表页；清空其他筛选态避免干扰
-  state.artistFilter = null
-  state.categoryFilter = '全部'
-  state.selectedPlaylist = null
-  state.view = 'search'
+  // 清空其他筛选态避免干扰
+  resetFilters()
 }
 
 function currentQueueIndex(): number {
@@ -340,23 +333,11 @@ function deletePlaylist(name: string) {
   if (state.selectedPlaylist === name) state.selectedPlaylist = null
 }
 
-// —— 视图导航 ——
-function navigate(view: ViewName) {
-  if (state.view === view) return
-  state.viewHistory.push(state.view)
-  state.view = view
+/** 重置详情筛选态（路由切换时由 router.afterEach 调用） */
+function resetFilters() {
   state.artistFilter = null
   state.categoryFilter = '全部'
   state.selectedPlaylist = null
-}
-function back() {
-  const prev = state.viewHistory.pop()
-  if (prev) {
-    state.view = prev
-    state.artistFilter = null
-    state.categoryFilter = '全部'
-    state.selectedPlaylist = null
-  }
 }
 
 // 接收播放窗同步事件
@@ -434,8 +415,7 @@ export const store = {
   toggleFav,
   saveCurrentPlaylist,
   deletePlaylist,
-  navigate,
-  back,
+  resetFilters,
   currentQueueIndex,
   artists,
   favSongs,

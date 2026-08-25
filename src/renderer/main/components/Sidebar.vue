@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import {
   HomeOutlined,
   AudioOutlined,
@@ -12,10 +13,8 @@ import {
 import type { ViewName } from '../store'
 import { store } from '../store'
 
-const props = defineProps<{ view: ViewName }>()
-const emit = defineEmits<{
-  (e: 'nav', view: ViewName): void
-}>()
+const route = useRoute()
+const router = useRouter()
 
 const menus: { key: ViewName; label: string; icon: Component }[] = [
   { key: 'recommend', label: '推荐', icon: HomeOutlined },
@@ -25,6 +24,12 @@ const menus: { key: ViewName; label: string; icon: Component }[] = [
   { key: 'playlists', label: '歌单', icon: ProfileOutlined },
   { key: 'mine', label: '我的', icon: UserOutlined }
 ]
+
+/** 当前高亮：路由名与菜单 key 一致 */
+const active = computed(() => route.name as string)
+function go(key: ViewName) {
+  router.push({ name: key })
+}
 
 /** 当前曲库目录的文件夹名（D:\song-lib → song-lib），左下角展示用 */
 const libName = computed(() => {
@@ -50,8 +55,8 @@ const libName = computed(() => {
         v-for="m in menus"
         :key="m.key"
         class="item"
-        :class="{ active: props.view === m.key }"
-        @click="emit('nav', m.key)"
+        :class="{ active: active === m.key }"
+        @click="go(m.key)"
       >
         <span class="ic"><component :is="m.icon" /></span>
         <span class="lb">{{ m.label }}</span>
