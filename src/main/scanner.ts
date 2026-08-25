@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { upsertSong, countSongs, pruneSongs } from './database'
+import { upsertSong, countSongs, pruneSongs, suspendPersist, resumePersist, flushPersist } from './database'
 import { mediaTokenFor } from './media'
 import type { RescanResult } from '../shared/types'
 
@@ -233,49 +233,58 @@ export function scanLibrary(libPath: string): RescanResult {
     return result
   }
 
-  const acc: ScanAcc = { added: 0, updated: 0, seenPaths: [] }
-
-  for (const name of entries) {
-    const dir = join(libPath, name)
-    if (!statSync(dir).isDirectory()) continue
-
-    // 判断是一级「歌手目录」还是旧版「歌曲目录」：
-    // 含子目录且自身没有媒体文件 → 歌手目录（新布局）
-    let subDirs: string[] = []
-    try {
-      subDirs = readdirSync(dir).filter((f) => statSync(join(dir, f)).isDirectory())
-    } catch {
-      /* ignore */
-    }
-    const hasDirectMedia =
-      !!findAnyVideo(dir, VIDEO_EXTS) ||
-      !!findBySuffix(dir, 'vocals?', AUDIO_EXTS) ||
-      !!findBySuffix(dir, 'instrumental', AUDIO_EXTS)
-
-    if (subDirs.length > 0 && !hasDirectMedia) {
-      // —— 新布局：<lib>/<歌手>/<歌曲>/ ——
-      const avatar = findArtistImage(dir) // 歌手文件夹内的照片，全歌手共享
-      for (const songName of subDirs) {
-        scanSong(join(dir, songName), songName, name, avatar, acc)
-      }
-    } else {
-      // —— 旧布局：<lib>/<歌曲>/ ——
-      scanSong(dir, name, undefined, undefined, acc)
-    }
-  }
-
-  result.added = acc.added
-  result.updated = acc.updated
-
-  // 清理磁盘上已不存在的旧行（素材移动/删除/旧格式残留），避免幽灵或重复歌曲
+  // 批量写库：扫描期间每首歌只改内存不落盘，扫完统一写一次，
+  // 避免上千首歌 = 上千次全量写盘（大库扫描卡顿的根源）。
+  suspendPersist()
   try {
-    const removed = pruneSongs(acc.seenPaths)
-    if (removed > 0) console.log('[scanner] 清理失效歌曲行:', removed)
-  } catch (e) {
-    console.error('[scanner] 清理失败:', e)
-  }
+    const acc: ScanAcc = { added: 0, updated: 0, seenPaths: [] }
 
-  result.total = countSongs()
+    for (const name of entries) {
+      const dir = join(libPath, name)
+      if (!statSync(dir).isDirectory()) continue
+
+      // 判断是一级「歌手目录」还是旧版「歌曲目录」：
+      // 含子目录且自身没有媒体文件 → 歌手目录（新布局）
+      let subDirs: string[] = []
+      try {
+        subDirs = readdirSync(dir).filter((f) => statSync(join(dir, f)).isDirectory())
+      } catch {
+        /* ignore */
+      }
+      const hasDirectMedia =
+        !!findAnyVideo(dir, VIDEO_EXTS) ||
+        !!findBySuffix(dir, 'vocals?', AUDIO_EXTS) ||
+        !!findBySuffix(dir, 'instrumental', AUDIO_EXTS)
+
+      if (subDirs.length > 0 && !hasDirectMedia) {
+        // —— 新布局：<lib>/<歌手>/<歌曲>/ ——
+        const avatar = findArtistImage(dir) // 歌手文件夹内的照片，全歌手共享
+        for (const songName of subDirs) {
+          scanSong(join(dir, songName), songName, name, avatar, acc)
+        }
+      } else {
+        // —— 旧布局：<lib>/<歌曲>/ ——
+        scanSong(dir, name, undefined, undefined, acc)
+      }
+    }
+
+    result.added = acc.added
+    result.updated = acc.updated
+
+    // 清理磁盘上已不存在的旧行（素材移动/删除/旧格式残留），避免幽灵或重复歌曲
+    try {
+      const removed = pruneSongs(acc.seenPaths)
+      if (removed > 0) console.log('[scanner] 清理失效歌曲行:', removed)
+    } catch (e) {
+      console.error('[scanner] 清理失败:', e)
+    }
+
+    result.total = countSongs()
+  } finally {
+    // 扫描期间所有变更一次性落盘，再恢复「逐条自动写盘」的默认行为
+    flushPersist()
+    resumePersist()
+  }
   console.log('[scanner] 扫描完成:', result)
   return result
 }

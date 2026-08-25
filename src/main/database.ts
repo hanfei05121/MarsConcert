@@ -82,7 +82,29 @@ export async function initDatabase(): Promise<void> {
   persist()
 }
 
+// 批量写库开关：开启后 DML 只改内存、不立即落盘，由 flushPersist 统一写一次。
+// 用于扫描大曲库等「连续插入/更新很多行」的场景，避免每一行都全量写盘。
+let persistSuspended = false
+
 function persist() {
+  if (persistSuspended) return // 批量模式下由 flushPersist 统一落盘
+  if (!db) return
+  const data = db.export()
+  writeFileSync(DB_PATH, Buffer.from(data))
+}
+
+/** 开启批量模式：期间所有 DML 只改内存，不写盘 */
+export function suspendPersist() {
+  persistSuspended = true
+}
+
+/** 关闭批量模式：恢复「每次 DML 后自动写盘」 */
+export function resumePersist() {
+  persistSuspended = false
+}
+
+/** 强制立即写盘一次（批量结束后调用，把期间所有变更一次性保存） */
+export function flushPersist() {
   if (!db) return
   const data = db.export()
   writeFileSync(DB_PATH, Buffer.from(data))
@@ -195,6 +217,11 @@ export function countSongs(): number {
 }
 
 export function updateDuration(id: number, duration: number): void {
+  // 播放进度约每秒上报一次，而时长在首次取到后就固定不变；
+  // 若值没变化就不写库，避免每播 1 秒就全量重写一次数据库（伤固态 + 偶尔卡顿）。
+  const rows = all('SELECT duration FROM song WHERE id = ?', [id])
+  const cur = rows[0]?.duration
+  if (typeof cur === 'number' && Math.abs(cur - duration) < 0.5) return
   run('UPDATE song SET duration = ? WHERE id = ?', [duration, id])
 }
 
