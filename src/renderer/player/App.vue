@@ -22,6 +22,7 @@ const audioError = ref(false)
 const songName = ref('')
 const lyricOffset = ref(0) // 歌词整体偏移（秒）：正=歌词延后，校正音画/歌词错位
 const idle = ref(true) // 空闲态：无歌曲/播完无下一首时，副屏显示“去点歌”提示而不是黑屏挂歌词
+const qrExpand = ref(false) // 右下角常驻扫码浮层：是否放大
 
 // —— 弹幕（手机发来的文字，副屏叠加滚动）——
 interface DanmakuLine {
@@ -445,6 +446,18 @@ function onAudioError() {
         {{ d.text }}
       </div>
     </div>
+
+    <!-- 右上角常驻扫码浮层：唱歌时也可扫码换歌/调音量/发弹幕，点击放大、再点收起 -->
+    <div
+      v-if="remoteInfo && remoteInfo.qrDataUrl"
+      class="corner-remote"
+      :class="{ expanded: qrExpand }"
+      @click="qrExpand = !qrExpand"
+    >
+      <img :src="remoteInfo.qrDataUrl" class="corner-qr" :class="{ expanded: qrExpand }" alt="扫码用手机遥控" />
+      <span v-if="!qrExpand" class="corner-tip">扫码操作</span>
+      <CloseOutlined v-else class="corner-close" />
+    </div>
   </div>
 </template>
 
@@ -608,6 +621,54 @@ function onAudioError() {
   to {
     transform: translateX(-100vw);
   }
+}
+/* —— 右上角常驻扫码浮层 —— */
+.corner-remote {
+  position: absolute;
+  top: 52px;
+  right: 18px;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.corner-qr {
+  width: 84px;
+  height: 84px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 140, 66, 0.7);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+.corner-tip {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  text-shadow: 0 1px 2px #000;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 2px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.corner-remote.expanded {
+  position: fixed;
+  inset: 0;
+  right: 0;
+  bottom: 0;
+  justify-content: center;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.82);
+}
+.corner-qr.expanded {
+  width: 240px;
+  height: 240px;
+  border-width: 3px;
+}
+.corner-close {
+  color: #fff;
+  font-size: 22px;
+  margin-top: 12px;
 }
 /* —— 副屏窗口控制按钮（无边框窗口无系统标题栏） —— */
 .pctrl {
