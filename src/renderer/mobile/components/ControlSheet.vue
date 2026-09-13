@@ -70,16 +70,18 @@ function onVol(key: 'master' | 'mic', val: number) {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(0, 0, 0, 0.55);
+  /* 只压暗、不模糊：模糊交给 .sheet，保证玻璃能糊到背后页面 */
+  background: rgba(6, 4, 6, 0.5);
   display: flex;
   align-items: flex-end;
 }
 .sheet {
   width: 100%;
-  background: linear-gradient(160deg, var(--bg-1), var(--bg-0));
+  background: var(--glass-sheen), var(--popup-bg);
+  border-top: 1px solid var(--line);
   border-radius: 20px 20px 0 0;
   padding: 10px 18px calc(22px + env(safe-area-inset-bottom));
-  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--glass-edge), 0 -10px 30px rgba(0, 0, 0, 0.5);
 }
 .grab {
   width: 40px;
@@ -121,12 +123,13 @@ function onVol(key: 'master' | 'mic', val: number) {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: var(--on-accent);
-  box-shadow: 0 6px 18px rgba(255, 77, 46, 0.5);
+  /* 橙玻璃播放键 */
+  background: var(--accent-glass-strong), var(--bg-2);
+  color: var(--accent-ink);
+  box-shadow: inset 0 0 0 1px var(--accent-line), 0 8px 24px rgba(255, 77, 46, 0.3);
 }
 .big.playing {
-  box-shadow: 0 0 0 6px rgba(255, 77, 46, 0.2);
+  box-shadow: inset 0 0 0 1px var(--accent-line), 0 0 0 6px rgba(255, 77, 46, 0.16);
 }
 .func-row {
   display: flex;
@@ -172,7 +175,8 @@ function onVol(key: 'master' | 'mic', val: number) {
   transition: background 0.15s ease;
 }
 .toggle.on {
-  background: var(--accent);
+  background: var(--accent-glass-strong), var(--bg-3);
+  box-shadow: inset 0 0 0 1px var(--accent-line);
 }
 .knob {
   position: absolute;

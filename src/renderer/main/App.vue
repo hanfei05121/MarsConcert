@@ -87,15 +87,18 @@ async function doSearch(q: string) {
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  border: 1px solid var(--accent-line);
-  background: linear-gradient(135deg, var(--bg-2), var(--bg-1));
+  border: 1px solid var(--line-strong);
+  background: var(--glass-sheen), var(--bg-2);
   color: var(--accent);
   font-size: 22px;
   cursor: pointer;
-  box-shadow: var(--shadow-glow);
+  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
+  box-shadow: var(--glass-edge), var(--shadow-glass);
 }
 .remote-fab:hover {
   background: var(--accent-soft);
+  border-color: var(--accent);
   transform: translateY(-2px) scale(1.05);
 }
 /* —— 轻提示 —— */
@@ -107,12 +110,14 @@ async function doSearch(q: string) {
   z-index: 200;
   padding: 10px 22px;
   border-radius: 999px;
-  background: rgba(20, 24, 38, 0.92);
-  border: 1px solid var(--accent);
+  background: var(--glass-sheen), var(--popup-bg);
+  border: 1px solid var(--accent-line);
   color: var(--text-0);
   font-size: 14px;
   font-weight: 600;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  box-shadow: var(--glass-edge), 0 8px 24px rgba(0, 0, 0, 0.4);
   pointer-events: none;
   white-space: nowrap;
 }

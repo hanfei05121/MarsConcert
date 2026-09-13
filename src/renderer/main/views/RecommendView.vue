@@ -32,7 +32,7 @@ const fresh = computed(() => [...state.allSongs].slice(-8).reverse()) // 新歌�
 </template>
 
 <style scoped>
-/* —— 火星人 Hero —— */
+/* —— 火星人 Hero（玻璃面板 + 火星红辉光）—— */
 .mars-hero {
   display: flex;
   align-items: center;
@@ -41,10 +41,11 @@ const fresh = computed(() => [...state.allSongs].slice(-8).reverse()) // 新歌�
   margin-bottom: 4px;
   border-radius: 18px;
   background:
-    radial-gradient(560px 200px at 0% 0%, rgba(255, 77, 46, 0.18), transparent 60%),
-    linear-gradient(120deg, var(--bg-2), var(--bg-1));
+    radial-gradient(560px 220px at 0% 0%, rgba(255, 77, 46, 0.22), transparent 62%),
+    var(--glass-sheen),
+    var(--bg-1);
   border: 1px solid var(--line);
-  box-shadow: var(--shadow-glow);
+  box-shadow: var(--glass-edge), 0 14px 40px rgba(255, 77, 46, 0.14), var(--shadow-glass);
 }
 .hero-mascot {
   width: 92px;

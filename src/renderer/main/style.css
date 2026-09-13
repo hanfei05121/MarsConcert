@@ -1,35 +1,61 @@
 :root {
-  /* —— 火星人专属主题 · MARS EDITION —— */
-  /* 暖炭黑底（黑煤球 / 火星夜空）*/
-  --bg-0: #14100e; /* 应用底色 */
-  --bg-1: #1e1815; /* 面板 */
-  --bg-2: #271f1a; /* 卡片 */
-  --bg-3: #332620; /* hover / 高亮底 */
-  --line: #413026; /* 暖描边 */
+  /* —— 火星人专属主题 · MARS GLASS EDITION —— */
+  /* 透明毛玻璃：面板半透明 + backdrop-filter 模糊，浮在「火星星云」背景之上。
+     思路参考 Rainform 的液态玻璃语言 —— 深空底、发丝描边、顶边高光、柔和投影。
+     火星红/熔岩橙的粉丝色仍作强调色，只是把「实心炭黑面板」换成了「玻璃」。 */
 
-  /* 文字：暖白 → 暖灰 */
-  --text-0: #fff6f0; /* 主文字 */
-  --text-1: #e9d6c8; /* 次文字 */
-  --text-2: #ab8f7c; /* 说明文字 */
+  /* 深空底色：玻璃之下的「大气层」。
+     平衡点：底色太黑 → 玻璃后面没东西可透，面板变实心板；太亮太艳 → 背景抢戏、发飘。
+     所以走「暗底 + 克制的色团 + 半透明白面板」：透明观感来自模糊与透光，不靠拔高亮度。 */
+  --base-0: #100b10; /* 最深处 */
+  --base-1: #1a131a; /* 中层 */
+  --base-2: #241a22; /* 近景 */
+
+  /* 玻璃面板 / 控件：以「半透明白」为主，而不是深色块 */
+  --bg-0: rgba(14, 10, 15, 0.4); /* 凹陷控件底（输入框 / 分页条） */
+  --bg-1: rgba(255, 246, 242, 0.085); /* 面板玻璃（半透明白，背景透得出来） */
+  --bg-2: rgba(255, 246, 240, 0.07); /* 卡片 / 控件玻璃 */
+  --bg-3: rgba(255, 246, 240, 0.13); /* hover / 高亮底 */
+  --line: rgba(255, 246, 240, 0.15); /* 玻璃发丝描边 */
+  --line-strong: rgba(252, 250, 248, 0.26); /* hover 描边 */
+
+  /* 文字：暖白 → 暖灰（比实心底上略提亮，补偿玻璃透光） */
+  --text-0: #fff8f4; /* 主文字 */
+  --text-1: #eddfd4; /* 次文字 */
+  --text-2: #cbb3a2; /* 说明文字 */
 
   /* 火星红 / 熔岩橙（粉丝代表色红 + 燃烧煤球）*/
   --accent: #ff4d2e; /* 火星红主强调 */
   --accent-2: #ff8c42; /* 熔岩橙 */
   --accent-3: #ffd166; /* 火星尘埃金（星点/点缀）*/
-  --on-accent: #1c0d08; /* accent 渐变背景上的文字色 */
+  --on-accent: #200d07; /* accent 渐变背景上的文字色 */
 
-  --danger: #ff3b30; /* 删除 / 红 */
-  --popup-bg: rgba(20, 15, 12, 0.92);
+  --danger: #ff453a; /* 删除 / 红 */
+  --popup-bg: rgba(34, 26, 34, 0.5); /* 弹窗玻璃底 */
+
+  /* —— 玻璃参数（统一在这里调，全套面板跟着变）—— */
+  --glass-blur: 34px; /* 大面板模糊半径 */
+  --glass-blur-sm: 15px; /* 小组件模糊半径 */
+  --glass-sat: 150%; /* 饱和度提升，让透出的星云更「润」（别调太高，否则背景发艳） */
+  --glass-sheen: linear-gradient(180deg, rgba(255, 250, 246, 0.1), rgba(255, 250, 246, 0.02));
+  --glass-edge: inset 0 1px 0 rgba(255, 250, 246, 0.16), inset 0 -1px 0 rgba(0, 0, 0, 0.22);
 
   /* —— 设计 token：光晕 / 阴影 / 过渡 / 派生色 —— */
-  --glow: rgba(255, 95, 55, 0.78); /* 炽光晕颜色 */
-  --shadow-glow: 0 0 6px var(--glow); /* 按钮/行/头像/卡片的光晕 */
-  --shadow-accent: 0 6px 20px rgba(255, 77, 46, 0.5); /* 主操作键的彩色投影 */
-  --shadow-panel: 0 14px 32px rgba(0, 0, 0, 0.6); /* 浮层面板（音量弹层等）*/
-  --shadow-pop: 0 20px 60px rgba(0, 0, 0, 0.6); /* 大弹窗 */
+  --glow: rgba(255, 95, 55, 0.5); /* 炽光晕颜色 */
+  --shadow-glow: 0 0 5px rgba(255, 95, 55, 0.3); /* 按钮/行/头像/卡片的光晕（收细，给玻璃让位）*/
+  --shadow-accent: 0 6px 22px rgba(255, 77, 46, 0.42); /* 主操作键的彩色投影 */
+  --shadow-glass: 0 10px 30px rgba(0, 0, 0, 0.22); /* 玻璃面板投影（收轻，避免发「重」）*/
+  --shadow-panel: 0 16px 38px rgba(0, 0, 0, 0.34); /* 浮层面板（音量弹层等）*/
+  --shadow-pop: 0 22px 56px rgba(0, 0, 0, 0.42); /* 大弹窗 */
   --ease: all 0.3s ease; /* 统一悬停过渡 */
-  --accent-soft: rgba(255, 77, 46, 0.14); /* accent 半透明底（选中/hover 底）*/
+  --accent-soft: rgba(255, 77, 46, 0.16); /* accent 半透明底（选中/hover 底）*/
   --accent-line: rgba(255, 95, 55, 0.5); /* accent 半透明描边 */
+
+  /* —— 「橙玻璃」：橙色不再做实心色块，改成玻璃里透出的火光 ——
+     主按钮 / 选中态统一用它：半透明橙底 + 橙色描边 + 暖橙文字。 */
+  --accent-glass: linear-gradient(180deg, rgba(255, 95, 55, 0.28), rgba(255, 77, 46, 0.13));
+  --accent-glass-strong: linear-gradient(180deg, rgba(255, 95, 55, 0.44), rgba(255, 77, 46, 0.22));
+  --accent-ink: #ffd0bd; /* 橙玻璃上的文字 / 图标色 */
 }
 
 * {
@@ -41,11 +67,18 @@ body,
   height: 100%;
   margin: 0;
 }
+/* 火星星云：多层径向渐变叠出「大气层」，玻璃面板浮在上面才通透。
+   分寸：只要玻璃背后「有亮度差」就够透，不需要亮、也不需要艳。 */
 body {
   background:
-    radial-gradient(1200px 620px at 50% 122%, rgba(255, 77, 46, 0.16), transparent 60%),
-    radial-gradient(820px 520px at 88% -12%, rgba(255, 140, 66, 0.1), transparent 55%),
-    var(--bg-0);
+    /* 火星色团：克制的一层，让玻璃后面有颜色在流动，但不抢戏 */
+    radial-gradient(1150px 780px at 4% -8%, rgba(255, 104, 52, 0.15), transparent 60%),
+    radial-gradient(1000px 680px at 98% 104%, rgba(255, 138, 64, 0.12), transparent 62%),
+    radial-gradient(840px 560px at 78% -2%, rgba(255, 196, 106, 0.06), transparent 64%),
+    radial-gradient(940px 700px at 16% 88%, rgba(150, 66, 128, 0.09), transparent 66%),
+    /* 极淡中央辉光：只留一点亮度差，避免玻璃浮在死黑上 */
+    radial-gradient(1000px 700px at 58% 50%, rgba(255, 100, 50, 0.05), transparent 72%),
+    linear-gradient(180deg, var(--base-1), var(--base-0) 58%, #0b070b);
   color: var(--text-0);
   font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -73,6 +106,20 @@ body::before {
   background-size: 360px 360px;
   opacity: 0.9;
 }
+/* 胶片颗粒：极淡噪点压住渐变的塑料感，玻璃边缘的折射会更真实（Rainform 同款手法）*/
+body::after {
+  content: '';
+  position: fixed;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 170px 170px;
+  mix-blend-mode: soft-light;
+  opacity: 0.04;
+}
 #app {
   position: relative;
   z-index: 1;
@@ -83,17 +130,55 @@ body::before {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--line);
+  background: rgba(255, 240, 232, 0.16);
   border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #5a4030;
+  background: rgba(255, 240, 232, 0.28);
 }
 
+/* —— 玻璃系统 ——
+   两档：大面板用 --glass-blur（真模糊），小控件用半透明填充 + 发丝描边 + 顶边高光
+   （小组件不叠 backdrop-filter，避免几十个模糊层拖垮渲染）。 */
 .glass {
-  background: var(--bg-1);
+  position: relative;
+  background: var(--glass-sheen), var(--bg-1);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 16px;
+  box-shadow: var(--glass-edge), var(--shadow-glass);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+}
+/* 大面板：整窗级别的玻璃层 */
+.topbar,
+.bottombar,
+.sidebar,
+.mars-hero,
+.card,
+.plcard,
+.popup,
+.qr-panel,
+.vpop {
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+}
+/* 小组件：半透明填充 + 顶边高光，不叠模糊（性能） */
+.user,
+.cloud,
+.chip,
+.pg,
+.qop,
+.f,
+.ctl,
+.ic,
+.back,
+.vbtn,
+.mrow,
+.thumb,
+.toggle,
+.sinput,
+.fbtn {
+  box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.08);
 }
 
 .neon-text {
@@ -122,10 +207,16 @@ body::before {
   border-color: var(--accent);
 }
 .btn.accent {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  border: none;
-  color: var(--on-accent);
+  /* 橙玻璃主按钮：不再是实心橙块 */
+  background: var(--accent-glass-strong), var(--bg-2);
+  border: 1px solid var(--accent-line);
+  color: var(--accent-ink);
   font-weight: 700;
+  box-shadow: var(--glass-edge), 0 6px 20px rgba(255, 77, 46, 0.28);
+}
+.btn.accent:hover {
+  background: var(--accent-glass-strong), var(--accent-soft);
+  border-color: var(--accent);
 }
 
 /* 橙黄滑块 */
@@ -138,7 +229,7 @@ body::before {
   box-shadow: 0 0 0 2px var(--accent) !important;
 }
 
-/* —— 全局炽光阴影 + 悬停动效（火星质感）—— */
+/* —— 全局炽光阴影 + 悬停动效（火星质感，收细后与玻璃共存）—— */
 button {
   box-shadow: var(--shadow-glow);
   transition: var(--ease);
@@ -156,11 +247,12 @@ button:hover {
 .thumb {
   box-shadow: var(--shadow-glow);
 }
-/* 列表行（歌曲行等）：统一光晕 + 移入下沉 */
+/* 列表行（歌曲行等）：默认透明，悬停浮起一层玻璃 */
 .row {
-  box-shadow: var(--shadow-glow);
+  box-shadow: none;
 }
 .row:hover {
+  background: var(--bg-3);
   transform: translateY(2px);
 }
 
@@ -220,8 +312,10 @@ button:hover {
   margin-bottom: 14px;
   padding: 8px 16px 8px 13px;
   border-radius: 999px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.08), 0 2px 10px rgba(0, 0, 0, 0.18);
   transition: all 0.2s ease;
+  backdrop-filter: blur(var(--glass-blur-sm));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm));
 }
 .back-link:hover {
   border-color: var(--accent);

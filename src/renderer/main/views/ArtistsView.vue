@@ -58,9 +58,10 @@ const artistSongs = computed<Song[]>(() =>
   gap: 6px;
   padding: 18px 10px;
   border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--bg-1);
+  border-radius: 16px;
+  background: var(--glass-sheen), var(--bg-1);
   cursor: pointer;
+  box-shadow: var(--glass-edge), var(--shadow-glass);
   transition: all 0.15s ease;
 }
 .card:hover {
@@ -71,14 +72,16 @@ const artistSongs = computed<Song[]>(() =>
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: var(--on-accent);
+  /* 无头像的歌手占位：橙玻璃圆，而不是实心橙 */
+  background: var(--accent-glass);
+  color: var(--accent-ink);
   font-size: 28px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--accent-line);
 }
 .ava img {
   width: 100%;

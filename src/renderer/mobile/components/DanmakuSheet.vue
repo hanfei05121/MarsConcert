@@ -67,7 +67,8 @@ async function send() {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(0, 0, 0, 0.55);
+  /* 只压暗、不模糊：模糊交给 .sheet */
+  background: rgba(6, 4, 6, 0.5);
   display: flex;
   align-items: flex-end;
 }
@@ -76,10 +77,11 @@ async function send() {
   max-height: 78vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(160deg, var(--bg-1), var(--bg-0));
+  background: var(--glass-sheen), var(--popup-bg);
+  border-top: 1px solid var(--line);
   border-radius: 20px 20px 0 0;
   padding: 10px 18px calc(20px + env(safe-area-inset-bottom));
-  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--glass-edge), 0 -10px 30px rgba(0, 0, 0, 0.5);
 }
 .grab {
   width: 40px;
@@ -113,10 +115,13 @@ async function send() {
 .send {
   width: 70px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: var(--on-accent);
+  /* 橙玻璃发送键 */
+  background: var(--accent-glass-strong), var(--bg-2);
+  border: 1px solid var(--accent-line);
+  color: var(--accent-ink);
   font-size: 15px;
   font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.1);
 }
 .send:disabled {
   opacity: 0.4;
@@ -144,9 +149,9 @@ async function send() {
   font-weight: 600;
 }
 .cat.on {
-  background: var(--accent);
-  color: var(--on-accent);
-  border-color: var(--accent);
+  background: var(--accent-glass), var(--bg-2);
+  color: var(--accent-ink);
+  border-color: var(--accent-line);
 }
 .quick {
   flex: 1;

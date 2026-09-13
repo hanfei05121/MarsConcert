@@ -78,8 +78,10 @@ const libName = computed(() => {
 .sidebar {
   width: 184px;
   flex-shrink: 0;
-  background: var(--bg-1);
+  /* 玻璃侧栏：半透明面板 + 发丝描边 + 顶边高光（模糊由全局 .sidebar 规则提供） */
+  background: var(--glass-sheen), var(--bg-1);
   border-right: 1px solid var(--line);
+  box-shadow: var(--glass-edge), var(--shadow-glass);
   display: flex;
   flex-direction: column;
   padding: 16px 12px;
@@ -91,20 +93,22 @@ const libName = computed(() => {
   padding: 10px;
   border-radius: 12px;
   background: var(--bg-2);
+  border: 1px solid var(--line);
   margin-bottom: 18px;
 }
 .avatar {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: var(--on-accent);
+  background: var(--accent-glass);
+  color: var(--accent-ink);
   font-weight: 800;
   font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px var(--accent-line);
 }
 /* 火星人吉祥物：黑煤球 */
 .avatar.coal {
@@ -141,8 +145,10 @@ const libName = computed(() => {
   transform: translateY(2px);
 }
 .item.active {
-  background: var(--accent);
-  color: var(--on-accent);
+  /* 当前菜单：橙玻璃，而不是一块实心橙 */
+  background: var(--accent-glass), var(--bg-2);
+  color: var(--accent-ink);
+  box-shadow: inset 0 0 0 1px var(--accent-line), 0 6px 18px rgba(255, 77, 46, 0.18);
 }
 .ic {
   font-size: 18px;
@@ -154,11 +160,12 @@ const libName = computed(() => {
   padding: 12px 16px;
   border-radius: 12px;
   background: var(--bg-2);
+  border: 1px solid var(--line);
   color: var(--text-1);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: var(--shadow-glow);
+  box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.08);
   transition: var(--ease);
 }
 .cloud:hover {

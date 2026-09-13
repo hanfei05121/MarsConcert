@@ -486,8 +486,13 @@ function onAudioError() {
   display: flex;
   align-items: center;
   gap: 16px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.7), transparent);
+  /* 玻璃渐隐条：顶部信息浮在画面上，靠模糊与渐隐压住视频杂色 */
+  background: linear-gradient(180deg, rgba(8, 5, 6, 0.72), rgba(8, 5, 6, 0.24) 62%, transparent);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
   pointer-events: none;
+  mask-image: linear-gradient(180deg, #000 62%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent);
 }
 .title {
   font-size: 22px;
@@ -499,11 +504,13 @@ function onAudioError() {
   font-size: 13px;
   padding: 3px 12px;
   border-radius: 999px;
-  border: 1px solid #ff5a2e;
+  border: 1px solid rgba(255, 90, 46, 0.7);
+  background: rgba(20, 10, 8, 0.42);
   color: #ff5a2e;
+  box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.12);
 }
 .mode.accomp {
-  border-color: #ff8c42;
+  border-color: rgba(255, 140, 66, 0.7);
   color: #ff8c42;
 }
 .audio-warn {
@@ -542,7 +549,11 @@ function onAudioError() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at center, #241611 0%, #0a0605 70%);
+  /* 待机页：与主窗同一套火星星云底色（MarsIdleBackground 画布叠在其上） */
+  background:
+    radial-gradient(900px 620px at 14% 6%, rgba(255, 104, 52, 0.14), transparent 60%),
+    radial-gradient(820px 560px at 88% 96%, rgba(255, 138, 64, 0.11), transparent 62%),
+    radial-gradient(ellipse at center, #221826 0%, #100b10 72%);
 }
 .idle-box {
   position: relative;
@@ -643,10 +654,14 @@ function onAudioError() {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 .corner-tip {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 11px;
   text-shadow: 0 1px 2px #000;
-  background: rgba(0, 0, 0, 0.45);
+  background: linear-gradient(180deg, rgba(255, 250, 246, 0.14), rgba(255, 250, 246, 0.04)),
+    rgba(14, 9, 10, 0.46);
+  border: 1px solid rgba(255, 250, 246, 0.2);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
   padding: 2px 9px;
   border-radius: 20px;
   white-space: nowrap;
@@ -658,7 +673,9 @@ function onAudioError() {
   bottom: 0;
   justify-content: center;
   z-index: 60;
-  background: rgba(0, 0, 0, 0.82);
+  background: rgba(6, 4, 6, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .corner-qr.expanded {
   width: 240px;
@@ -694,15 +711,19 @@ function onAudioError() {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 250, 246, 0.24);
+  background: linear-gradient(180deg, rgba(255, 250, 246, 0.14), rgba(255, 250, 246, 0.04)),
+    rgba(14, 9, 10, 0.46);
   color: #fff;
   font-size: 15px;
   cursor: pointer;
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.16);
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 .pic:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.22);
   border-color: #ff5a2e;
 }
 .pic.close:hover {

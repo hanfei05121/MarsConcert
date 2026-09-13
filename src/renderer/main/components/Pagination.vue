@@ -56,7 +56,9 @@ function go(p: number) {
   gap: 6px;
   padding: 12px 18px;
   border-top: 1px solid var(--line);
-  background: var(--bg-0);
+  background: var(--glass-sheen), var(--bg-0);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
   flex-shrink: 0;
 }
 .pg {
@@ -65,7 +67,7 @@ function go(p: number) {
   padding: 0 10px;
   border-radius: 8px;
   border: 1px solid var(--line);
-  background: var(--bg-1);
+  background: var(--bg-2);
   color: var(--text-1);
   font-size: 13px;
   font-weight: 600;
@@ -77,9 +79,10 @@ function go(p: number) {
   color: var(--accent);
 }
 .pg.on {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--on-accent);
+  /* 当前页码：橙玻璃 */
+  background: var(--accent-glass), var(--bg-2);
+  border-color: var(--accent-line);
+  color: var(--accent-ink);
 }
 .pg:disabled {
   opacity: 0.4;

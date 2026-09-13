@@ -88,10 +88,11 @@ const playlistTitle = computed(() => {
   gap: 6px;
   padding: 16px;
   border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--bg-1);
+  border-radius: 16px;
+  background: var(--glass-sheen), var(--bg-1);
   cursor: pointer;
   text-align: left;
+  box-shadow: var(--glass-edge), var(--shadow-glass);
   transition: all 0.15s ease;
 }
 .plcard:hover {
@@ -102,7 +103,8 @@ const playlistTitle = computed(() => {
   width: 56px;
   height: 56px;
   border-radius: 12px;
-  background: var(--bg-3);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: center;

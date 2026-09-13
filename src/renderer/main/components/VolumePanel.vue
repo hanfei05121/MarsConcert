@@ -61,13 +61,13 @@ function onChange() {
   width: 30px;
   text-align: right;
   font-variant-numeric: tabular-nums;
-  color: var(--neon-2);
+  color: var(--accent-2);
   font-size: 13px;
 }
 :deep(.ant-slider-track) {
-  background: linear-gradient(92deg, var(--neon), var(--neon-3));
+  background: linear-gradient(92deg, var(--accent), var(--accent-3));
 }
 :deep(.ant-slider-handle::after) {
-  box-shadow: 0 0 0 2px var(--neon);
+  box-shadow: 0 0 0 2px var(--accent);
 }
 </style>

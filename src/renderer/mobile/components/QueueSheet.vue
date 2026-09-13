@@ -85,7 +85,8 @@ function fmtSec(d?: number): string {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(0, 0, 0, 0.55);
+  /* 只压暗、不模糊：模糊交给 .sheet */
+  background: rgba(6, 4, 6, 0.5);
   display: flex;
   align-items: flex-end;
 }
@@ -94,10 +95,11 @@ function fmtSec(d?: number): string {
   max-height: 80vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(160deg, var(--bg-1), var(--bg-0));
+  background: var(--glass-sheen), var(--popup-bg);
+  border-top: 1px solid var(--line);
   border-radius: 20px 20px 0 0;
   padding: 10px 18px calc(14px + env(safe-area-inset-bottom));
-  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--glass-edge), 0 -10px 30px rgba(0, 0, 0, 0.5);
 }
 .grab {
   width: 40px;
@@ -132,7 +134,7 @@ function fmtSec(d?: number): string {
   align-items: center;
   gap: 10px;
   padding: 11px 4px;
-  border-bottom: 1px solid rgba(65, 48, 38, 0.5);
+  border-bottom: 1px solid var(--line);
   border-radius: 10px;
 }
 .qrow.active {
@@ -206,6 +208,6 @@ function fmtSec(d?: number): string {
   padding-top: 8px;
   font-size: 11px;
   color: var(--text-2);
-  border-top: 1px solid rgba(65, 48, 38, 0.4);
+  border-top: 1px solid var(--line);
 }
 </style>

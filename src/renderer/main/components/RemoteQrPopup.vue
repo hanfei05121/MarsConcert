@@ -50,7 +50,8 @@ function copyUrl() {
   position: fixed;
   inset: 0;
   z-index: 300;
-  background: rgba(0, 0, 0, 0.55);
+  /* 只压暗、不模糊：模糊交给 .qr-panel，保证玻璃能糊到背后画面 */
+  background: rgba(6, 4, 6, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -59,10 +60,12 @@ function copyUrl() {
   position: relative;
   width: 320px;
   padding: 26px 24px 22px;
-  border-radius: 18px;
-  background: linear-gradient(160deg, var(--bg-1), var(--bg-0));
+  border-radius: 20px;
+  background: var(--glass-sheen), var(--popup-bg);
   border: 1px solid var(--line);
-  box-shadow: var(--shadow-pop);
+  box-shadow: var(--glass-edge), var(--shadow-pop);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
   text-align: center;
 }
 .qr-close {

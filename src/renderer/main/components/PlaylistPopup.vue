@@ -102,7 +102,8 @@ function onPin(i: number) {
 .overlay {
   position: fixed;
   inset: 56px 0 84px 184px; /* 避开顶栏/底栏/侧栏 */
-  background: rgba(10, 12, 20, 0.45);
+  /* 只压暗、不模糊：模糊交给 .popup，否则父层成为 backdrop root，面板就糊不到背后画面 */
+  background: rgba(8, 6, 8, 0.42);
   display: flex;
   justify-content: flex-end;
   z-index: 50;
@@ -111,13 +112,15 @@ function onPin(i: number) {
   width: 380px;
   max-width: 80%;
   margin: 16px;
-  background: var(--popup-bg);
-  backdrop-filter: blur(12px);
+  background: var(--glass-sheen), var(--popup-bg);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
   border-radius: 16px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: var(--shadow-pop);
+  box-shadow: var(--glass-edge), var(--shadow-pop);
 }
 .phead {
   display: flex;
@@ -175,7 +178,7 @@ function onPin(i: number) {
 .no {
   width: 24px;
   text-align: center;
-  color: var(--accent);
+  color: var(--accent-2);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }

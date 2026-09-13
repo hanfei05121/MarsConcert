@@ -145,8 +145,10 @@ function onMic(val: number) {
   align-items: center;
   gap: 18px;
   padding: 0 22px;
-  background: var(--bg-1);
+  /* 玻璃底栏：与顶栏对称（模糊由全局 .bottombar 规则提供） */
+  background: var(--glass-sheen), var(--bg-1);
   border-top: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.14), 0 -8px 24px rgba(0, 0, 0, 0.2);
 }
 .left {
   display: flex;
@@ -190,7 +192,7 @@ function onMic(val: number) {
   margin-top: 3px;
 }
 .time {
-  color: var(--accent);
+  color: var(--accent-2);
   font-variant-numeric: tabular-nums;
 }
 .center {
@@ -219,11 +221,12 @@ function onMic(val: number) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: var(--on-accent);
+  /* 橙玻璃播放键 */
+  background: var(--accent-glass-strong), var(--bg-2);
+  color: var(--accent-ink);
   padding: 0;
   cursor: pointer;
-  box-shadow: var(--shadow-accent);
+  box-shadow: inset 0 0 0 1px var(--accent-line), 0 8px 24px rgba(255, 77, 46, 0.3);
 }
 .play .ic {
   display: block;
@@ -249,9 +252,9 @@ function onMic(val: number) {
   border-color: var(--accent);
 }
 .f.on {
-  background: var(--accent-soft);
-  color: var(--accent);
-  border-color: var(--accent);
+  background: var(--accent-glass), var(--bg-2);
+  color: var(--accent-ink);
+  border-color: var(--accent-line);
 }
 /* 已点数量徽标：按钮右上角 */
 .qbadge {
@@ -307,7 +310,8 @@ function onMic(val: number) {
   transition: background 0.15s ease;
 }
 .toggle.on {
-  background: var(--accent);
+  background: var(--accent-glass-strong), var(--bg-3);
+  box-shadow: inset 0 0 0 1px var(--accent-line);
 }
 .knob {
   position: absolute;
@@ -371,10 +375,10 @@ function onMic(val: number) {
   display: flex;
   gap: 16px;
   padding: 16px 14px;
-  background: var(--bg-1);
+  background: var(--glass-sheen), var(--popup-bg);
   border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: var(--shadow-panel);
+  border-radius: 16px;
+  box-shadow: var(--glass-edge), var(--shadow-panel);
 }
 .col {
   display: flex;

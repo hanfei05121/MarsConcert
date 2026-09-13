@@ -50,15 +50,17 @@ function fmt(d: number): string {
 .row {
   display: flex;
   align-items: center;
-  box-shadow: var(--shadow-glow);
   gap: 12px;
   padding: 10px 14px;
   border-radius: 10px;
+  border: 1px solid transparent;
   cursor: pointer;
   transition: var(--ease);
 }
 .row:hover {
-  background: var(--bg-3);
+  /* 悬停浮起一层玻璃：半透明填充 + 发丝描边 */
+  background: linear-gradient(180deg, rgba(255, 250, 246, 0.11), rgba(255, 250, 246, 0.04));
+  border-color: var(--line);
   transform: translateY(2px);
 }
 .row.active {
@@ -74,7 +76,7 @@ function fmt(d: number): string {
   color: var(--text-2);
 }
 .rank.top {
-  color: var(--accent);
+  color: var(--accent-2);
 }
 .meta {
   flex: 1;
@@ -100,7 +102,7 @@ function fmt(d: number): string {
 }
 .lang {
   font-size: 11px;
-  color: var(--accent);
+  color: var(--accent-2);
   border: 1px solid var(--accent-line);
   border-radius: 4px;
   padding: 0 5px;
@@ -122,7 +124,7 @@ function fmt(d: number): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-2);
+  color: var(--text-1);
   font-weight: 700;
   font-size: 14px;
 }
@@ -131,13 +133,15 @@ function fmt(d: number): string {
   height: 30px;
   border-radius: 50%;
   border: none;
-  background: var(--accent);
-  color: var(--on-accent);
+  /* 橙玻璃「＋」，不再是一颗实心橙点 */
+  background: var(--accent-glass), var(--bg-2);
+  color: var(--accent-ink);
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
   flex-shrink: 0;
-  transition: transform 0.1s ease;
+  box-shadow: inset 0 0 0 1px var(--accent-line);
+  transition: transform 0.1s ease, background 0.15s ease;
 }
 .add:hover {
   transform: scale(1.12);

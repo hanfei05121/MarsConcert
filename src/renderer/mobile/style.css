@@ -1,19 +1,39 @@
 :root {
-  --bg-0: #14100e;
-  --bg-1: #1e1815;
-  --bg-2: #271f1a;
-  --bg-3: #332620;
-  --line: #413026;
-  --text-0: #fff6f0;
-  --text-1: #e9d6c8;
-  --text-2: #ab8f7c;
+  /* 手机遥控：与桌面端同一套火星玻璃 token */
+  --base-0: #100b10;
+  --base-1: #1a131a;
+
+  --bg-0: rgba(14, 10, 15, 0.4);
+  --bg-1: rgba(255, 246, 242, 0.085);
+  --bg-2: rgba(255, 246, 240, 0.07);
+  --bg-3: rgba(255, 246, 240, 0.13);
+  --line: rgba(255, 246, 240, 0.15);
+  --line-strong: rgba(252, 250, 248, 0.26);
+
+  --text-0: #fff8f4;
+  --text-1: #eddfd4;
+  --text-2: #cbb3a2;
+
   --accent: #ff4d2e;
   --accent-2: #ff8c42;
   --accent-3: #ffd166;
-  --on-accent: #1c0d08;
-  --danger: #ff3b30;
-  --accent-soft: rgba(255, 77, 46, 0.14);
-  --glow: rgba(255, 95, 55, 0.78);
+  --on-accent: #200d07;
+  --danger: #ff453a;
+  --popup-bg: rgba(34, 26, 34, 0.52);
+  --accent-soft: rgba(255, 77, 46, 0.16);
+  /* 橙玻璃（与桌面端同一套） */
+  --accent-line: rgba(255, 95, 55, 0.5);
+  --accent-glass: linear-gradient(180deg, rgba(255, 95, 55, 0.28), rgba(255, 77, 46, 0.13));
+  --accent-glass-strong: linear-gradient(180deg, rgba(255, 95, 55, 0.44), rgba(255, 77, 46, 0.22));
+  --accent-ink: #ffd0bd;
+
+  --glass-blur: 30px;
+  --glass-blur-sm: 15px;
+  --glass-sat: 150%;
+  --glass-sheen: linear-gradient(180deg, rgba(255, 250, 246, 0.1), rgba(255, 250, 246, 0.02));
+  --glass-edge: inset 0 1px 0 rgba(255, 250, 246, 0.18), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --shadow-glass: 0 10px 26px rgba(0, 0, 0, 0.22);
+  --glow: rgba(255, 95, 55, 0.5);
 }
 
 * {
@@ -28,8 +48,10 @@ body,
 }
 body {
   background:
-    radial-gradient(600px 400px at 50% 130%, rgba(255, 77, 46, 0.16), transparent 60%),
-    var(--bg-0);
+    radial-gradient(660px 500px at 6% -6%, rgba(255, 104, 52, 0.15), transparent 62%),
+    radial-gradient(600px 440px at 98% 100%, rgba(255, 138, 64, 0.12), transparent 62%),
+    radial-gradient(620px 420px at 50% 128%, rgba(255, 104, 52, 0.08), transparent 62%),
+    linear-gradient(180deg, var(--base-1), var(--base-0) 60%, #0b070b);
   color: var(--text-0);
   font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -52,6 +74,25 @@ input,
 textarea {
   font-family: inherit;
   outline: none;
+}
+
+/* —— 手机端玻璃表面：大面板叠加模糊，小控件只做半透明填充 —— */
+.now,
+.sheet,
+.nav,
+.toastbar,
+.sinput {
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+}
+.fbtn,
+.orig,
+.qop,
+.cat,
+.q,
+.dm-input,
+.r-add {
+  box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.08);
 }
 
 /* —— rem 适配的兜底：横屏/超宽屏（根字号已封顶 32px）时内容居中，避免被拉成超长条 —— */

@@ -65,15 +65,19 @@ const categorySongs = computed<Song[]>(() => {
   padding: 8px 18px;
   border-radius: 999px;
   border: 1px solid var(--line);
-  background: var(--bg-1);
+  background: var(--glass-sheen), var(--bg-1);
   color: var(--text-1);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  box-shadow: var(--glass-edge);
+  backdrop-filter: blur(var(--glass-blur-sm));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm));
 }
 .chip.on {
-  background: var(--accent);
-  color: var(--on-accent);
-  border-color: var(--accent);
+  /* 选中的语言：橙玻璃 */
+  background: var(--accent-glass), var(--bg-1);
+  color: var(--accent-ink);
+  border-color: var(--accent-line);
 }
 </style>

@@ -245,9 +245,10 @@ function dkDur(id: number): number {
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border-radius: 14px;
-  background: linear-gradient(120deg, var(--bg-2), var(--bg-1));
+  border-radius: 16px;
+  background: var(--glass-sheen), var(--bg-1);
   border: 1px solid var(--line);
+  box-shadow: var(--glass-edge), var(--shadow-glass);
   text-align: left;
 }
 .now-i {
@@ -258,8 +259,10 @@ function dkDur(id: number): number {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: var(--on-accent);
+  /* 橙玻璃：不再实心橙 */
+  background: var(--accent-glass);
+  color: var(--accent-ink);
+  box-shadow: inset 0 0 0 1px var(--accent-line);
 }
 .now-t {
   flex: 1;
@@ -299,10 +302,11 @@ function dkDur(id: number): number {
   height: 42px;
   border-radius: 21px;
   border: 1px solid var(--line);
-  background: var(--bg-1);
+  background: var(--glass-sheen), var(--bg-0);
   color: var(--text-0);
   padding: 0 40px 0 38px;
   font-size: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.06);
 }
 .sinput:focus {
   border-color: var(--accent);
@@ -337,7 +341,7 @@ function dkDur(id: number): number {
   display: flex;
   align-items: center;
   padding: 12px 6px;
-  border-bottom: 1px solid rgba(65, 48, 38, 0.6);
+  border-bottom: 1px solid var(--line);
   text-align: left;
 }
 .r-info {
@@ -382,7 +386,8 @@ function dkDur(id: number): number {
   height: 64px;
   display: flex;
   border-top: 1px solid var(--line);
-  background: var(--bg-1);
+  background: var(--glass-sheen), var(--bg-1);
+  box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.12), 0 -10px 30px rgba(0, 0, 0, 0.3);
   z-index: 40;
 }
 .tab {
@@ -458,12 +463,12 @@ function dkDur(id: number): number {
   z-index: 100;
   padding: 10px 20px;
   border-radius: 999px;
-  background: rgba(20, 16, 14, 0.92);
-  border: 1px solid var(--accent);
+  background: var(--glass-sheen), var(--popup-bg);
+  border: 1px solid var(--accent-line, rgba(255, 95, 55, 0.5));
   color: var(--text-0);
   font-size: 14px;
   font-weight: 600;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--glass-edge), 0 8px 24px rgba(0, 0, 0, 0.4);
   pointer-events: none;
   max-width: 80vw;
 }

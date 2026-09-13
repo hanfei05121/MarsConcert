@@ -88,8 +88,8 @@ function fmt(d: number): string {
 }
 .playing-tag {
   font-size: 11px;
-  color: var(--neon);
-  border: 1px solid var(--neon);
+  color: var(--accent);
+  border: 1px solid var(--accent-line);
   border-radius: 999px;
   padding: 1px 8px;
 }

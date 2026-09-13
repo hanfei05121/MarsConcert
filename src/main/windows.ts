@@ -23,7 +23,8 @@ export function createMainWindow(): BrowserWindow {
     minWidth: 900,
     minHeight: 600,
     title: '火星点歌台 · MARS KTV',
-    backgroundColor: '#14100e',
+    // 深空底色：与渲染层 body 的星云底一致，避免加载瞬间闪白/闪灰
+    backgroundColor: '#0a0709',
     icon: devIcon(),
     webPreferences: {
       preload: PRELOAD,
