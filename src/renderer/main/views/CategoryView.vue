@@ -75,9 +75,9 @@ const categorySongs = computed<Song[]>(() => {
   -webkit-backdrop-filter: blur(var(--glass-blur-sm));
 }
 .chip.on {
-  /* 选中的语言：橙玻璃 */
-  background: var(--accent-glass), var(--bg-1);
-  color: var(--accent-ink);
-  border-color: var(--accent-line);
+  /* 选中的语言：橙玻璃（控件统一色） */
+  background: var(--ctrl-accent-soft), var(--bg-1);
+  color: var(--ctrl-accent-ink);
+  border-color: var(--ctrl-accent-line);
 }
 </style>

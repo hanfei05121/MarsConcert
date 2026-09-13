@@ -61,6 +61,40 @@
 - **两档玻璃约定**：大面板（`.topbar/.bottombar/.sidebar/.glass/.card/.plcard/.popup/.qr-panel/.vpop/.mrow/.pager` 等）用 `backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat))`；小控件只用半透明填充 + `inset 0 1px 0` 顶边高光，**不叠模糊**（避免几十个模糊层拖垮渲染）。
 - **组件里不要再写死颜色**，一律用上面的 token；新增面板加进 `style.css` 里那份「大面板清单」即可获得模糊。
 - **backdrop-filter 嵌套限制（踩过的坑）**：父元素一旦有 `backdrop-filter` 就成为 backdrop root，子元素的模糊只能糊到父层自己的背景。所以遮罩层（`.overlay/.qr-backdrop/.backdrop`）**只压暗、不模糊**，模糊交给里面的玻璃面板 —— 否则弹层糊不到背后画面。
+- **backdrop-filter 的第二个坑：它会创建层叠上下文，把内部弹层的 z-index 锁死**（2026-09-13 实际事故）：
+  底栏加了 `backdrop-filter` 后成为层叠上下文，里面的音量面板 `.vpop`（z-index:60）在根上下文里等同 z-index:0，
+  于是全屏遮罩 `.pop-backdrop`（z-index:50）**盖到了面板上面** → 鼠标事件全被遮罩吃掉 → **总音量/麦克风滑块拖不动**
+  （只点击不拖反而会把面板关掉，是很典型的症状）。
+  **修法**：给带模糊的容器自身显式抬起层级 —— `.bottombar { position: relative; z-index: 40 }`，
+  并让遮罩降到其下 `.pop-backdrop { z-index: 30 }`。
+  **通用规则**：任何加了 `backdrop-filter` 的容器，只要内部有绝对定位的弹层，就必须顺手给容器 `position: relative` + 足够的 `z-index`。
+- **原生 range 滑块：统一用全局 `.slider` / `.slider--v`**（2026-09-13 用户反馈「滑块颜色和原唱开关不一样」后定下）：
+  - 病因：滑块原来用 `accent-color: var(--accent)` —— 那是**实心**橙，而开关是**半透明橙玻璃**，两种观感。
+  - 修法：弃用 `accent-color`，改用 `appearance: none` + 自绘轨道/滑块头，**与开关同色源**；
+    已填充比例由组件用 `--fill` 喂进来，例如 `:style="{ '--fill': pct + '%' }"`。
+  - 竖直滑块**别再写 `-webkit-appearance: slider-vertical`**（已废弃，新版 Chromium 失效后退化成横向，24px 宽列里抓不住）：
+    用 `.slider--v`（`writing-mode: vertical-lr; direction: rtl`，上=最大，下=最小，填充从下往上）。
+  - 样式定义在 `main/style.css` 与 `mobile/style.css`（两份镜像，改一处要同步另一处）。
+- **控件配色统一走 `--ctrl-*` 语义 token**（`main/style.css` 与 `mobile/style.css` 各一份）：
+  `--ctrl-accent`(控件底) / `--ctrl-accent-soft`(次级小控件) / `--ctrl-accent-line`(描边) / `--ctrl-accent-ink`(图标文字滑块头)，
+  由底层的 `--accent-glass*` / `--accent-line` / `--accent-ink` 派生。
+  **开关 / 滑块 / 播放键 / 选中态（chip、页码、侧栏当前项、已点）/ 「＋」/ 主按钮 / 头像占位** 全部从这里取色 ——
+  改这 4 个变量即可整套同步。新增橙色控件一律用 `--ctrl-*`，不要再直接用 `--accent`（实心）或裸写 `--accent-glass*`。
+- **橙玻璃分两档，别再临时拍透明度**（2026-09-13 用户反馈「重新扫描按钮跟导航选中色不一样」后定下）：
+  - **soft 档 `--ctrl-accent-soft`（= `--accent-glass`，0.28→0.13）**：选中态 + 次级主按钮。
+    用到的：`Sidebar .item.active`、`.row/.prow.active`、`.qrow.active`、`.f.on`、`.chip.on`、`.pg.on`、
+    `.add`（＋）、`.r-add`、`.cat.on`、`.now-i`、`Sidebar .avatar` / `ArtistsView .ava` 占位、**`.btn.accent`（主按钮）**。
+  - **strong 档 `--ctrl-accent`（= `--accent-glass-strong`，0.44→0.22）**：只有「强调动作键」用 ——
+    `BottomBar .play`（播放）、`ControlSheet .big`（手机播放）、`DanmakuSheet .send`（发送）。
+  - 判据：**「选中/被点亮」用 soft；「点下去要发生大事」用 strong**。`.btn.accent` 一度误用 strong，比侧栏选中项重，已改回 soft。
+- **列表行统一外观（2026-09-13 用户要求，三态对齐左侧导航）**：
+  - **默认态 = 原来「悬停」那层玻璃**（用户觉得好看）：`linear-gradient(180deg, rgba(255,250,246,.11), rgba(255,250,246,.04))` + `1px solid var(--line)`。
+  - **悬停 = 与 Sidebar `.item:hover` 一致**：`background: var(--bg-3)` + `transform: translateY(2px)`。
+  - **选中 = 与 `.item.active` 一致**：`var(--ctrl-accent-soft), var(--bg-2)` + `border-color: var(--ctrl-accent-line)` + `box-shadow: 0 6px 18px rgba(255,77,46,.18)`，标题转 `--ctrl-accent-ink`。
+  - 定义位置：`main/style.css` 的「列表行统一外观」一节（`.row` / `.prow`）、`mobile/style.css`（`.row` / `.qrow`，手机端没有 hover，用 `:active` 代替）。
+  - **组件里只写布局**（flex / padding / gap / radius），**不要再写行底色** —— 两处都写会互相打架（scoped 优先级更高，容易把全局规则顶掉）。
+  - 列表容器必须有 `gap`（`.list` / `.plist` / 手机端 `.list`），否则相邻行的玻璃底会粘成一片。
+  - `SongList.vue` / `VolumePanel.vue` 是**无引用的死代码**，不用维护。
 - `.row`（SongRow）默认透明，`hover` 才浮起一层玻璃；全局 `--shadow-glow` 已收细到 `0 0 5px rgba(255,95,55,.3)`，给玻璃让位。
 - 播放窗（`player/App.vue`）顶部信息条用「渐隐 + mask-image + 10px 模糊」压在视频上；待机页底色与主窗星云一致。
 - 顺带清理：`SongList.vue` / `VolumePanel.vue` 里引用不存在的 `--neon/--neon-2/--neon-3`，已改为 `--accent*`。

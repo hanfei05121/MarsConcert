@@ -79,10 +79,10 @@ function go(p: number) {
   color: var(--accent);
 }
 .pg.on {
-  /* 当前页码：橙玻璃 */
-  background: var(--accent-glass), var(--bg-2);
-  border-color: var(--accent-line);
-  color: var(--accent-ink);
+  /* 当前页码：橙玻璃（控件统一色） */
+  background: var(--ctrl-accent-soft), var(--bg-2);
+  border-color: var(--ctrl-accent-line);
+  color: var(--ctrl-accent-ink);
 }
 .pg:disabled {
   opacity: 0.4;

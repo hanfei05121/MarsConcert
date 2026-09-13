@@ -72,9 +72,9 @@ const artistSongs = computed<Song[]>(() =>
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  /* 无头像的歌手占位：橙玻璃圆，而不是实心橙 */
-  background: var(--accent-glass);
-  color: var(--accent-ink);
+  /* 无头像的歌手占位：橙玻璃圆，而不是实心橙（控件统一色） */
+  background: var(--ctrl-accent-soft);
+  color: var(--ctrl-accent-ink);
   font-size: 28px;
   font-weight: 800;
   display: flex;

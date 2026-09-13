@@ -48,24 +48,14 @@ function fmt(d: number): string {
 
 <style scoped>
 .row {
+  /* 列表行的外观（默认玻璃底 / 悬停 / 选中）统一在全局 style.css 的
+     「列表行统一外观」一节，这里只保留布局，避免两处打架。 */
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid transparent;
+  border-radius: 12px;
   cursor: pointer;
-  transition: var(--ease);
-}
-.row:hover {
-  /* 悬停浮起一层玻璃：半透明填充 + 发丝描边 */
-  background: linear-gradient(180deg, rgba(255, 250, 246, 0.11), rgba(255, 250, 246, 0.04));
-  border-color: var(--line);
-  transform: translateY(2px);
-}
-.row.active {
-  /* background: rgba(169, 173, 184, 0.14); */
-  /* box-shadow: inset 3px 0 0 var(--accent); */
 }
 .rank {
   width: 30px;
@@ -133,14 +123,14 @@ function fmt(d: number): string {
   height: 30px;
   border-radius: 50%;
   border: none;
-  /* 橙玻璃「＋」，不再是一颗实心橙点 */
-  background: var(--accent-glass), var(--bg-2);
-  color: var(--accent-ink);
+  /* 橙玻璃「＋」，不再是一颗实心橙点（控件统一色） */
+  background: var(--ctrl-accent-soft), var(--bg-2);
+  color: var(--ctrl-accent-ink);
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
   flex-shrink: 0;
-  box-shadow: inset 0 0 0 1px var(--accent-line);
+  box-shadow: inset 0 0 0 1px var(--ctrl-accent-line);
   transition: transform 0.1s ease, background 0.15s ease;
 }
 .add:hover {

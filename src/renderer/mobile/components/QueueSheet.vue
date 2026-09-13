@@ -128,17 +128,18 @@ function fmtSec(d?: number): string {
 .list {
   flex: 1;
   overflow-y: auto;
+  /* 行间留缝，每行的玻璃底才分得开 */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 .qrow {
+  /* 外观（默认玻璃底 / 按下 / 当前播放）见 mobile/style.css「列表行统一外观」 */
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 11px 4px;
-  border-bottom: 1px solid var(--line);
-  border-radius: 10px;
-}
-.qrow.active {
-  background: var(--accent-soft);
+  padding: 11px 12px;
+  border-radius: 12px;
 }
 .qidx {
   width: 26px;

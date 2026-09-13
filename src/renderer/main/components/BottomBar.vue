@@ -106,7 +106,8 @@ function onMic(val: number) {
         <div class="col">
           <span class="vlbl">总音量</span>
           <input
-            class="vslide"
+            class="slider slider--v"
+            :style="{ '--fill': masterPct + '%' }"
             type="range"
             min="0"
             max="100"
@@ -119,7 +120,8 @@ function onMic(val: number) {
         <div class="col">
           <span class="vlbl">麦克风</span>
           <input
-            class="vslide"
+            class="slider slider--v"
+            :style="{ '--fill': micPct + '%' }"
             type="range"
             min="0"
             max="100"
@@ -149,6 +151,11 @@ function onMic(val: number) {
   background: var(--glass-sheen), var(--bg-1);
   border-top: 1px solid var(--line);
   box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.14), 0 -8px 24px rgba(0, 0, 0, 0.2);
+  /* ⚠ backdrop-filter 会建立层叠上下文，把里面的 .vpop 一起锁在底栏内
+     （在根上下文里等同 z-index:0）。必须显式抬高底栏，
+     否则全屏遮罩 .pop-backdrop 会盖在音量面板上，滑块拖不动。 */
+  position: relative;
+  z-index: 40;
 }
 .left {
   display: flex;
@@ -221,12 +228,12 @@ function onMic(val: number) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* 橙玻璃播放键 */
-  background: var(--accent-glass-strong), var(--bg-2);
-  color: var(--accent-ink);
+  /* 橙玻璃播放键（与滑块/开关同一组控件色） */
+  background: var(--ctrl-accent), var(--bg-2);
+  color: var(--ctrl-accent-ink);
   padding: 0;
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px var(--accent-line), 0 8px 24px rgba(255, 77, 46, 0.3);
+  box-shadow: inset 0 0 0 1px var(--ctrl-accent-line), 0 8px 24px rgba(255, 77, 46, 0.3);
 }
 .play .ic {
   display: block;
@@ -252,9 +259,9 @@ function onMic(val: number) {
   border-color: var(--accent);
 }
 .f.on {
-  background: var(--accent-glass), var(--bg-2);
-  color: var(--accent-ink);
-  border-color: var(--accent-line);
+  background: var(--ctrl-accent-soft), var(--bg-2);
+  color: var(--ctrl-accent-ink);
+  border-color: var(--ctrl-accent-line);
 }
 /* 已点数量徽标：按钮右上角 */
 .qbadge {
@@ -310,8 +317,8 @@ function onMic(val: number) {
   transition: background 0.15s ease;
 }
 .toggle.on {
-  background: var(--accent-glass-strong), var(--bg-3);
-  box-shadow: inset 0 0 0 1px var(--accent-line);
+  background: var(--ctrl-accent), var(--bg-3);
+  box-shadow: inset 0 0 0 1px var(--ctrl-accent-line);
 }
 .knob {
   position: absolute;
@@ -390,13 +397,6 @@ function onMic(val: number) {
   font-size: 12px;
   color: var(--text-2);
 }
-.vslide {
-  width: 22px;
-  height: 140px;
-  accent-color: var(--accent);
-  cursor: pointer;
-  -webkit-appearance: slider-vertical;
-}
 .vnum {
   font-size: 12px;
   color: var(--text-1);
@@ -405,6 +405,7 @@ function onMic(val: number) {
 .pop-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  /* 低于底栏(z-index:40)：遮罩只负责「点面板外关闭」，不能盖住底栏里的音量面板 */
+  z-index: 30;
 }
 </style>

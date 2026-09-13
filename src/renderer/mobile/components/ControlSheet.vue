@@ -49,11 +49,11 @@ function onVol(key: 'master' | 'mic', val: number) {
       <div class="vol">
         <div class="vrow">
           <span class="vlb">总音量 {{ Math.round(mobile.volumes.master * 100) }}</span>
-          <input type="range" min="0" max="100" :value="Math.round(mobile.volumes.master * 100)" @input="onVol('master', Number(($event.target as HTMLInputElement).value))" />
+          <input class="slider" :style="{ '--fill': Math.round(mobile.volumes.master * 100) + '%' }" type="range" min="0" max="100" :value="Math.round(mobile.volumes.master * 100)" @input="onVol('master', Number(($event.target as HTMLInputElement).value))" />
         </div>
         <div class="vrow">
           <span class="vlb">麦克风 {{ Math.round(mobile.volumes.mic * 100) }}</span>
-          <input type="range" min="0" max="100" :value="Math.round(mobile.volumes.mic * 100)" @input="onVol('mic', Number(($event.target as HTMLInputElement).value))" />
+          <input class="slider" :style="{ '--fill': Math.round(mobile.volumes.mic * 100) + '%' }" type="range" min="0" max="100" :value="Math.round(mobile.volumes.mic * 100)" @input="onVol('mic', Number(($event.target as HTMLInputElement).value))" />
         </div>
       </div>
 
@@ -123,13 +123,13 @@ function onVol(key: 'master' | 'mic', val: number) {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* 橙玻璃播放键 */
-  background: var(--accent-glass-strong), var(--bg-2);
-  color: var(--accent-ink);
-  box-shadow: inset 0 0 0 1px var(--accent-line), 0 8px 24px rgba(255, 77, 46, 0.3);
+  /* 橙玻璃播放键（控件统一色，和滑块/开关同源） */
+  background: var(--ctrl-accent), var(--bg-2);
+  color: var(--ctrl-accent-ink);
+  box-shadow: inset 0 0 0 1px var(--ctrl-accent-line), 0 8px 24px rgba(255, 77, 46, 0.3);
 }
 .big.playing {
-  box-shadow: inset 0 0 0 1px var(--accent-line), 0 0 0 6px rgba(255, 77, 46, 0.16);
+  box-shadow: inset 0 0 0 1px var(--ctrl-accent-line), 0 0 0 6px rgba(255, 77, 46, 0.16);
 }
 .func-row {
   display: flex;
@@ -175,8 +175,8 @@ function onVol(key: 'master' | 'mic', val: number) {
   transition: background 0.15s ease;
 }
 .toggle.on {
-  background: var(--accent-glass-strong), var(--bg-3);
-  box-shadow: inset 0 0 0 1px var(--accent-line);
+  background: var(--ctrl-accent), var(--bg-3);
+  box-shadow: inset 0 0 0 1px var(--ctrl-accent-line);
 }
 .knob {
   position: absolute;
@@ -207,10 +207,8 @@ function onVol(key: 'master' | 'mic', val: number) {
   font-size: 12px;
   color: var(--text-2);
 }
-.vrow input[type='range'] {
+.vrow .slider {
   flex: 1;
-  accent-color: var(--accent);
-  height: 26px;
 }
 .meta {
   margin-top: 16px;

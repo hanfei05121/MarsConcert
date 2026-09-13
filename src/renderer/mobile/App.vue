@@ -259,10 +259,10 @@ function dkDur(id: number): number {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* 橙玻璃：不再实心橙 */
-  background: var(--accent-glass);
-  color: var(--accent-ink);
-  box-shadow: inset 0 0 0 1px var(--accent-line);
+  /* 橙玻璃：不再实心橙（控件统一色） */
+  background: var(--ctrl-accent-soft);
+  color: var(--ctrl-accent-ink);
+  box-shadow: inset 0 0 0 1px var(--ctrl-accent-line);
 }
 .now-t {
   flex: 1;
@@ -321,6 +321,10 @@ function dkDur(id: number): number {
   flex: 1;
   overflow-y: auto;
   padding: 6px 16px 12px;
+  /* 行间留缝，每行的玻璃底才分得开 */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 .list-head {
   display: flex;
@@ -337,11 +341,11 @@ function dkDur(id: number): number {
   color: var(--text-2);
 }
 .row {
+  /* 外观（默认玻璃底 / 按下 / 当前播放）见 mobile/style.css「列表行统一外观」 */
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 12px 6px;
-  border-bottom: 1px solid var(--line);
+  padding: 12px 12px;
   text-align: left;
 }
 .r-info {
@@ -363,11 +367,11 @@ function dkDur(id: number): number {
 .r-add {
   flex-shrink: 0;
   font-size: 13px;
-  color: var(--accent);
+  color: var(--ctrl-accent-ink);
   padding: 6px 10px;
   border-radius: 999px;
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-line, rgba(255,95,55,0.4));
+  background: var(--ctrl-accent-soft);
+  border: 1px solid var(--ctrl-accent-line);
 }
 .r-add i {
   font-style: normal;

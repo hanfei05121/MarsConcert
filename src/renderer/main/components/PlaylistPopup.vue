@@ -160,20 +160,19 @@ function onPin(i: number) {
   flex: 1;
   overflow-y: auto;
   padding: 8px;
+  /* 行间留缝，每行的玻璃底才分得开（与 .list 一致） */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 .prow {
+  /* 外观（默认玻璃底 / 悬停 / 选中）见全局 style.css「列表行统一外观」，这里只留布局 */
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 10px;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-}
-.prow:hover {
-  background: var(--bg-3);
-}
-.prow.active {
-  background: var(--accent-soft);
 }
 .no {
   width: 24px;

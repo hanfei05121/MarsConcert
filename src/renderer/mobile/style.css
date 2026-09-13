@@ -26,6 +26,11 @@
   --accent-glass: linear-gradient(180deg, rgba(255, 95, 55, 0.28), rgba(255, 77, 46, 0.13));
   --accent-glass-strong: linear-gradient(180deg, rgba(255, 95, 55, 0.44), rgba(255, 77, 46, 0.22));
   --accent-ink: #ffd0bd;
+  /* 控件统一色（语义层）：开关 / 滑块 / 播放键 / 选中态共用，改这 4 个就整套变 */
+  --ctrl-accent: var(--accent-glass-strong);
+  --ctrl-accent-soft: var(--accent-glass);
+  --ctrl-accent-line: var(--accent-line);
+  --ctrl-accent-ink: var(--accent-ink);
 
   --glass-blur: 30px;
   --glass-blur-sm: 15px;
@@ -93,6 +98,57 @@ textarea {
 .dm-input,
 .r-add {
   box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.08);
+}
+
+/* —— 玻璃滑块（原生 range）：与桌面端同款、与原唱开关同色源 ——
+   组件用 :style="{ '--fill': pct + '%' }" 把当前值喂进来。 */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 26px;
+  margin: 0;
+  border-radius: 999px;
+  background-color: var(--bg-3);
+  background-image: var(--ctrl-accent);
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: var(--fill, 0%) 100%;
+  box-shadow: inset 0 0 0 1px var(--ctrl-accent-line);
+  cursor: pointer;
+  outline: none;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ctrl-accent-ink);
+  box-shadow: 0 0 0 1px var(--ctrl-accent-line), 0 2px 6px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+/* —— 列表行统一外观（手机端歌曲列表 / 已点列表），与桌面端同款 ——
+   默认 = 浅玻璃底 + 发丝描边；按下 = 浮起一层更亮的玻璃；当前播放 = 橙玻璃。
+   组件里只留布局，不要再写行底色。 */
+.row,
+.qrow {
+  background: linear-gradient(180deg, rgba(255, 250, 246, 0.11), rgba(255, 250, 246, 0.04));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+.row:active,
+.qrow:active {
+  background: var(--bg-3);
+}
+.qrow.active {
+  background: var(--ctrl-accent-soft), var(--bg-2);
+  border-color: var(--ctrl-accent-line);
+}
+.qrow.active .qname {
+  color: var(--ctrl-accent-ink);
 }
 
 /* —— rem 适配的兜底：横屏/超宽屏（根字号已封顶 32px）时内容居中，避免被拉成超长条 —— */

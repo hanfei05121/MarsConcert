@@ -115,10 +115,10 @@ async function send() {
 .send {
   width: 70px;
   border-radius: 12px;
-  /* 橙玻璃发送键 */
-  background: var(--accent-glass-strong), var(--bg-2);
-  border: 1px solid var(--accent-line);
-  color: var(--accent-ink);
+  /* 橙玻璃发送键（控件统一色） */
+  background: var(--ctrl-accent), var(--bg-2);
+  border: 1px solid var(--ctrl-accent-line);
+  color: var(--ctrl-accent-ink);
   font-size: 15px;
   font-weight: 700;
   box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.1);
@@ -149,9 +149,9 @@ async function send() {
   font-weight: 600;
 }
 .cat.on {
-  background: var(--accent-glass), var(--bg-2);
-  color: var(--accent-ink);
-  border-color: var(--accent-line);
+  background: var(--ctrl-accent-soft), var(--bg-2);
+  color: var(--ctrl-accent-ink);
+  border-color: var(--ctrl-accent-line);
 }
 .quick {
   flex: 1;

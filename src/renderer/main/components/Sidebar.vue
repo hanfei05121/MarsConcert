@@ -100,15 +100,15 @@ const libName = computed(() => {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: var(--accent-glass);
-  color: var(--accent-ink);
+  background: var(--ctrl-accent-soft);
+  color: var(--ctrl-accent-ink);
   font-weight: 800;
   font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: inset 0 0 0 1px var(--accent-line);
+  box-shadow: inset 0 0 0 1px var(--ctrl-accent-line);
 }
 /* 火星人吉祥物：黑煤球 */
 .avatar.coal {
@@ -145,10 +145,10 @@ const libName = computed(() => {
   transform: translateY(2px);
 }
 .item.active {
-  /* 当前菜单：橙玻璃，而不是一块实心橙 */
-  background: var(--accent-glass), var(--bg-2);
-  color: var(--accent-ink);
-  box-shadow: inset 0 0 0 1px var(--accent-line), 0 6px 18px rgba(255, 77, 46, 0.18);
+  /* 当前菜单：橙玻璃，而不是一块实心橙（控件统一色） */
+  background: var(--ctrl-accent-soft), var(--bg-2);
+  color: var(--ctrl-accent-ink);
+  box-shadow: inset 0 0 0 1px var(--ctrl-accent-line), 0 6px 18px rgba(255, 77, 46, 0.18);
 }
 .ic {
   font-size: 18px;
