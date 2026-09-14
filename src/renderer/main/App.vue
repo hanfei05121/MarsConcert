@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { QrcodeOutlined } from '@ant-design/icons-vue'
 import { store } from './store'
+import SilkBackground from '../components/SilkBackground.vue'
 import Sidebar from './components/Sidebar.vue'
 import TopBar from './components/TopBar.vue'
 import PlaylistPopup from './components/PlaylistPopup.vue'
@@ -31,6 +32,13 @@ async function doSearch(q: string) {
 </script>
 
 <template>
+  <!-- 丝绸背景：Teleport 到 body 与 #app 平级（#app 是 z-index:1），
+       z-index=-1 让它垫在星云底之上、星尘颗粒之下 → 玻璃面板后面是一层流动的幕布。
+       视觉参数（hue/saturation/brightness/speed/opacity）改这里即可。 -->
+  <Teleport to="body">
+    <SilkBackground :speed="0.7" :opacity="0.6" :z-index="-1" />
+  </Teleport>
+
   <div class="app">
     <Sidebar />
 

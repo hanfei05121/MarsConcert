@@ -77,17 +77,18 @@ body,
   height: 100%;
   margin: 0;
 }
-/* 火星星云：多层径向渐变叠出「大气层」，玻璃面板浮在上面才通透。
-   分寸：只要玻璃背后「有亮度差」就够透，不需要亮、也不需要艳。 */
+/* 火星星云底：背景主体已由 <SilkBackground>（WebGL 丝绸）承担（见 App.vue），
+   这里只留一层很淡的暖色团 —— 丝绸带半透明，下层这点色差就是玻璃后面「有东西在流动」的来源。
+   想让丝绸完全独挑背景，把这几个 radial-gradient 删掉只留最后一行 linear-gradient 即可。 */
 body {
   background:
     /* 火星色团：克制的一层，让玻璃后面有颜色在流动，但不抢戏 */
-    radial-gradient(1150px 780px at 4% -8%, rgba(255, 104, 52, 0.15), transparent 60%),
-    radial-gradient(1000px 680px at 98% 104%, rgba(255, 138, 64, 0.12), transparent 62%),
-    radial-gradient(840px 560px at 78% -2%, rgba(255, 196, 106, 0.06), transparent 64%),
-    radial-gradient(940px 700px at 16% 88%, rgba(150, 66, 128, 0.09), transparent 66%),
+    radial-gradient(1150px 780px at 4% -8%, rgba(255, 104, 52, 0.1), transparent 60%),
+    radial-gradient(1000px 680px at 98% 104%, rgba(255, 138, 64, 0.08), transparent 62%),
+    radial-gradient(840px 560px at 78% -2%, rgba(255, 196, 106, 0.04), transparent 64%),
+    radial-gradient(940px 700px at 16% 88%, rgba(150, 66, 128, 0.06), transparent 66%),
     /* 极淡中央辉光：只留一点亮度差，避免玻璃浮在死黑上 */
-    radial-gradient(1000px 700px at 58% 50%, rgba(255, 100, 50, 0.05), transparent 72%),
+    radial-gradient(1000px 700px at 58% 50%, rgba(255, 100, 50, 0.035), transparent 72%),
     linear-gradient(180deg, var(--base-1), var(--base-0) 58%, #0b070b);
   color: var(--text-0);
   font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
@@ -152,26 +153,15 @@ body::after {
    （小组件不叠 backdrop-filter，避免几十个模糊层拖垮渲染）。 */
 .glass {
   position: relative;
-  background: var(--glass-sheen), var(--bg-1);
+  /* background: var(--glass-sheen), var(--bg-1); */
   border: 1px solid var(--line);
   border-radius: 16px;
   box-shadow: var(--glass-edge), var(--shadow-glass);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  /* backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)); */
 }
 /* 大面板：整窗级别的玻璃层 */
-.topbar,
-.bottombar,
-.sidebar,
-.mars-hero,
-.card,
-.plcard,
-.popup,
-.qr-panel,
-.vpop {
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-}
+
 /* 小组件：半透明填充 + 顶边高光，不叠模糊（性能） */
 .user,
 .cloud,

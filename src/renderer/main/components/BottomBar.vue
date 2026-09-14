@@ -147,8 +147,6 @@ function onMic(val: number) {
   align-items: center;
   gap: 18px;
   padding: 0 22px;
-  /* 玻璃底栏：与顶栏对称（模糊由全局 .bottombar 规则提供） */
-  background: var(--glass-sheen), var(--bg-1);
   border-top: 1px solid var(--line);
   box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.14), 0 -8px 24px rgba(0, 0, 0, 0.2);
   /* ⚠ backdrop-filter 会建立层叠上下文，把里面的 .vpop 一起锁在底栏内

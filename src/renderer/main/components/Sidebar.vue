@@ -45,7 +45,7 @@ const libName = computed(() => {
     <div class="user">
       <div class="avatar coal" title="火星人 · 黑煤球"></div>
       <div class="uinfo">
-        <div class="nick">火星人</div>
+        <div class="nick">MarsConcert</div>
       </div>
     </div>
 
@@ -79,7 +79,7 @@ const libName = computed(() => {
   width: 184px;
   flex-shrink: 0;
   /* 玻璃侧栏：半透明面板 + 发丝描边 + 顶边高光（模糊由全局 .sidebar 规则提供） */
-  background: var(--glass-sheen), var(--bg-1);
+  /* background: var(--glass-sheen), var(--bg-1); */
   border-right: 1px solid var(--line);
   box-shadow: var(--glass-edge), var(--shadow-glass);
   display: flex;
@@ -92,7 +92,6 @@ const libName = computed(() => {
   gap: 10px;
   padding: 10px;
   border-radius: 12px;
-  background: var(--bg-2);
   border: 1px solid var(--line);
   margin-bottom: 18px;
 }

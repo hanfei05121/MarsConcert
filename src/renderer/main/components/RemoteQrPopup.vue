@@ -61,11 +61,11 @@ function copyUrl() {
   width: 320px;
   padding: 26px 24px 22px;
   border-radius: 20px;
-  background: var(--glass-sheen), var(--popup-bg);
+  /* background: var(--glass-sheen), var(--popup-bg); */
   border: 1px solid var(--line);
   box-shadow: var(--glass-edge), var(--shadow-pop);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  /* backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)); */
   text-align: center;
 }
 .qr-close {

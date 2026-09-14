@@ -4,7 +4,7 @@ import { AudioOutlined, CustomerServiceOutlined, WarningOutlined, MinusOutlined,
 import { parseLrc, findActiveLine } from './lrc'
 import type { LyricLine } from './lrc'
 import LyricsOverlay from './components/LyricsOverlay.vue'
-import MarsIdleBackground from './components/MarsIdleBackground.vue'
+import SilkBackground from '../components/SilkBackground.vue'
 import type { Playload, VideoMode, Volumes, ModePayload, DanmakuItem, RemoteInfo } from '../../shared/types'
 
 const videoRef = ref<HTMLVideoElement | null>(null)
@@ -375,8 +375,8 @@ function onAudioError() {
 
     <!-- 空闲态：启动/播完无下一首时，副屏提示点歌，而不是黑屏挂着上一句歌词 -->
     <div v-if="idle" class="idle">
-      <!-- 火星主题星空背景特效 -->
-      <MarsIdleBackground />
+      <!-- 丝绸流动背景（WebGL2，局部铺满本容器；播放时随 idle 一起卸载，不占资源） -->
+      <SilkBackground :fill="false" :speed="0.6" :opacity="0.75" />
       <div class="idle-box">
         <div class="idle-icon"><CustomerServiceOutlined /></div>
         <div class="idle-title">没有歌曲啦，请点歌 ~ ~</div>
@@ -487,7 +487,6 @@ function onAudioError() {
   align-items: center;
   gap: 16px;
   /* 玻璃渐隐条：顶部信息浮在画面上，靠模糊与渐隐压住视频杂色 */
-  background: linear-gradient(180deg, rgba(8, 5, 6, 0.72), rgba(8, 5, 6, 0.24) 62%, transparent);
   backdrop-filter: blur(10px) saturate(130%);
   -webkit-backdrop-filter: blur(10px) saturate(130%);
   pointer-events: none;
@@ -549,10 +548,11 @@ function onAudioError() {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* 待机页：与主窗同一套火星星云底色（MarsIdleBackground 画布叠在其上） */
+  /* 待机页：深空底 + 一层很淡的暖色团 —— 背景主体是丝绸（SilkBackground 画布铺满本层），
+     这里只留一点火星暖意从丝绸后面透出来。 */
   background:
-    radial-gradient(900px 620px at 14% 6%, rgba(255, 104, 52, 0.14), transparent 60%),
-    radial-gradient(820px 560px at 88% 96%, rgba(255, 138, 64, 0.11), transparent 62%),
+    radial-gradient(900px 620px at 14% 6%, rgba(255, 104, 52, 0.09), transparent 60%),
+    radial-gradient(820px 560px at 88% 96%, rgba(255, 138, 64, 0.07), transparent 62%),
     radial-gradient(ellipse at center, #221826 0%, #100b10 72%);
 }
 .idle-box {

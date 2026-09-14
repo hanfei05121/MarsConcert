@@ -92,7 +92,7 @@ const playlistTitle = computed(() => {
   background: var(--glass-sheen), var(--bg-1);
   cursor: pointer;
   text-align: left;
-  box-shadow: var(--glass-edge), var(--shadow-glass);
+  /* box-shadow: var(--glass-edge), var(--shadow-glass); */
   transition: all 0.15s ease;
 }
 .plcard:hover {

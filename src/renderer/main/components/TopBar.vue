@@ -76,7 +76,6 @@ onBeforeUnmount(() => {
   gap: 14px;
   padding: 0 18px;
   /* 玻璃顶栏：半透明 + 发丝下线 + 顶边高光（模糊由全局 .topbar 规则提供） */
-  background: var(--glass-sheen), var(--bg-1);
   border-bottom: 1px solid var(--line);
   box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.14), 0 8px 24px rgba(0, 0, 0, 0.18);
 }

@@ -40,14 +40,13 @@ const state = store.state
   align-items: center;
   padding: 16px 18px;
   border-radius: 14px;
-  background: var(--glass-sheen), var(--bg-1);
+  /* background: var(--glass-sheen), var(--bg-1); */
   border: 1px solid var(--line);
   color: var(--text-1);
   font-size: 15px;
   margin-bottom: 10px;
   box-shadow: var(--glass-edge), var(--shadow-glass);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+
 }
 .mrow b {
   color: var(--accent);
