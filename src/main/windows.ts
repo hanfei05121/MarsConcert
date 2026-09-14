@@ -22,7 +22,7 @@ export function createMainWindow(): BrowserWindow {
     height: 760,
     minWidth: 900,
     minHeight: 600,
-    title: '火星点歌台 · MARS KTV',
+    title: '火星乌托邦 · MARS KTV',
     // 深空底色：与渲染层 body 的星云底一致，避免加载瞬间闪白/闪灰
     backgroundColor: '#0a0709',
     icon: devIcon(),
@@ -75,7 +75,7 @@ export function createPlayerWindow(config: AppConfig): BrowserWindow {
     frame: false,
     transparent: false,
     fullscreen: false,
-    title: '火星点歌台 · MARS KTV',
+    title: '火星乌托邦 · MARS KTV',
     backgroundColor: '#000000',
     icon: devIcon(),
     webPreferences: {

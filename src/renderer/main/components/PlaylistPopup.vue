@@ -101,7 +101,7 @@ function onPin(i: number) {
 <style scoped>
 .overlay {
   position: fixed;
-  inset: 56px 0 84px 184px; /* 避开顶栏/底栏/侧栏 */
+  inset: 56px 0 84px 400px; /* 避开顶栏/底栏/侧栏（侧栏宽度见 Sidebar.vue，改一处两处都要改） */
   /* 只压暗、不模糊：模糊交给 .popup，否则父层成为 backdrop root，面板就糊不到背后画面 */
   background: rgba(8, 6, 8, 0.42);
   display: flex;

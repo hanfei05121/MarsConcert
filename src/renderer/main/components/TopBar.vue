@@ -43,7 +43,7 @@ onBeforeUnmount(() => {
   <header class="topbar">
     <button class="back" title="返回" @click="emit('back')"><ArrowLeftOutlined /></button>
 
-    <div class="brand"><span class="bdot" />火星点歌台</div>
+    <div class="brand"><span class="bdot" />火星乌托邦</div>
 
     <div class="search">
       <span class="si"><SearchOutlined /></span>

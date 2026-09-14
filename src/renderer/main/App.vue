@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { QrcodeOutlined } from '@ant-design/icons-vue'
 import { store } from './store'
+import { navDir } from './navDir'
 import SilkBackground from '../components/SilkBackground.vue'
 import Sidebar from './components/Sidebar.vue'
 import TopBar from './components/TopBar.vue'
@@ -45,9 +46,14 @@ async function doSearch(q: string) {
     <div class="main">
       <TopBar @back="goBack" @search="doSearch" />
 
-      <!-- 路由出口：各主视图由 vue-router 渲染 -->
-      <main class="content">
-        <router-view />
+      <!-- 路由出口：各主视图由 vue-router 渲染。
+           换页做成与侧栏滚轮同向的淡入淡出（往下滚 → 新页从下方浮起、旧页向上淡出）。 -->
+      <main class="content" :class="navDir === -1 ? 'nav-up' : 'nav-down'">
+        <router-view v-slot="{ Component, route: r }">
+          <Transition name="page">
+            <component :is="Component" :key="r.name" />
+          </Transition>
+        </router-view>
       </main>
 
       <!-- 已点悬浮弹窗 -->
@@ -142,6 +148,34 @@ async function doSearch(q: string) {
 
 <!-- 飞入「已点」的亮点：动态插入 body，scoped 样式不生效，故用全局块 -->
 <style>
+/* —— 页面切换：与侧栏滚轮同向的淡入淡出 ——
+   往下滚菜单（nav-down）→ 新页从下方浮起、旧页向上淡出；往上滚反过来。
+   旧页在过渡期间脱离文档流（absolute），这样新页立刻占位，不会出现两页堆叠导致的跳动。 */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.3s ease, transform 0.34s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.page-leave-active {
+  position: absolute;
+  inset: 0;
+}
+.nav-down .page-enter-from {
+  opacity: 0;
+  transform: translateY(24px);
+}
+.nav-down .page-leave-to {
+  opacity: 0;
+  transform: translateY(-18px);
+}
+.nav-up .page-enter-from {
+  opacity: 0;
+  transform: translateY(-24px);
+}
+.nav-up .page-leave-to {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
 .fly-dot {
   position: fixed;
   z-index: 9999;

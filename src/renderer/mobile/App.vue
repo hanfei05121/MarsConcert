@@ -124,7 +124,7 @@ function dkDur(id: number): number {
     <header class="head">
       <div class="brand">
         <span class="bdot" />
-        <span class="bt">火星点歌台</span>
+        <span class="bt">火星乌托邦</span>
         <span class="dot" :class="mobile.connected ? 'on' : ''" />
       </div>
       <button class="now" @click="tapTab('control')">
