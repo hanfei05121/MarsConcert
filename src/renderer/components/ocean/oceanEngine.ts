@@ -22,7 +22,8 @@ import {
 } from 'three/tsl'
 import { bloom } from 'three/addons/tsl/display/BloomNode.js'
 
-export type OceanQuality = 'auto' | 'low' | 'high'
+/** 流畅 / 精细两档。没有「自动」：按设备猜档猜错还得手动再调，不如让人自己选 */
+export type OceanQuality = 'low' | 'high'
 
 /* -------------------------------------------------------------------------- */
 /* SECTION 1 · 共享 uniform（单实例引擎，模块级持有即可）                       */
@@ -363,14 +364,11 @@ export interface OceanEngine {
  */
 export async function createOceanEngine(options: OceanEngineOptions): Promise<OceanEngine> {
   const { container } = options
-  const quality = options.quality ?? 'auto'
+  const quality = options.quality ?? 'high'
+  // 「减弱动态效果」是系统级无障碍偏好，跟画质档位是两回事，仍然要尊重
   const reduced =
     typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
-  const lowEnd =
-    quality === 'low' ||
-    (quality === 'auto' &&
-      ((navigator.hardwareConcurrency || 8) <= 4 ||
-        ('deviceMemory' in navigator && Number((navigator as never as { deviceMemory: number }).deviceMemory) <= 4)))
+  const lowEnd = quality === 'low'
 
   let pixelRatioCap = reduced ? 0.9 : lowEnd ? 1.0 : 1.5
   let basePixelRatio = Math.min(window.devicePixelRatio || 1, pixelRatioCap)

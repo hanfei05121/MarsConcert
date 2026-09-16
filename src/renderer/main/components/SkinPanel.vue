@@ -154,16 +154,18 @@ onBeforeUnmount(() => {
         </label>
         <label class="tgl">
           <span>画质</span>
+          <!-- 下拉浮层是 Teleport 到 body 的，scoped 样式够不着，
+               所以给它挂 glass-pop，样式写在下面那个不带 scoped 的 style 块里 -->
           <a-select
             :value="oceanSkin.quality"
             :disabled="!oceanOn"
             size="small"
             class="quality"
+            popup-class-name="glass-pop"
             @change="(v: unknown) => (oceanSkin.quality = v as typeof oceanSkin.quality)"
           >
-            <a-select-option value="auto">自动</a-select-option>
-            <a-select-option value="low">流畅优先</a-select-option>
             <a-select-option value="high">精细优先</a-select-option>
+            <a-select-option value="low">流畅优先</a-select-option>
           </a-select>
         </label>
       </div>
@@ -177,7 +179,7 @@ onBeforeUnmount(() => {
       </p>
 
       <button class="reset" type="button" @click="resetOceanSkin()">
-        恢复默认（波浪 45 · 金红时刻 · 玻璃 72%）
+        恢复默认（波浪 45 · 日光 80 · 玻璃 72% · 精细）
       </button>
     </div>
   </Transition>
@@ -322,6 +324,66 @@ onBeforeUnmount(() => {
   width: 112px;
 }
 
+/* —— 玻璃开关（自动昼夜循环）——
+   Ant 默认是「灰轨 + 白点 / 亮蓝轨」，在这里换成面板同一套语言：
+   轨道是凹陷玻璃（--bg-0 + 发丝描边），选中 = 橙玻璃 soft 档（与导航选中态同款）。
+   选择器都带 .tgl 前缀，特异性压过 Ant 运行时注入的 cssinjs 样式，不用 !important。 */
+.tgl :deep(.ant-switch) {
+  background-color: var(--bg-0);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.tgl :deep(.ant-switch:hover:not(.ant-switch-checked)) {
+  background-color: var(--bg-0);
+}
+.tgl :deep(.ant-switch-handle::before) {
+  background-color: var(--text-2);
+}
+.tgl :deep(.ant-switch-checked) {
+  background-color: var(--bg-2);
+  background-image: var(--ctrl-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--ctrl-accent-line);
+}
+.tgl :deep(.ant-switch-checked:hover) {
+  background-image: var(--ctrl-accent); /* 悬停升 strong 档，与 .btn.accent 一致 */
+}
+.tgl :deep(.ant-switch-checked .ant-switch-handle::before) {
+  background-color: var(--ctrl-accent-ink);
+}
+/* 海洋皮肤关掉时，开关跟着 .rows.off 一起淡下去，别还是亮着的 */
+.tgl :deep(.ant-switch-disabled) {
+  opacity: 0.5;
+}
+/* Ant 那圈 focus 蓝辉换成火星橙 */
+.tgl :deep(.ant-switch:focus-visible) {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--ctrl-accent-line), 0 0 0 3px rgba(255, 95, 55, 0.18);
+}
+
+/* —— 玻璃下拉（画质）—— 选中框本体；浮层见下面不带 scoped 的 style 块 */
+.quality :deep(.ant-select-selector) {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--text-0);
+  font-size: 13px;
+  box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.08);
+}
+.quality :deep(.ant-select-selection-item),
+.quality :deep(.ant-select-selection-placeholder) {
+  color: var(--text-0);
+  line-height: 24px;
+}
+.quality :deep(.ant-select-arrow) {
+  color: var(--text-2);
+}
+.quality :deep(.ant-select:hover .ant-select-selector) {
+  border-color: var(--line-strong);
+}
+.quality :deep(.ant-select-focused .ant-select-selector) {
+  border-color: var(--accent-line);
+  box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.08), 0 0 0 3px rgba(255, 95, 55, 0.18);
+}
+
 .note {
   margin: 14px 0 0;
   font-size: 11px;
@@ -369,5 +431,37 @@ onBeforeUnmount(() => {
 .skin-pop-leave-to {
   opacity: 0;
   transform: translateY(10px) scale(0.97);
+}
+</style>
+
+<!-- 画质下拉的浮层被 Teleport 到 body，scoped 样式够不着，只能写成全局块。
+     取色跟弹窗本体同一套：玻璃底 + 发丝描边 + 顶边高光，选中项 = 橙玻璃 soft 档。 -->
+<style>
+.glass-pop.ant-select-dropdown {
+  padding: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--glass-sheen), var(--popup-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  box-shadow: var(--glass-edge), var(--shadow-pop);
+}
+.glass-pop .ant-select-item {
+  color: var(--text-1);
+  border-radius: 8px;
+  font-size: 13px;
+  padding: 6px 10px;
+  min-height: 30px;
+}
+.glass-pop .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background-color: var(--bg-3);
+  color: var(--text-0);
+}
+.glass-pop .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  background-color: transparent;
+  background-image: var(--ctrl-accent-soft);
+  color: var(--ctrl-accent-ink);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--ctrl-accent-line);
 }
 </style>

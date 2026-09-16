@@ -24,6 +24,7 @@ function fmt(d: number): string {
 
 <template>
   <div
+    v-spotlight
     class="row"
     :class="{ active }"
     @click="emit('add', song, $event)"
