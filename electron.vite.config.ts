@@ -18,6 +18,16 @@ export default defineConfig({
   },
   renderer: {
     root: 'src/renderer',
+    resolve: {
+      // three 的 webgpu / tsl / addons 三个入口最终指向同一份 build 产物，
+      // 去重避免 dev 预构建时出现两份实例 —— TSL 节点跨副本会互相认不出来。
+      dedupe: ['three']
+    },
+    optimizeDeps: {
+      // 海洋引擎（海洋背景）挂在动态 import 的 chunk 里，这里主动声明，
+      // 让 dev 一开始就把它预构建好，而不是运行时才发现新依赖、页面重载一次。
+      include: ['three/webgpu', 'three/tsl', 'three/addons/tsl/display/BloomNode.js']
+    },
     css: {
       postcss: {
         plugins: [

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { store } from '../store'
-import type { Song } from '../../shared/types'
+import type { Song } from '../../../shared/types'
 import SongRow from '../components/SongRow.vue'
 import Pagination from '../components/Pagination.vue'
 import { onAdd, onPlay } from '../useQueueActions'

@@ -13,6 +13,7 @@ import {
 import type { ViewName } from '../store'
 import { store } from '../store'
 import { navDir } from '../navDir'
+import { skinPanel } from '../oceanSkin'
 
 const route = useRoute()
 const router = useRouter()
@@ -260,7 +261,7 @@ onBeforeUnmount(() => {
     <nav
       ref="navEl"
       class="nav"
-      :class="{ dragging }"
+      :class="{ dragging, dim: skinPanel.open }"
       :style="{ '--baseline': BASELINE }"
       @pointerdown="onDown"
     >
@@ -279,13 +280,41 @@ onBeforeUnmount(() => {
       </button>
     </nav>
 
-    <!-- 我的资源：点击选择曲库目录 -->
-    <div class="cloud" title="点击选择曲库目录" @click="store.chooseLib()">
-      <span class="ic"><FolderOutlined /></span>
-      <div class="clbinfo">
-        <span class="clbtitle">我的资源</span>
-        <span class="clbpath">{{ libName }}</span>
+    <!-- 底栏一行：我的资源（点选曲库目录） + 背景特效按钮 -->
+    <div class="foot">
+      <div class="cloud" title="点击选择曲库目录" @click="store.chooseLib()">
+        <span class="ic"><FolderOutlined /></span>
+        <div class="clbinfo">
+          <span class="clbtitle">我的资源</span>
+          <span class="clbpath">{{ libName }}</span>
+        </div>
       </div>
+
+      <!-- 背景特效：点开是参数弹窗（海洋 / 丝绸 / 关闭 + 波浪 · 日光 · 玻璃） -->
+      <button
+        class="skin-trigger"
+        :class="{ on: skinPanel.open }"
+        type="button"
+        title="背景特效 · 海洋夕阳光影"
+        :aria-expanded="skinPanel.open"
+        @click="skinPanel.open = !skinPanel.open"
+      >
+        <svg viewBox="0 0 18 18" width="24" height="24" fill="none" aria-hidden="true">
+          <path
+            d="M2 7.7c1.35-1.75 2.7-1.75 4.05 0s2.7 1.75 4.05 0 2.2-1.35 3.9-.55"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+          <path
+            d="M2 12c1.35-1.45 2.7-1.45 4.05 0s2.7 1.45 4.05 0 2.2-1.1 3.9-.5"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            opacity=".55"
+          />
+        </svg>
+      </button>
     </div>
   </aside>
 </template>
@@ -346,6 +375,14 @@ onBeforeUnmount(() => {
   cursor: grab;
   -webkit-user-select: none;
   user-select: none;
+  /* 背景特效弹窗从下方浮上来时会盖住导航：这里配套淡隐 + 断开交互，
+     避免两层叠在一起「点哪儿都不是」。点这片区域会落到弹窗的「点外部关闭」上，
+     所以「点导航 = 关弹窗」是自然动作，不会误切页。 */
+  transition: opacity 0.3s ease;
+}
+.nav.dim {
+  opacity: 0.12;
+  pointer-events: none;
 }
 .nav.dragging,
 .nav.dragging .item {
@@ -405,6 +442,42 @@ onBeforeUnmount(() => {
 }
 .ic {
   font-size: 22px;
+}
+
+/* —— 底栏一行：我的资源 + 背景特效按钮 —— */
+.foot {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 10px;
+}
+.foot .cloud {
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
+}
+.skin-trigger {
+  flex: none;
+  width: 58px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--accent-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 250, 246, 0.08);
+  transition: var(--ease);
+}
+.skin-trigger:hover,
+.skin-trigger.on {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-3);
+}
+.skin-trigger.on {
+  box-shadow: inset 0 0 0 1px var(--accent-line), 0 0 14px var(--accent-soft);
 }
 
 .cloud {

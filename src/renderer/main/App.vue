@@ -5,6 +5,9 @@ import { QrcodeOutlined } from '@ant-design/icons-vue'
 import { store } from './store'
 import { navDir } from './navDir'
 import SilkBackground from '../components/SilkBackground.vue'
+import OceanSunsetBackground from '../components/ocean/OceanSunsetBackground.vue'
+import SkinPanel from './components/SkinPanel.vue'
+import { oceanSkin } from './oceanSkin'
 import Sidebar from './components/Sidebar.vue'
 import TopBar from './components/TopBar.vue'
 import PlaylistPopup from './components/PlaylistPopup.vue'
@@ -33,11 +36,28 @@ async function doSearch(q: string) {
 </script>
 
 <template>
-  <!-- 丝绸背景：Teleport 到 body 与 #app 平级（#app 是 z-index:1），
+  <!-- 背景层：Teleport 到 body 与 #app 平级（#app 是 z-index:1），
        z-index=-1 让它垫在星云底之上、星尘颗粒之下 → 玻璃面板后面是一层流动的幕布。
-       视觉参数（hue/saturation/brightness/speed/opacity）改这里即可。 -->
+       皮肤与参数由右下角「背景特效」按钮（SkinControl）驱动，状态见 ./oceanSkin：
+         · 海洋：实时海面 + 夕阳光影（Three.js WebGPU + TSL，移植自 open-sea-skin）
+         · 丝绸：原有的 WebGL2 丝绸流动背景
+         · 关闭：只留火星星云底 -->
   <Teleport to="body">
-    <SilkBackground :speed="0.7" :opacity="0.6" :z-index="-1" />
+    <OceanSunsetBackground
+      v-if="oceanSkin.skin === 'ocean'"
+      :key="'ocean-' + oceanSkin.quality"
+      :sea="oceanSkin.sea"
+      :daylight="oceanSkin.daylight"
+      :auto-cycle="oceanSkin.autoCycle"
+      :quality="oceanSkin.quality"
+      :z-index="-1"
+    />
+    <SilkBackground
+      v-else-if="oceanSkin.skin === 'silk'"
+      :speed="0.7"
+      :opacity="0.6"
+      :z-index="-1"
+    />
   </Teleport>
 
   <div class="app">
@@ -72,6 +92,10 @@ async function doSearch(q: string) {
       <QrcodeOutlined />
     </button>
     <RemoteQrPopup v-if="remoteOpen" @close="remoteOpen = false" />
+
+    <!-- 背景特效参数弹窗（海洋 / 丝绸 / 关闭 + 波浪·日光·玻璃）。
+         触发按钮长在侧栏底部「我的资源」旁边，见 Sidebar.vue。 -->
+    <SkinPanel />
   </div>
 </template>
 
