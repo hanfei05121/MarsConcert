@@ -65,8 +65,9 @@ const artistSongs = computed<Song[]>(() =>
   transition: all 0.15s ease;
 }
 .card:hover {
-  border-color: var(--accent);
-  transform: translateY(2px);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  transform: translateY(-2px);
 }
 .ava {
   width: 64px;

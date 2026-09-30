@@ -236,8 +236,10 @@ body::after {
   font-size: 14px;
 }
 .btn:hover {
-  background: var(--bg-3);
-  border-color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 .btn.accent {
   /* 主按钮 = soft 档，与左侧导航「选中」(.item.active) 完全同款 */
@@ -248,9 +250,11 @@ body::after {
   box-shadow: var(--glass-edge), 0 6px 18px rgba(255, 77, 46, 0.18);
 }
 .btn.accent:hover {
-  /* 悬停升到 strong 档，给主按钮一点反馈 */
-  background: var(--ctrl-accent), var(--bg-2);
-  border-color: var(--accent);
+  /* 悬停统一为 soft 档橙玻璃，与皮肤开启键一致，并轻微上浮 */
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--ctrl-accent-ink);
+  transform: translateY(-2px);
 }
 
 /* 滑块（Ant slider）：与玻璃控件同色源 */
@@ -309,8 +313,10 @@ button {
   transition: var(--ease);
 }
 button:hover {
-  background: var(--bg-3);
-  transform: translateY(2px);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 /* 非 button 的卡片 / 标签 / 头像也统一光晕 */
 .chip,
@@ -336,8 +342,9 @@ button:hover {
 }
 .row:hover,
 .prow:hover {
-  background: var(--bg-3);
-  transform: translateY(2px);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  transform: translateY(-2px);
 }
 .row.active,
 .prow.active {
@@ -358,8 +365,9 @@ button:hover {
   transition: var(--ease);
 }
 .lift:hover {
-  background: var(--bg-3);
-  transform: translateY(2px);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  transform: translateY(-2px);
 }
 
 /* —— 主视图共用布局（视图组件里复用；App.vue 作为路由出口不再自带） —— */

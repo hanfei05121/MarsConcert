@@ -70,9 +70,13 @@ const emit = defineEmits<{
   font-size: 12px;
   color: var(--text-2);
   cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 999px;
 }
 .more:hover {
-  color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 .list {
   margin-top: 6px;

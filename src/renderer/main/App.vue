@@ -136,8 +136,9 @@ async function doSearch(q: string) {
 }
 .remote-fab:hover {
   background: var(--accent-soft);
-  border-color: var(--accent);
-  transform: translateY(-2px) scale(1.05);
+  border-color: var(--accent-line);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 /* —— 轻提示 —— */
 .toast {

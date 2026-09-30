@@ -216,7 +216,10 @@ function onMic(val: number) {
   cursor: pointer;
 }
 .ctl:hover {
-  border-color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 .play {
   width: 56px;
@@ -254,7 +257,10 @@ function onMic(val: number) {
   cursor: pointer;
 }
 .f:hover {
-  border-color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 .f.on {
   background: var(--ctrl-accent-soft), var(--bg-2);
@@ -353,7 +359,10 @@ function onMic(val: number) {
   cursor: pointer;
 }
 .vbtn:hover {
-  border-color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 .spk {
   font-size: 15px;

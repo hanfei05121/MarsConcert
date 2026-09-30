@@ -75,8 +75,10 @@ function go(p: number) {
   transition: all 0.15s ease;
 }
 .pg:hover:not(:disabled) {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 .pg.on {
   /* 当前页码：橙玻璃（控件统一色） */

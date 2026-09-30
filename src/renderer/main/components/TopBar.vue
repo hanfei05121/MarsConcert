@@ -90,7 +90,10 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 .back:hover {
-  border-color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 .brand {
   display: flex;
@@ -167,7 +170,10 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 .ic:hover {
-  border-color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 .ic.close:hover {
   background: var(--danger);

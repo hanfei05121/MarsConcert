@@ -723,8 +723,9 @@ function onAudioError() {
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 .pic:hover {
-  background: rgba(255, 255, 255, 0.22);
-  border-color: #ff5a2e;
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  transform: translateY(-2px);
 }
 .pic.close:hover {
   background: #e5484d;

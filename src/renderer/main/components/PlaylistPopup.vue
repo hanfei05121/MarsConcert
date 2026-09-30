@@ -154,7 +154,9 @@ function onPin(i: number) {
   cursor: pointer;
 }
 .x:hover {
-  color: var(--text-0);
+  background: var(--accent-soft);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 .plist {
   flex: 1;
@@ -227,8 +229,10 @@ function onPin(i: number) {
   opacity: 0.6;
 }
 .pin:hover {
+  background: var(--accent-soft);
   opacity: 1;
-  color: var(--accent);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 .del {
   border: none;

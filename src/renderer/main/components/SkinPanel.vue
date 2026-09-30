@@ -229,7 +229,9 @@ onBeforeUnmount(() => {
   transition: var(--ease);
 }
 .close:hover {
-  color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 
 /* —— 皮肤三选一 —— */
@@ -254,7 +256,9 @@ onBeforeUnmount(() => {
   transition: var(--ease);
 }
 .seg button:hover {
-  color: var(--text-0);
+  background: var(--accent-soft);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 .seg button.on {
   background: var(--ctrl-accent-soft);
@@ -358,6 +362,7 @@ onBeforeUnmount(() => {
   border-color: var(--accent-line);
   color: var(--accent-ink);
   background: var(--accent-soft);
+  transform: translateY(-2px);
 }
 
 /* —— 弹出动效 —— */

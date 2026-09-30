@@ -96,8 +96,9 @@ const playlistTitle = computed(() => {
   transition: all 0.15s ease;
 }
 .plcard:hover {
-  border-color: var(--accent);
-  transform: translateY(2px);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  transform: translateY(-2px);
 }
 .pic {
   width: 56px;

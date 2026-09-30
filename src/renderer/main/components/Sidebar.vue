@@ -31,7 +31,7 @@ const menus: { key: ViewName; label: string; icon: Component }[] = [
    弧心在侧栏左侧很远处，选项沿圆弧排布（扇形）：
      · 弧顶 = 「基准线」（nav 垂直居中），压在线上时文字正好水平，越远的项越倾斜 → 扇形张角。
      · 只有正压线（pos 为整数）的那一项才高亮；滚动/拖动途中一律不亮。 */
-const RADIUS = 640 // 弧半径（px）：越大弧越平缓
+const RADIUS = 260 // 弧半径（px）：越小弧越弯、扇形越张开；640 时太平缓像竖直列表
 const STEP = 62 // 紧邻基准线那一格的弧长（px）：越大越透气
 const GAP_RATIO = 0.74 // 每往两端远一格，间距就乘这个系数（近疏远密 → 有纵深，也不会顶出导航区）
 const TILT = 1 // 跟随弧面的倾斜系数（0 = 全部水平，1 = 完全贴合弧切线）
@@ -428,8 +428,8 @@ onBeforeUnmount(() => {
   will-change: transform, opacity, filter;
 }
 .item:hover {
-  background: transparent;
-  color: var(--text-0);
+  background: var(--accent-soft);
+  color: var(--accent-3);
 }
 .item.active,
 .item.active:hover {
@@ -497,9 +497,10 @@ onBeforeUnmount(() => {
   transition: var(--ease);
 }
 .cloud:hover {
-  background: var(--bg-3);
-  color: var(--accent);
-  transform: translateY(2px);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-3);
+  transform: translateY(-2px);
 }
 .clbinfo {
   display: flex;

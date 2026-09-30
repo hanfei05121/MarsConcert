@@ -60,7 +60,8 @@ function fmt(d: number): string {
   transition: all 0.15s ease;
 }
 .song:hover {
-  background: var(--bg-3);
+  background: var(--accent-soft);
+  transform: translateY(-2px);
 }
 .song.active {
   background: linear-gradient(92deg, rgba(255, 77, 46, 0.18), rgba(255, 140, 66, 0.14));
