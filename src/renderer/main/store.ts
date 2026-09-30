@@ -1,7 +1,7 @@
 import { reactive, computed } from 'vue'
 import type { AppConfig, Song, VideoMode, Volumes } from '../../shared/types'
 
-export type ViewName = 'recommend' | 'artists' | 'category' | 'playlists' | 'mine' | 'search'
+export type ViewName = 'recommend' | 'artists' | 'playlists' | 'mine' | 'search'
 export type QueueTab = 'queued' | 'sung'
 export type PlayMode = 'order' | 'random'
 export type Lang = '国语' | '英语' | '日语' | '韩语' | '其他'
@@ -36,7 +36,6 @@ interface State {
   queueOpen: boolean
   queueTab: QueueTab
   artistFilter: string | null
-  categoryFilter: Lang | '全部'
   selectedPlaylist: string | null // 歌单详情标识：歌单名 | '__fav__' | '__history__'
   /** 轻提示（自绘，替代 antd 静态 message） */
   toast: { text: string; key: number } | null
@@ -93,7 +92,6 @@ export const state = reactive<State>({
   queueOpen: false,
   queueTab: 'queued',
   artistFilter: null,
-  categoryFilter: '全部',
   selectedPlaylist: null,
   toast: null
 })
@@ -174,21 +172,24 @@ async function removeQueueAt(i: number) {
   }
 }
 
-/** 置顶到下一首：把第 i 首排到当前歌曲之后，播完这首就轮到它 */
-function pinToNext(i: number) {
+/** 置顶到下一首：把第 i 首排到当前歌曲之后，播完这首就轮到它。
+ *  返回它置顶后的最终下标；moved=false 表示本来就是下一首（或已在队首），没有挪动 */
+function pinToNext(i: number): { moved: boolean; index: number } {
   const song = state.queue[i]
-  if (!song) return
+  if (!song) return { moved: false, index: i }
   const cur = currentQueueIndex()
   if (cur === -1) {
+    if (i === 0) return { moved: false, index: 0 } // 已在队首，挪了也等于没挪
     state.queue.splice(i, 1)
     state.queue.unshift(song)
-    return
+    return { moved: true, index: 0 }
   }
-  if (cur === i) return
-  if (cur + 1 === i) return // 本来就是下一首
+  if (cur === i) return { moved: false, index: i }
+  if (cur + 1 === i) return { moved: false, index: i } // 本来就是下一首
   state.queue.splice(i, 1)
   const target = i < cur ? cur : cur + 1
   state.queue.splice(target, 0, song)
+  return { moved: true, index: target }
 }
 
 /** 调整队列顺序 */
@@ -336,7 +337,6 @@ function deletePlaylist(name: string) {
 /** 重置详情筛选态（路由切换时由 router.afterEach 调用） */
 function resetFilters() {
   state.artistFilter = null
-  state.categoryFilter = '全部'
   state.selectedPlaylist = null
 }
 

@@ -43,6 +43,13 @@
   --danger: #ff453a; /* 删除 / 红 */
   --popup-bg: rgba(34, 26, 34, calc(0.5 * var(--ui-glass))); /* 弹窗玻璃底 */
 
+  /* —— 列表行底色 ——
+     深底（星云 / 丝绸）上「半透明白」是提亮，行自然浮起来。
+     海洋那类亮背景不适用，见 html.skin-ocean 里的覆盖。
+     同样乘 --ui-glass：行底也归「玻璃不透明度」滑块管。 */
+  --row-top: rgba(255, 250, 246, calc(0.13 * var(--ui-glass)));
+  --row-bottom: rgba(255, 250, 246, calc(0.05 * var(--ui-glass)));
+
   /* —— 玻璃参数（统一在这里调，全套面板跟着变）—— */
   --glass-blur: 34px; /* 大面板模糊半径 */
   --glass-blur-sm: 15px; /* 小组件模糊半径 */
@@ -145,6 +152,16 @@ body::before {
 html.skin-ocean body::before {
   opacity: 0;
 }
+/* 海洋是亮背景：这套玻璃语汇（半透明白 = 提亮）是为深色星云底设计的，
+   铺到亮海面上会失效 —— 面板糊成一片、白字压不住。这里只做两件事，不动整体配色：
+     · 背景蒙版压深一档（见下面的 html.skin-ocean #app::before）：海面照旧透出来，
+       但不再冲淡面板，白字与小字重新拿到对比度；
+     · 列表行底加厚一点，让每行重新读得出来是「一张玻璃」。
+   行底同样乘 --ui-glass，「玻璃不透明度」滑块依然管得住海洋下的通透度。 */
+html.skin-ocean {
+  --row-top: rgba(255, 250, 246, calc(0.19 * var(--ui-glass)));
+  --row-bottom: rgba(255, 250, 246, calc(0.08 * var(--ui-glass)));
+}
 /* 胶片颗粒：极淡噪点压住渐变的塑料感，玻璃边缘的折射会更真实（Rainform 同款手法）*/
 body::after {
   content: '';
@@ -176,6 +193,12 @@ body::after {
   z-index: -1;
   pointer-events: none;
   background: #34353759;
+}
+/* 海面比星云底亮得多，上面那层 0.35 的灰压不住：面板里的小字被冲得发白，
+   列表行也分不清彼此。海洋下压深一档 —— 海面仍透得出来，但不再跟面板抢对比度。
+   想更亮的海面就把 alpha 调小（0.4 上下），想更清楚就调大（0.6 上下）。 */
+html.skin-ocean #app::before {
+  background: rgba(30, 31, 34, 0.52);
 }
 
 ::-webkit-scrollbar {
@@ -344,7 +367,7 @@ button:hover {
    组件里不要再单独写列表行的底色，只留布局（flex / padding / gap）。 */
 .row,
 .prow {
-  background: linear-gradient(180deg, rgba(255, 250, 246, 0.11), rgba(255, 250, 246, 0.04));
+  background: linear-gradient(180deg, var(--row-top), var(--row-bottom));
   border: 1px solid var(--line);
   border-radius: 12px;
   transition: var(--ease);

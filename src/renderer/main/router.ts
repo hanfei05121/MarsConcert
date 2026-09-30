@@ -12,7 +12,6 @@ const router = createRouter({
     { path: '/', redirect: '/recommend' },
     { path: '/recommend', name: 'recommend', component: () => import('./views/RecommendView.vue') },
     { path: '/artists', name: 'artists', component: () => import('./views/ArtistsView.vue') },
-    { path: '/category', name: 'category', component: () => import('./views/CategoryView.vue') },
     { path: '/playlists', name: 'playlists', component: () => import('./views/PlaylistsView.vue') },
     { path: '/search', name: 'search', component: () => import('./views/SearchView.vue') },
     { path: '/mine', name: 'mine', component: () => import('./views/MineView.vue') }

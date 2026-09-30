@@ -33,7 +33,7 @@ const artistSongs = computed<Song[]>(() =>
     </div>
     <div v-else>
       <button class="back-link" @click="state.artistFilter = null"><ArrowLeftOutlined /> 返回歌手列表</button>
-      <div class="list">
+      <div class="list grid2">
         <SongRow
           v-for="s in artistSongs"
           :key="s.id"

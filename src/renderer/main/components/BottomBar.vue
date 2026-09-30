@@ -44,7 +44,7 @@ function onMic(val: number) {
       <div class="info">
         <div class="name">{{ state.currentSong?.name || '等待点歌…' }}</div>
         <div class="sub">
-          {{ state.currentSong?.artist || '点一首歌开始吧' }}
+          <span class="artist">{{ state.currentSong?.artist || '点一首歌开始吧' }}</span>
           <span class="time">{{ fmt(state.currentTime) }}</span>
         </div>
       </div>
@@ -159,7 +159,11 @@ function onMic(val: number) {
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 260px;
+  /* 固定宽：歌名/歌手长短不影响整条底栏的布局 */
+  flex: 0 0 320px;
+  width: 320px;
+  min-width: 0;
+  overflow: hidden;
 }
 .thumb {
   width: 52px;
@@ -179,7 +183,9 @@ function onMic(val: number) {
   object-fit: cover;
 }
 .info {
+  flex: 1 1 auto;
   min-width: 0;
+  overflow: hidden;
 }
 .name {
   font-size: 15px;
@@ -195,10 +201,19 @@ function onMic(val: number) {
   display: flex;
   gap: 8px;
   margin-top: 3px;
+  min-width: 0;
+  overflow: hidden;
+}
+.artist {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .time {
   color: var(--accent-2);
   font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
 }
 .center {
   display: flex;
@@ -344,6 +359,7 @@ function onMic(val: number) {
   gap: 10px;
   justify-content: flex-end;
   margin-left: auto;
+  margin-right: 50px;
 }
 .vbtn {
   display: flex;

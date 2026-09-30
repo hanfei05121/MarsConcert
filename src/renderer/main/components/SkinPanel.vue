@@ -282,6 +282,10 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 10px;
+  /* 行底那圈玻璃盒来自全局 .row，但内边距不在那里统一给（列表行、滑块行需求不同），
+     得各自补：不补的话「波浪大小」会贴在圆角边上、读数也顶到右侧描边。
+     横向取歌曲行同款 14px，纵向只给一点，免得三条滑块把弹窗撑得太高。 */
+  padding: 4px 14px;
 }
 .lb {
   flex: none;

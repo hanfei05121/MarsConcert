@@ -5,7 +5,6 @@ import {
   HomeOutlined,
   AudioOutlined,
   CustomerServiceOutlined,
-  TagsOutlined,
   ProfileOutlined,
   UserOutlined,
   FolderOutlined
@@ -22,7 +21,6 @@ const menus: { key: ViewName; label: string; icon: Component }[] = [
   { key: 'recommend', label: '推荐', icon: HomeOutlined },
   { key: 'search', label: '歌曲', icon: AudioOutlined },
   { key: 'artists', label: '歌星', icon: CustomerServiceOutlined },
-  { key: 'category', label: '分类', icon: TagsOutlined },
   { key: 'playlists', label: '歌单', icon: ProfileOutlined },
   { key: 'mine', label: '我的', icon: UserOutlined }
 ]

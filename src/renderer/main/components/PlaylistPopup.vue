@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { ArrowUpOutlined, CloseOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import type { Song } from '../../../shared/types'
 import { store } from '../store'
+import { onAdd } from '../useQueueActions'
 
 const state = store.state
 const emit = defineEmits<{ (e: 'close'): void }>()
+
+/** 刚被置顶的行下标：闪一下，让「挪到下一首」这件事看得见 */
+const flashIndex = ref<number | null>(null)
+let flashTimer: ReturnType<typeof setTimeout> | null = null
 
 const list = computed<Song[]>(() =>
   state.queueTab === 'queued' ? state.queue : state.history
@@ -18,15 +23,31 @@ function fmt(d: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
-async function onRowClick(i: number) {
-  if (state.queueTab === 'queued') await store.topQueue(i)
-  else await store.addToQueue(list.value[i]) // 已唱：再点一次 = 重新点歌，加到已点末尾
+async function onRowClick(i: number, ev: MouseEvent) {
+  if (state.queueTab === 'queued') {
+    await store.topQueue(i)
+    return
+  }
+  // 已唱：再点一次 = 重新点歌，加到已点末尾 → 亮点飞入「已点」按钮 + 轻提示
+  const song = list.value[i]
+  if (!song) return
+  onAdd(song, ev)
+  store.showToast('已加入播放列表')
 }
 async function onRemove(i: number) {
   if (state.queueTab === 'queued') await store.removeQueueAt(i)
 }
 function onPin(i: number) {
-  if (state.queueTab === 'queued') store.pinToNext(i)
+  if (state.queueTab !== 'queued') return
+  const res = store.pinToNext(i)
+  if (res.moved) {
+    flashIndex.value = res.index
+    store.showToast('已置顶：下一首就唱它')
+    if (flashTimer) clearTimeout(flashTimer)
+    flashTimer = setTimeout(() => (flashIndex.value = null), 900)
+  } else {
+    store.showToast('它已经是下一首啦')
+  }
 }
 </script>
 
@@ -56,13 +77,12 @@ function onPin(i: number) {
       <div class="plist">
         <div
           v-for="(song, i) in list"
-          :key="song.id"
+          :key="`${song.id}-${i}`"
           v-spotlight
           class="prow"
-          :class="{ active: song.id === state.currentSong?.id }"
-          :title="state.queueTab === 'sung' ? '点击重新点歌' : ''"
-          @click="onRowClick(i)"
-          @dblclick="onRowClick(i)"
+          :class="{ active: song.id === state.currentSong?.id, flash: i === flashIndex }"
+          :title="state.queueTab === 'sung' ? '点击重新点歌，加入播放列表' : ''"
+          @click="onRowClick(i, $event)"
         >
           <span class="no">{{ String(i + 1).padStart(2, '0') }}</span>
           <div class="meta">
@@ -176,6 +196,21 @@ function onPin(i: number) {
   padding: 10px 10px;
   border-radius: 12px;
   cursor: pointer;
+}
+/* 置顶后闪一下：让「已挪到下一首」看得见 */
+.prow.flash {
+  animation: pin-flash 0.9s ease;
+}
+@keyframes pin-flash {
+  0% {
+    box-shadow: 0 0 0 0 var(--accent-line);
+  }
+  30% {
+    box-shadow: 0 0 0 2px var(--accent-line), 0 0 18px rgba(255, 77, 46, 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 46, 0);
+  }
 }
 .no {
   width: 24px;
