@@ -12,7 +12,8 @@ import { reactive, watch } from 'vue'
 
 /** ocean = 实时海洋 · 夕阳光影；silk = 原来的丝绸；none = 只留火星星云底 */
 export type LobbySkin = 'ocean' | 'silk' | 'none'
-export type OceanQuality = 'auto' | 'low' | 'high'
+/** 只有两档：流畅优先 / 精细优先。原来那档「自动」按设备猜，猜错就得手动再调，不如让人直接选 */
+export type OceanQuality = 'low' | 'high'
 
 export interface OceanSkinState {
   skin: LobbySkin
@@ -28,17 +29,24 @@ export interface OceanSkinState {
 }
 
 const STORAGE_KEY = 'mars-lobby-skin'
+/**
+ * 存档格式版本。旧档（没有 v 字段）里日光是「金红时刻 14」，
+ * 而这次把默认日光改成了 80 —— 不迁移的话改默认值对已装过的机器等于没改，
+ * 打开还是旧的金红黄昏。所以旧档只把日光迁到新默认，其余（皮肤 / 波浪 / 玻璃）照旧。
+ */
+const STORAGE_VERSION = 1
 /** glass 的基准值：乘数 1.0 对应上游默认观感 */
 const GLASS_BASE = 72
 
 const DEFAULTS: OceanSkinState = {
-  // 默认就上海洋：日光压在 14（金红时刻），一张贴地地平线的夕照海面
+  // 默认就上海洋：日光 80（午后偏亮的日照海面），不再是贴地地平线的金红黄昏
   skin: 'ocean',
   sea: 45,
-  daylight: 14,
+  daylight: 80,
   glass: GLASS_BASE,
   autoCycle: false,
-  quality: 'auto'
+  // 默认精细：本机起得动，就没必要先给一档糊的
+  quality: 'high'
 }
 
 const SKINS: LobbySkin[] = ['ocean', 'silk', 'none']
@@ -52,13 +60,16 @@ function clamp(value: number, min: number, max: number, fallback: number): numbe
 function load(): OceanSkinState {
   try {
     const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
+    const legacy = raw.v !== STORAGE_VERSION // 没有版本号的都是这次改默认值之前的档
     return {
       skin: SKINS.includes(raw.skin) ? raw.skin : DEFAULTS.skin,
       sea: clamp(raw.sea, 0, 100, DEFAULTS.sea),
-      daylight: clamp(raw.daylight, 0, 100, DEFAULTS.daylight),
+      // 旧档的日光一律迁到新默认 80；新档尊重用户自己拖过的值
+      daylight: legacy ? DEFAULTS.daylight : clamp(raw.daylight, 0, 100, DEFAULTS.daylight),
       glass: clamp(raw.glass, 40, 90, DEFAULTS.glass),
       autoCycle: raw.autoCycle === true,
-      quality: (['auto', 'low', 'high'] as OceanQuality[]).includes(raw.quality)
+      // 老数据里存过 'auto'：那档已经取消，落到默认的精细画质
+      quality: (['low', 'high'] as OceanQuality[]).includes(raw.quality)
         ? raw.quality
         : DEFAULTS.quality
     }
@@ -108,7 +119,7 @@ function syncDom() {
 
 function persist() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...oceanSkin }))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...oceanSkin, v: STORAGE_VERSION }))
   } catch {
     /* 隐私模式 / 配额满：设置不持久化也不该中断界面 */
   }

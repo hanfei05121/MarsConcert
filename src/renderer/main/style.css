@@ -76,6 +76,15 @@
   --ctrl-accent-soft: var(--accent-glass); /* soft 档：选中态 / 次级主按钮 */
   --ctrl-accent-line: var(--accent-line); /* 控件描边 */
   --ctrl-accent-ink: var(--accent-ink); /* 控件上的图标 / 文字 / 滑块头 */
+
+  /* —— 列表「跟随鼠标的圆形光斑」 ——
+     取色与左侧导航选中态 .item.active 同源：把那道竖向的橙玻璃
+     （--ctrl-accent-soft = --accent-glass，顶色 rgba(255,95,55,.28) / 底色 rgba(255,77,46,.13)）
+     改成以光标为圆心的径向渐变 —— 圆心最亮，向外淡出到全透明。
+     想调光斑只动这三个变量，别去组件里写死颜色。 */
+  --spot-r: 210px; /* 光斑半径：够大才能跨过行高压住整行，太大就糊成一片 */
+  --spot-core: rgba(255, 95, 55, 0.3); /* 圆心色（= --accent-glass 顶色） */
+  --spot-edge: rgba(255, 77, 46, 0.13); /* 中段色（= --accent-glass 底色） */
 }
 
 * {
@@ -339,6 +348,45 @@ button:hover {
   border: 1px solid var(--line);
   border-radius: 12px;
   transition: var(--ease);
+}
+/* —— 跟随鼠标的圆形光斑 ——
+   v-spotlight 只负责打标记 + 把光标位置写成 --gx / --gy（行内坐标，px），这里负责画：
+   z-index:-1 → 压在本行的玻璃底之上、文字与按钮之下；圆角跟随行，光斑不会溢出圆角。
+   行与行之间是连续的：光标移到下一行时，那行的光斑从同一纵向位置接上，看起来就是一团光在列表里滑。
+
+   注意只认 [data-spotlight]：.row 这个类名在背景特效弹窗 / 音量弹层里也被复用（滑块行），
+   那些行不该有光斑，所以不能写成 .row::before。 */
+.row[data-spotlight],
+.prow[data-spotlight] {
+  /* isolation 把 ::before 的 z-index:-1 关在本行内，不会掉到列表背后去 */
+  position: relative;
+  isolation: isolate;
+}
+.row[data-spotlight]::before,
+.prow[data-spotlight]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    circle var(--spot-r) at var(--gx, 50%) var(--gy, 50%),
+    var(--spot-core),
+    var(--spot-edge) 42%,
+    transparent 72%
+  );
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.row[data-spotlight]:hover::before,
+.prow[data-spotlight]:hover::before {
+  opacity: 1;
+}
+/* 选中行本来就是一整条橙玻璃，光斑再叠满格会糊掉「选中」这件事 —— 收半档 */
+.row.active[data-spotlight]:hover::before,
+.prow.active[data-spotlight]:hover::before {
+  opacity: 0.55;
 }
 .row:hover,
 .prow:hover {

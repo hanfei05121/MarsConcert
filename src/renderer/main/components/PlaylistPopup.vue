@@ -57,6 +57,7 @@ function onPin(i: number) {
         <div
           v-for="(song, i) in list"
           :key="song.id"
+          v-spotlight
           class="prow"
           :class="{ active: song.id === state.currentSong?.id }"
           :title="state.queueTab === 'sung' ? '点击重新点歌' : ''"

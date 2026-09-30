@@ -26,7 +26,8 @@ const props = withDefaults(
     zIndex?: number
     opacity?: number
   }>(),
-  { sea: 45, daylight: 14, autoCycle: false, quality: 'auto', zIndex: -1, opacity: 1 }
+  // 默认与 oceanSkin 的 DEFAULTS 对齐：日光 80、精细画质
+  { sea: 45, daylight: 80, autoCycle: false, quality: 'high', zIndex: -1, opacity: 1 }
 )
 
 const emit = defineEmits<{ ready: []; fail: [message: string] }>()
